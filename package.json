@@ -1,0 +1,21 @@
+{
+  "name": "deskframe",
+  "version": "0.1.0",
+  "description": "A private desk companion for study sessions, movement breaks and posture research.",
+  "author": "Deskframe contributors",
+  "main": "desktop/main.mjs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run desktop",
+    "start": "npm run desktop",
+    "desktop": "npm run build && electron ."
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "electron": "45.4.1"
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.npm-cache/
+.qa/
+release/
+.venv/
+__pycache__/
+*.sqlite*
+*.deskmodel
+!research/generated/activity.deskmodel
+study-data/
+*.jsonl
