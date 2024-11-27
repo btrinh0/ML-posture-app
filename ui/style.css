@@ -1,0 +1,412 @@
+:root {
+  font-family: Inter, 'Segoe UI', sans-serif;
+  color: #202923;
+  background: #f8f8f4;
+  font-size: 15px;
+  --muted: #52625b;
+  --line: #dce0d8;
+  --green: #214e3c;
+  --pale: #ecf2df;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-height: 100vh;
+}
+[hidden] {
+  display: none !important;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+h1 {
+  font-size: clamp(2.1rem, 4vw, 3rem);
+  letter-spacing: -0.065em;
+  font-weight: 550;
+  margin: 10px 0 22px;
+}
+h2 {
+  font-size: 1.12rem;
+  letter-spacing: -0.035em;
+  font-weight: 620;
+}
+h3 {
+  font-size: 1rem;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+button,
+select,
+input:not([type='checkbox']) {
+  min-height: 40px;
+  border-radius: 9px;
+  border: 1px solid #cbd2c9;
+  background: #fff;
+  padding: 8px 13px;
+}
+button {
+  cursor: pointer;
+  font-weight: 550;
+  transition:
+    background-color 0.14s ease,
+    scale 0.1s ease;
+}
+button:hover {
+  background: #f0f3eb;
+}
+button:active:not(:disabled) {
+  scale: 0.96;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+:focus-visible {
+  outline: 3px solid #54875b;
+  outline-offset: 3px;
+}
+.rail {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 16px 22px;
+  border-right: 1px solid var(--line);
+  background: #f0f1ea;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.22rem;
+  font-weight: 680;
+  letter-spacing: -0.055em;
+}
+.brand img {
+  width: 34px;
+  height: 34px;
+}
+nav {
+  display: grid;
+  gap: 5px;
+  margin-top: 48px;
+}
+nav button {
+  background: transparent;
+  border: 0;
+  text-align: left;
+  padding: 11px 14px;
+  color: var(--muted);
+}
+nav button[aria-current] {
+  background: #dce7d7;
+  color: #203f30;
+}
+.account {
+  margin-top: auto;
+  display: grid;
+  gap: 6px;
+}
+.account label,
+.eyebrow {
+  font-size: 0.77rem;
+  font-weight: 620;
+  color: var(--muted);
+}
+.account select {
+  max-width: 100%;
+}
+.link {
+  background: transparent;
+  border: 0;
+  padding-inline: 0;
+  color: var(--green);
+  text-align: left;
+  font-size: 0.88rem;
+}
+main {
+  padding: 24px clamp(20px, 4.5vw, 66px) 48px;
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 35px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.local {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.dot {
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background: #578464;
+}
+.focus {
+  background: #1c3930;
+  color: #f9fcf4;
+  padding: 26px 30px;
+  border-radius: 19px;
+  margin: 0 0 18px;
+}
+.focus-header,
+.focus-foot,
+.inline,
+.row,
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.focus-header,
+.focus-foot,
+.row {
+  justify-content: space-between;
+}
+.focus-header span {
+  font-size: 0.8rem;
+  color: #d5e1d0;
+}
+.focus #clock {
+  font-size: clamp(3rem, 7.5vw, 5.4rem);
+  letter-spacing: -0.08em;
+  line-height: 1.35;
+  font-weight: 480;
+}
+.focus progress {
+  width: 100%;
+  height: 5px;
+  appearance: none;
+  border: 0;
+  background: #406150;
+  border-radius: 4px;
+  margin: 3px 0 15px;
+}
+.focus progress::-webkit-progress-bar {
+  background: #406150;
+  border-radius: 4px;
+}
+.focus progress::-webkit-progress-value {
+  background: #d5ec9b;
+  border-radius: 4px;
+}
+.focus-foot span {
+  font-size: 0.84rem;
+  color: #d9e4d6;
+}
+.accent {
+  background: #d7ec9f;
+  color: #233220;
+  border: 0;
+}
+.accent:hover {
+  background: #e3f3bb;
+}
+.primary {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+.primary:hover {
+  background: #31664f;
+}
+.card,
+.notice {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 22px;
+  margin: 0 0 16px;
+}
+.columns {
+  display: grid;
+  grid-template-columns: 1.18fr 1fr;
+  gap: 16px;
+}
+.muted,
+.hint {
+  color: var(--muted);
+  font-size: 0.87rem;
+}
+.card h2 + p,
+.notice h2 + p {
+  margin-top: 5px;
+}
+.stack {
+  display: grid;
+  gap: 15px;
+  margin-top: 16px;
+  align-items: start;
+}
+.stack > button {
+  justify-self: start;
+}
+.stack label,
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 520;
+}
+.stack label + label,
+.field + .field {
+  margin-top: 11px;
+}
+#scores label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#scores select {
+  width: 80px;
+}
+.big-number {
+  font-size: 3.5rem;
+  letter-spacing: -0.065em;
+  line-height: 1.3;
+}
+.controls {
+  flex-wrap: wrap;
+}
+.notice {
+  background: #edf3e5;
+}
+.notice .controls {
+  margin-top: 12px;
+}
+.hint {
+  margin-top: 8px;
+  font-size: 0.78rem;
+}
+.row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+.row:last-child {
+  border-bottom: 0;
+}
+.rows,
+.inline {
+  margin-top: 12px;
+}
+hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 18px 0;
+}
+#desk-status {
+  font-size: 0.93rem;
+}
+.inline {
+  margin-bottom: 8px;
+}
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+}
+dialog {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  width: 360px;
+}
+dialog::backdrop {
+  background: #13231a55;
+}
+dialog .stack {
+  margin: 4px;
+}
+#feedback {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  background: #f1f5e7;
+  border: 1px solid #879a7d;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-size: 0.87rem;
+}
+@media (max-width: 880px) {
+  body {
+    grid-template-columns: 155px minmax(0, 1fr);
+  }
+  main {
+    padding-inline: 22px;
+  }
+  .rail {
+    padding-inline: 12px;
+  }
+  .card {
+    padding: 17px;
+  }
+}
+@media (max-width: 740px) {
+  body {
+    display: block;
+  }
+  .rail {
+    height: auto;
+    position: static;
+    display: block;
+    padding: 13px 18px;
+  }
+  .account {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  nav {
+    display: flex;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+  .columns {
+    grid-template-columns: 1fr;
+  }
+  .focus {
+    padding: 20px;
+  }
+  main {
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+  button:active:not(:disabled) {
+    scale: 1;
+  }
+}

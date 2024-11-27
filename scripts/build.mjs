@@ -13,7 +13,8 @@ if (previous) {
     throw new Error('Unexpected build directory.');
   await rm(out, { recursive: true });
 }
-await mkdir(out, { recursive: true });
+await cp(join(root, 'ui'), out, { recursive: true });
 const assets = join(out, 'assets');
 await mkdir(assets, { recursive: true });
+await cp(join(root, 'assets/icon.png'), join(assets, 'icon.png'));
 console.log('Built the offline Deskframe desktop interface.');
