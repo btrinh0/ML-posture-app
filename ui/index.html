@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Deskframe</title>
     <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./dashboard.mjs"></script>
   </head>
   <body>
     <aside class="rail">
       <div class="brand"><img src="./assets/icon.png" alt="" />Deskframe</div>
       <nav aria-label="Workspace">
         <button data-page="today" aria-current="page">Study desk</button>
+        <button data-page="setup">Desk setup</button>
       </nav>
     </aside>
     <main>
@@ -21,6 +23,15 @@
       <div id="feedback" role="status" hidden></div>
       <section id="today" class="page">
         <h1>Study desk</h1>
+      </section>
+      <section id="setup" class="page" hidden>
+        <h1>Desk setup</h1>
+        <article class="card">
+          <h2>Workstation check</h2>
+          <form id="setup-form" class="stack">
+            <div id="questions"></div>
+          </form>
+        </article>
       </section>
     </main>
   </body>

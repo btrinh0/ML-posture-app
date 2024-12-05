@@ -1,0 +1,66 @@
+import { deskQuestions } from './companion.mjs';
+
+export const $ = (id) => document.getElementById(id);
+export function node(tag, text, cls) {
+  const element = document.createElement(tag);
+  if (text !== undefined) element.textContent = text;
+  if (cls) element.className = cls;
+  return element;
+}
+let state, formKey, feedbackTimer;
+const renderers = new Set();
+export function observe(fn) {
+  renderers.add(fn);
+  if (state) fn(state);
+}
+export function feedback(text) {
+  $('feedback').textContent = text;
+  $('feedback').hidden = false;
+  clearTimeout(feedbackTimer);
+  feedbackTimer = setTimeout(() => {
+    $('feedback').hidden = true;
+  }, 6500);
+}
+export async function act(name, value, message) {
+  try {
+    render(await window.desk.action(name, value));
+    if (message) feedback(message);
+    return true;
+  } catch (err) {
+    feedback(err.message.replace(/^Error invoking remote method .+?Error: /, ''));
+    return false;
+  }
+}
+export function openPage(id) {
+  for (const section of document.querySelectorAll('.page')) section.hidden = section.id !== id;
+  for (const btn of document.querySelectorAll('[data-page]')) {
+    if (btn.dataset.page === id) btn.setAttribute('aria-current', 'page');
+    else btn.removeAttribute('aria-current');
+  }
+  window.dispatchEvent(new CustomEvent('desk-page', { detail: id }));
+}
+export const duration = (ms) => {
+  const sec = Math.floor(ms / 1000);
+  return [Math.floor(sec / 60), sec % 60].map((v) => String(v).padStart(2, '0')).join(':');
+};
+function selectField(parent, id, title, choices) {
+  const label = node('label', title),
+    select = node('select');
+  select.id = id;
+  select.required = true;
+  select.add(new Option('Choose…', ''));
+  choices.forEach((v, i) => select.add(new Option(v, i)));
+  label.append(select);
+  parent.append(label);
+}
+deskQuestions.forEach((q) => selectField($('questions'), q.key, q.title, q.choices));
+function render(next) {
+  if (!next) return;
+  state = next;
+  for (const fn of renderers) fn(state);
+}
+document
+  .querySelectorAll('[data-page],[data-open]')
+  .forEach((b) => (b.onclick = () => openPage(b.dataset.page || b.dataset.open)));
+window.desk.onChange(render);
+render(await window.desk.state());
