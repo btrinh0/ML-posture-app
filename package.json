@@ -10,6 +10,7 @@
     "build": "node scripts/build.mjs",
     "dev": "npm run desktop",
     "start": "npm run desktop",
+    "test": "node --test --test-isolation=none test/*.test.mjs",
     "desktop": "npm run build && electron ."
   },
   "engines": {

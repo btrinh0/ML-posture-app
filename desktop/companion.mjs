@@ -32,5 +32,14 @@ export const deskQuestions = [
 ];
 
 
+export function deskResult(answers) {
+  const advice = deskQuestions.flatMap(({ key, advice }) => {
+    const choice = answers?.[key];
+    if (!Number.isInteger(choice) || choice < 0 || choice >= advice.length)
+      throw new Error('Answer each desk question.');
+    return choice === 0 ? [] : [advice[choice]];
+  });
+  return { score: deskQuestions.length - advice.length, advice };
+}
 
 
