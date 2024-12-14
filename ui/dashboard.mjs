@@ -1,4 +1,4 @@
-import { deskQuestions } from './companion.mjs';
+import { deskQuestions, deskResult } from './companion.mjs';
 
 export const $ = (id) => document.getElementById(id);
 export function node(tag, text, cls) {
@@ -62,5 +62,13 @@ function render(next) {
 document
   .querySelectorAll('[data-page],[data-open]')
   .forEach((b) => (b.onclick = () => openPage(b.dataset.page || b.dataset.open)));
+$('setup-form').onsubmit = (event) => {
+  event.preventDefault();
+  const answers = Object.fromEntries(deskQuestions.map(({key}) => [key, Number($(key).value)]));
+  const result = deskResult(answers);
+  $('adjustments').hidden = false;
+  $('advice').replaceChildren(...result.advice.map((entry) => node('p', entry)));
+  $('desk-status').textContent = result.score + ' of 3 desk checks supported';
+};
 window.desk.onChange(render);
 render(await window.desk.state());

@@ -23,6 +23,10 @@
       <div id="feedback" role="status" hidden></div>
       <section id="today" class="page">
         <h1>Study desk</h1>
+          <article class="card">
+            <p id="desk-status"></p>
+            <button class="link" data-open="setup">Review desk setup ↗</button>
+          </article>
       </section>
       <section id="setup" class="page" hidden>
         <h1>Desk setup</h1>
@@ -30,7 +34,12 @@
           <h2>Workstation check</h2>
           <form id="setup-form" class="stack">
             <div id="questions"></div>
+            <button class="primary" type="submit">Save desk setup</button>
           </form>
+        </article>
+        <article class="card" id="adjustments" hidden>
+          <h2>Desk adjustments</h2>
+          <div id="advice"></div>
         </article>
       </section>
     </main>
