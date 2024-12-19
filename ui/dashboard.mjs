@@ -57,6 +57,26 @@ deskQuestions.forEach((q) => selectField($('questions'), q.key, q.title, q.choic
 function render(next) {
   if (!next) return;
   state = next;
+  const { profile, session, prompt } = state;
+  const form = JSON.stringify([profile, state.profiles, state.day, state.symptoms, state.autoStart]);
+  if (form !== formKey) {
+    formKey = form;
+    $('adjustments').hidden = !state.setupResult;
+    $('advice').replaceChildren(
+      ...(state.setupResult?.advice.length
+        ? state.setupResult.advice
+        : ['All three setup checks are supported.']
+      ).map((t) => node('p', t)),
+    );
+    $('desk-status').textContent = state.setupResult
+      ? state.setupResult.score + ' of 3 desk checks supported'
+      : 'Desk setup incomplete.';
+    $('date').textContent = new Date(state.day + 'T12:00:00').toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
   for (const fn of renderers) fn(state);
 }
 document

@@ -42,4 +42,5 @@ export function deskResult(answers) {
   return { score: deskQuestions.length - advice.length, advice };
 }
 
+export const localDay = (at = Date.now()) => new Date(at).toISOString().slice(0, 10);
 

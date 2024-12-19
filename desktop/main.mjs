@@ -15,6 +15,7 @@ import {
 import { readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DeskStore } from './store.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');
@@ -40,6 +41,7 @@ let lastPerformance = 0,
   candidate = null;
 const isHome = (url) => url === home;
 const state = () => ({
+  ...store.state(),
 });
 const show = () => {
   win?.show();
@@ -87,6 +89,7 @@ async function start() {
   );
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, cb) => cb(false));
   session.defaultSession.setPermissionCheckHandler(() => false);
+  store = new DeskStore(join(app.getPath('userData'), 'deskframe.sqlite'));
   win = new BrowserWindow({
     width: 1120,
     height: 840,
