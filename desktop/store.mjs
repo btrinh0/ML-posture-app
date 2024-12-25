@@ -39,6 +39,10 @@ export class DeskStore {
       throw err;
     }
   }
+  saveSetup({ answers, interval }) {
+    deskResult(answers);
+    this.run('UPDATE profiles SET setup=? WHERE id=?', JSON.stringify(answers), this.profile);
+  }
   state() {
     const today = localDay(this.now());
     const profile = this.get('SELECT id,alias,interval_min,setup FROM profiles WHERE id=?', this.profile);

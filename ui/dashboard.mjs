@@ -61,6 +61,9 @@ function render(next) {
   const form = JSON.stringify([profile, state.profiles, state.day, state.symptoms, state.autoStart]);
   if (form !== formKey) {
     formKey = form;
+    deskQuestions.forEach(({ key }) => {
+      $(key).value = profile.setup?.[key] ?? '';
+    });
     $('adjustments').hidden = !state.setupResult;
     $('advice').replaceChildren(
       ...(state.setupResult?.advice.length
@@ -82,13 +85,16 @@ function render(next) {
 document
   .querySelectorAll('[data-page],[data-open]')
   .forEach((b) => (b.onclick = () => openPage(b.dataset.page || b.dataset.open)));
-$('setup-form').onsubmit = (event) => {
-  event.preventDefault();
-  const answers = Object.fromEntries(deskQuestions.map(({key}) => [key, Number($(key).value)]));
-  const result = deskResult(answers);
-  $('adjustments').hidden = false;
-  $('advice').replaceChildren(...result.advice.map((entry) => node('p', entry)));
-  $('desk-status').textContent = result.score + ' of 3 desk checks supported';
+$('setup-form').onsubmit = (e) => {
+  e.preventDefault();
+  act(
+    'setup',
+    {
+      answers: Object.fromEntries(deskQuestions.map(({ key }) => [key, Number($(key).value)])),
+      interval: 30,
+    },
+    'Desk setup saved.',
+  );
 };
 window.desk.onChange(render);
 render(await window.desk.state());

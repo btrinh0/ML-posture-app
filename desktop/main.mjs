@@ -51,6 +51,7 @@ const send = () => {
   if (win && !win.isDestroyed()) win.webContents.send('desk:change', state());
 };
 const actions = {
+  setup: (v) => store.saveSetup(v),
 };
 const mime = {
   '.html': 'text/html',
