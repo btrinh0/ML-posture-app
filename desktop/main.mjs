@@ -52,6 +52,8 @@ const send = () => {
 };
 const actions = {
   setup: (v) => store.saveSetup(v),
+  addProfile: (v) => store.addProfile(v),
+  profile: (v) => store.chooseProfile(v),
 };
 const mime = {
   '.html': 'text/html',

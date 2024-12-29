@@ -14,8 +14,10 @@ export class DeskStore {
         study_id TEXT NOT NULL UNIQUE, interval_min INTEGER NOT NULL DEFAULT 30, setup TEXT);
       CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     `);
-    if (!this.get('SELECT id FROM profiles LIMIT 1')) this.run('INSERT INTO profiles(alias,study_id) VALUES(?,?)', 'My desk', randomUUID());
-    this.profile = this.get('SELECT min(id) AS id FROM profiles').id;
+    if (!this.get('SELECT id FROM profiles LIMIT 1')) this.addProfile('My desk');
+    this.profile =
+      Number(this.get("SELECT value FROM settings WHERE key='profile'")?.value) ||
+      this.get('SELECT min(id) AS id FROM profiles').id;
     this.session = null;
     this.idle = false;
   }
@@ -38,6 +40,20 @@ export class DeskStore {
       this.db.exec('ROLLBACK');
       throw err;
     }
+  }
+  addProfile(alias) {
+    if (typeof alias !== 'string' || !alias.trim() || alias.trim().length > 32)
+      throw new Error('Use a profile name of 1–32 characters.');
+    if (this.get('SELECT id FROM profiles WHERE alias=?', alias.trim()))
+      throw new Error('That profile already exists.');
+    const row = this.run('INSERT INTO profiles(alias,study_id) VALUES(?,?)', alias.trim(), randomUUID());
+    this.chooseProfile(Number(row.lastInsertRowid));
+  }
+  chooseProfile(id) {
+    if (!Number.isInteger(id) || !this.get('SELECT id FROM profiles WHERE id=?', id))
+      throw new Error('Unknown profile.');
+    this.run("INSERT OR REPLACE INTO settings VALUES('profile',?)", String(id));
+    this.profile = id;
   }
   saveSetup({ answers, interval }) {
     deskResult(answers);

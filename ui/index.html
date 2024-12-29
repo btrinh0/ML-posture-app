@@ -14,6 +14,11 @@
         <button data-page="today" aria-current="page">Study desk</button>
         <button data-page="setup">Desk setup</button>
       </nav>
+      <div class="account">
+        <label for="profiles">Local profile</label
+        ><select id="profiles"></select
+        ><button class="link" id="add-profile">Add profile</button>
+      </div>
     </aside>
     <main>
       <header>
@@ -43,5 +48,15 @@
         </article>
       </section>
     </main>
+    <dialog id="profile-dialog">
+      <form id="profile-form" class="stack">
+        <h2>Add a local profile</h2>
+        <label>Nickname<input id="alias" maxlength="32" required autocomplete="off" /></label>
+        <div class="controls">
+          <button class="primary">Create profile</button
+          ><button id="cancel-profile" type="button">Cancel</button>
+        </div>
+      </form>
+    </dialog>
   </body>
 </html>

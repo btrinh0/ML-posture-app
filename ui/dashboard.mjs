@@ -61,6 +61,9 @@ function render(next) {
   const form = JSON.stringify([profile, state.profiles, state.day, state.symptoms, state.autoStart]);
   if (form !== formKey) {
     formKey = form;
+    $('profiles').replaceChildren(
+      ...state.profiles.map((p) => new Option(p.alias, p.id, false, p.id === profile.id)),
+    );
     deskQuestions.forEach(({ key }) => {
       $(key).value = profile.setup?.[key] ?? '';
     });
@@ -85,6 +88,16 @@ function render(next) {
 document
   .querySelectorAll('[data-page],[data-open]')
   .forEach((b) => (b.onclick = () => openPage(b.dataset.page || b.dataset.open)));
+$('profiles').onchange = (e) => act('profile', Number(e.target.value));
+$('add-profile').onclick = () => $('profile-dialog').showModal();
+$('cancel-profile').onclick = () => $('profile-dialog').close();
+$('profile-form').onsubmit = async (e) => {
+  e.preventDefault();
+  if (await act('addProfile', $('alias').value)) {
+    $('profile-dialog').close();
+    $('alias').value = '';
+  }
+};
 $('setup-form').onsubmit = (e) => {
   e.preventDefault();
   act(
