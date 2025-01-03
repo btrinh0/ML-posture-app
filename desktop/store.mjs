@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
-import { deskResult, localDay } from './companion.mjs';
+import { deskResult, localDay, dayBefore } from './companion.mjs';
 
 export class DeskStore {
   constructor(path, clock = Date.now) {
@@ -13,6 +13,9 @@ export class DeskStore {
         id INTEGER PRIMARY KEY, alias TEXT NOT NULL UNIQUE COLLATE NOCASE,
         study_id TEXT NOT NULL UNIQUE, interval_min INTEGER NOT NULL DEFAULT 30, setup TEXT);
       CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS symptoms (
+        profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, jaw INTEGER NOT NULL,
+        neck INTEGER NOT NULL, back INTEGER NOT NULL, PRIMARY KEY(profile, day));
     `);
     if (!this.get('SELECT id FROM profiles LIMIT 1')) this.addProfile('My desk');
     this.profile =
@@ -59,6 +62,17 @@ export class DeskStore {
     deskResult(answers);
     this.run('UPDATE profiles SET setup=? WHERE id=?', JSON.stringify(answers), this.profile);
   }
+  checkIn(values) {
+    const scores = ['jaw', 'neck', 'back'].map((key) => values?.[key]);
+    if (scores.some((v) => !Number.isInteger(v) || v < 0 || v > 10))
+      throw new Error('Enter a score from 0 to 10 for each area.');
+    this.run(
+      'INSERT INTO symptoms VALUES(?,?,?,?,?)',
+      this.profile,
+      localDay(this.now()),
+      ...scores,
+    );
+  }
   state() {
     const today = localDay(this.now());
     const profile = this.get('SELECT id,alias,interval_min,setup FROM profiles WHERE id=?', this.profile);
@@ -70,7 +84,16 @@ export class DeskStore {
       setupResult: profile.setup && deskResult(profile.setup),
       session: this.session && { ...this.session },
       idle: this.idle,
+      symptoms:
+        this.get('SELECT jaw,neck,back FROM symptoms WHERE profile=? AND day=?', this.profile, today) || null,
     };
+  }
+  symptomsSince(days = 28) {
+    return this.all(
+      'SELECT day,jaw,neck,back FROM symptoms WHERE profile=? AND day>=? ORDER BY day',
+      this.profile,
+      dayBefore(localDay(this.now()), days - 1),
+    );
   }
   close() {
     this.db.close();

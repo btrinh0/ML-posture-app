@@ -28,10 +28,20 @@
       <div id="feedback" role="status" hidden></div>
       <section id="today" class="page">
         <h1>Study desk</h1>
+        <div class="columns">
+          <article class="card">
+            <h2>Daily check-in</h2>
+            <p class="muted">Rate each area from 0 (none) to 10 (highest).</p>
+            <form id="symptoms" class="stack">
+              <div id="scores"></div>
+              <button class="primary" type="submit">Save check-in</button>
+            </form>
+          </article>
           <article class="card">
             <p id="desk-status"></p>
             <button class="link" data-open="setup">Review desk setup ↗</button>
           </article>
+        </div>
       </section>
       <section id="setup" class="page" hidden>
         <h1>Desk setup</h1>

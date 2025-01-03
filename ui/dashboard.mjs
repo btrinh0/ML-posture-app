@@ -54,6 +54,18 @@ function selectField(parent, id, title, choices) {
   parent.append(label);
 }
 deskQuestions.forEach((q) => selectField($('questions'), q.key, q.title, q.choices));
+for (const [key, title] of [
+  ['jaw', 'Jaw tension'],
+  ['neck', 'Neck stiffness'],
+  ['back', 'Upper-back soreness'],
+]) {
+  selectField(
+    $('scores'),
+    key,
+    title,
+    Array.from({ length: 11 }, (_, i) => String(i)),
+  );
+}
 function render(next) {
   if (!next) return;
   state = next;
@@ -66,6 +78,9 @@ function render(next) {
     );
     deskQuestions.forEach(({ key }) => {
       $(key).value = profile.setup?.[key] ?? '';
+    });
+    ['jaw', 'neck', 'back'].forEach((k) => {
+      $(k).value = state.symptoms?.[k] ?? '';
     });
     $('adjustments').hidden = !state.setupResult;
     $('advice').replaceChildren(
@@ -97,6 +112,14 @@ $('profile-form').onsubmit = async (e) => {
     $('profile-dialog').close();
     $('alias').value = '';
   }
+};
+$('symptoms').onsubmit = (e) => {
+  e.preventDefault();
+  act(
+    'checkIn',
+    Object.fromEntries(['jaw', 'neck', 'back'].map((k) => [k, Number($(k).value)])),
+    'Today’s check-in is saved.',
+  );
 };
 $('setup-form').onsubmit = (e) => {
   e.preventDefault();

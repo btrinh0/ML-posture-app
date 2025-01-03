@@ -52,6 +52,7 @@ const send = () => {
 };
 const actions = {
   setup: (v) => store.saveSetup(v),
+  checkIn: (v) => store.checkIn(v),
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
 };

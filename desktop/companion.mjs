@@ -44,3 +44,8 @@ export function deskResult(answers) {
 
 export const localDay = (at = Date.now()) => new Date(at).toISOString().slice(0, 10);
 
+export function dayBefore(day, count) {
+  const d = new Date(day + 'T12:00:00');
+  d.setDate(d.getDate() - count);
+  return localDay(d);
+}
