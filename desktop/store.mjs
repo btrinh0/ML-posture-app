@@ -67,7 +67,7 @@ export class DeskStore {
     if (scores.some((v) => !Number.isInteger(v) || v < 0 || v > 10))
       throw new Error('Enter a score from 0 to 10 for each area.');
     this.run(
-      'INSERT INTO symptoms VALUES(?,?,?,?,?)',
+      'INSERT OR REPLACE INTO symptoms VALUES(?,?,?,?,?)',
       this.profile,
       localDay(this.now()),
       ...scores,

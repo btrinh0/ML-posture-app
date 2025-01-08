@@ -12,6 +12,9 @@ test('desk adjustments, symptoms and intervals belong to the selected profile', 
   assert.equal(deskResult(answers).score, 1);
   s.saveSetup({ answers, interval: 25 });
   s.checkIn({ jaw: 0, neck: 3, back: 2 });
+  s.checkIn({ jaw: 2, neck: 1, back: 0 });
+  assert.equal(s.symptomsSince().length, 1);
+  assert.equal(s.state().symptoms.jaw, 2);
   assert.throws(() => s.checkIn({ jaw: null, neck: 2, back: 1 }));
   s.addProfile('Sibling');
   assert.equal(s.state().symptoms, null);
