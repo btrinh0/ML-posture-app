@@ -42,7 +42,14 @@ export function deskResult(answers) {
   return { score: deskQuestions.length - advice.length, advice };
 }
 
-export const localDay = (at = Date.now()) => new Date(at).toISOString().slice(0, 10);
+export function localDay(at = Date.now()) {
+  const d = new Date(at);
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-');
+}
 
 export function dayBefore(day, count) {
   const d = new Date(day + 'T12:00:00');
