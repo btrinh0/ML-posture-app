@@ -13,6 +13,11 @@ export class DeskStore {
         id INTEGER PRIMARY KEY, alias TEXT NOT NULL UNIQUE COLLATE NOCASE,
         study_id TEXT NOT NULL UNIQUE, interval_min INTEGER NOT NULL DEFAULT 30, setup TEXT);
       CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS sessions (
+        id INTEGER PRIMARY KEY, profile INTEGER NOT NULL REFERENCES profiles, started INTEGER NOT NULL,
+        ended INTEGER, last_tick INTEGER NOT NULL, active_ms INTEGER NOT NULL DEFAULT 0,
+        next_break INTEGER NOT NULL, study_id TEXT NOT NULL UNIQUE);
+      CREATE UNIQUE INDEX IF NOT EXISTS one_open_session ON sessions((1)) WHERE ended IS NULL;
       CREATE TABLE IF NOT EXISTS symptoms (
         profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, jaw INTEGER NOT NULL,
         neck INTEGER NOT NULL, back INTEGER NOT NULL, PRIMARY KEY(profile, day));
@@ -73,6 +78,44 @@ export class DeskStore {
       ...scores,
     );
   }
+  start() {
+    if (this.session) return;
+    const now = this.now();
+    const interval = this.get('SELECT interval_min FROM profiles WHERE id=?', this.profile).interval_min;
+    this.run(
+      'INSERT INTO sessions(profile,started,last_tick,next_break,study_id) VALUES(?,?,?,?,?)',
+      this.profile,
+      now,
+      now,
+      interval * 60_000,
+      randomUUID(),
+    );
+    this.session = this.get('SELECT * FROM sessions WHERE ended IS NULL');
+    this.idle = false;
+    this.lastSaved = now;
+  }
+  persist() {
+    const s = this.session;
+    if (s)
+      this.run(
+        'UPDATE sessions SET active_ms=?,last_tick=?,next_break=? WHERE id=?',
+        s.active_ms,
+        s.last_tick,
+        s.next_break,
+        s.id,
+      );
+    this.lastSaved = this.now();
+  }
+  end() {
+    if (!this.session) return;
+    const s = this.session;
+    this.transaction(() => {
+      this.persist();
+      this.run('UPDATE sessions SET ended=? WHERE id=?', this.now(), s.id);
+    });
+    this.session = null;
+    this.idle = false;
+  }
   state() {
     const today = localDay(this.now());
     const profile = this.get('SELECT id,alias,interval_min,setup FROM profiles WHERE id=?', this.profile);
@@ -96,6 +139,7 @@ export class DeskStore {
     );
   }
   close() {
+    this.end();
     this.db.close();
   }
 }

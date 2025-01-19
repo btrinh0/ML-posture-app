@@ -98,11 +98,14 @@ function render(next) {
       day: 'numeric',
     });
   }
+  $('session-button').textContent = session ? 'End session' : 'Start session';
+  $('session-status').textContent = !session ? 'Ready' : state.idle ? 'Paused while idle' : 'In progress';
   for (const fn of renderers) fn(state);
 }
 document
   .querySelectorAll('[data-page],[data-open]')
   .forEach((b) => (b.onclick = () => openPage(b.dataset.page || b.dataset.open)));
+$('session-button').onclick = () => act(state.session ? 'end' : 'start');
 $('profiles').onchange = (e) => act('profile', Number(e.target.value));
 $('add-profile').onclick = () => $('profile-dialog').showModal();
 $('cancel-profile').onclick = () => $('profile-dialog').close();

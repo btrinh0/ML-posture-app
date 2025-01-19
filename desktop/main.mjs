@@ -51,6 +51,14 @@ const send = () => {
   if (win && !win.isDestroyed()) win.webContents.send('desk:change', state());
 };
 const actions = {
+  start: () => {
+    if (!store.session) {
+      store.start();
+    }
+  },
+  end: () => {
+    store.end();
+  },
   setup: (v) => store.saveSetup(v),
   checkIn: (v) => store.checkIn(v),
   addProfile: (v) => store.addProfile(v),
