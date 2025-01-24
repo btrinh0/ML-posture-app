@@ -106,6 +106,15 @@ export class DeskStore {
       );
     this.lastSaved = this.now();
   }
+  tick(idle, sensorActive = false, drill) {
+    const s = this.session;
+    if (!s) return;
+    const now = this.now();
+    s.active_ms = Math.max(0, now - s.started);
+    s.last_tick = now;
+    this.idle = idle;
+
+  }
   end() {
     if (!this.session) return;
     const s = this.session;
@@ -129,6 +138,10 @@ export class DeskStore {
       idle: this.idle,
       symptoms:
         this.get('SELECT jaw,neck,back FROM symptoms WHERE profile=? AND day=?', this.profile, today) || null,
+      history: this.all(
+        'SELECT started,ended,active_ms FROM sessions WHERE profile=? AND ended IS NOT NULL ORDER BY id DESC LIMIT 5',
+        this.profile,
+      ),
     };
   }
   symptomsSince(days = 28) {

@@ -100,6 +100,31 @@ function render(next) {
   }
   $('session-button').textContent = session ? 'End session' : 'Start session';
   $('session-status').textContent = !session ? 'Ready' : state.idle ? 'Paused while idle' : 'In progress';
+  $('clock').textContent = duration(session?.active_ms ?? 0);
+  const historyKey = JSON.stringify(state.history);
+  if ($('history').dataset.key !== historyKey) {
+    $('history').dataset.key = historyKey;
+    $('history').replaceChildren(
+      ...(state.history.length
+        ? state.history.map((s) => {
+            const row = node('div', undefined, 'row');
+            row.append(
+              node(
+                'span',
+                new Date(s.started).toLocaleString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                }),
+              ),
+              node('strong', duration(s.active_ms) + ' active'),
+            );
+            return row;
+          })
+        : [node('p', 'No completed sessions yet.', 'muted')]),
+    );
+  }
   for (const fn of renderers) fn(state);
 }
 document

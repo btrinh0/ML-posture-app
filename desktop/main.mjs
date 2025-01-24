@@ -50,6 +50,13 @@ const show = () => {
 const send = () => {
   if (win && !win.isDestroyed()) win.webContents.send('desk:change', state());
 };
+function notify() {}
+function tick() {
+  if (!store.session) return;
+  const idle = false;
+  notify(store.tick(idle, false));
+  send();
+}
 const actions = {
   start: () => {
     if (!store.session) {
@@ -135,6 +142,7 @@ async function start() {
   });
   await win.loadURL(home);
   show();
+  timer = setInterval(tick, 1000);
 }
 {
   app.on('before-quit', () => {
