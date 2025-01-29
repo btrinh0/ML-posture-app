@@ -82,6 +82,7 @@ function render(next) {
     ['jaw', 'neck', 'back'].forEach((k) => {
       $(k).value = state.symptoms?.[k] ?? '';
     });
+    $('interval').value = profile.interval_min;
     $('adjustments').hidden = !state.setupResult;
     $('advice').replaceChildren(
       ...(state.setupResult?.advice.length
@@ -155,7 +156,7 @@ $('setup-form').onsubmit = (e) => {
     'setup',
     {
       answers: Object.fromEntries(deskQuestions.map(({ key }) => [key, Number($(key).value)])),
-      interval: 30,
+      interval: Number($('interval').value),
     },
     'Desk setup saved.',
   );

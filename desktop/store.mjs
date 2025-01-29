@@ -1,3 +1,4 @@
+import { elapsedSinceStart, nextDeadline } from './wall-clock-break.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { deskResult, localDay, dayBefore } from './companion.mjs';
@@ -65,7 +66,18 @@ export class DeskStore {
   }
   saveSetup({ answers, interval }) {
     deskResult(answers);
-    this.run('UPDATE profiles SET setup=? WHERE id=?', JSON.stringify(answers), this.profile);
+    if (![25, 30, 35, 40].includes(interval))
+      throw new Error('Choose a break interval from 25 to 40 minutes.');
+    this.run(
+      'UPDATE profiles SET setup=?, interval_min=? WHERE id=?',
+      JSON.stringify(answers),
+      interval,
+      this.profile,
+    );
+    if (this.session) {
+      this.session.next_break = this.session.active_ms + interval * 60_000;
+      this.persist();
+    }
   }
   checkIn(values) {
     const scores = ['jaw', 'neck', 'back'].map((key) => values?.[key]);
@@ -110,7 +122,7 @@ export class DeskStore {
     const s = this.session;
     if (!s) return;
     const now = this.now();
-    s.active_ms = Math.max(0, now - s.started);
+    s.active_ms = elapsedSinceStart(s, now);
     s.last_tick = now;
     this.idle = idle;
 
@@ -134,7 +146,7 @@ export class DeskStore {
       profiles: this.all('SELECT id,alias FROM profiles ORDER BY id'),
       day: today,
       setupResult: profile.setup && deskResult(profile.setup),
-      session: this.session && { ...this.session },
+      session: this.session && { ...this.session, dueAt: nextDeadline(this.session) },
       idle: this.idle,
       symptoms:
         this.get('SELECT jaw,neck,back FROM symptoms WHERE profile=? AND day=?', this.profile, today) || null,
