@@ -1,4 +1,4 @@
-import { deskQuestions, deskResult } from './companion.mjs';
+import { deskQuestions, drills } from './companion.mjs';
 
 export const $ = (id) => document.getElementById(id);
 export function node(tag, text, cls) {
@@ -6,6 +6,9 @@ export function node(tag, text, cls) {
   if (text !== undefined) element.textContent = text;
   if (cls) element.className = cls;
   return element;
+}
+for (const drill of Object.values(drills)) {
+  $('drill-library').append(node('h3', drill.title), node('p', drill.text, 'muted'));
 }
 let state, formKey, feedbackTimer;
 const renderers = new Set();

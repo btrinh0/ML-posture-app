@@ -1,7 +1,7 @@
 import { elapsedSinceStart, nextDeadline } from './wall-clock-break.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
-import { deskResult, localDay, dayBefore } from './companion.mjs';
+import { dayBefore, deskResult, drills, localDay } from './companion.mjs';
 
 export class DeskStore {
   constructor(path, clock = Date.now) {

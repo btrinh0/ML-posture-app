@@ -31,6 +31,28 @@ export const deskQuestions = [
   },
 ];
 
+export const drills = {
+  walk: {
+    title: 'Stand and walk',
+    text: 'Leave the desk for a comfortable walk. Return when you feel ready.',
+  },
+  chin: {
+    title: 'Gentle chin tuck',
+    text: 'Look straight ahead. Gently draw your chin back, keeping your eyes level, then release.',
+  },
+  back: {
+    title: 'Seated upper-back extension',
+    text: 'Sit against a supportive chair. Gently lift your chest and ease your upper back over the backrest, then return.',
+  },
+  shoulders: {
+    title: 'Shoulder-blade squeeze',
+    text: 'Relax your shoulders. Gently bring your shoulder blades toward each other, then release.',
+  },
+  jaw: {
+    title: 'Jaw tension check',
+    text: 'Notice whether you are clenching while you work. If so, ease the pressure and allow your jaw muscles to relax.',
+  },
+};
 
 export function deskResult(answers) {
   const advice = deskQuestions.flatMap(({ key, advice }) => {
