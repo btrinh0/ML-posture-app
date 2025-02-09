@@ -19,6 +19,9 @@ export class DeskStore {
         ended INTEGER, last_tick INTEGER NOT NULL, active_ms INTEGER NOT NULL DEFAULT 0,
         next_break INTEGER NOT NULL, study_id TEXT NOT NULL UNIQUE);
       CREATE UNIQUE INDEX IF NOT EXISTS one_open_session ON sessions((1)) WHERE ended IS NULL;
+      CREATE TABLE IF NOT EXISTS prompts (
+        id INTEGER PRIMARY KEY, session INTEGER NOT NULL REFERENCES sessions, at INTEGER NOT NULL,
+        kind TEXT NOT NULL, drill TEXT NOT NULL, outcome TEXT, resolved INTEGER);
       CREATE TABLE IF NOT EXISTS symptoms (
         profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, jaw INTEGER NOT NULL,
         neck INTEGER NOT NULL, back INTEGER NOT NULL, PRIMARY KEY(profile, day));
@@ -125,13 +128,37 @@ export class DeskStore {
     s.active_ms = elapsedSinceStart(s, now);
     s.last_tick = now;
     this.idle = idle;
-
+    if (!idle && now >= nextDeadline(s) && !this.pending()) {
+      const count = this.get(
+        'SELECT count(*) AS n FROM prompts p JOIN sessions s ON p.session=s.id WHERE s.profile=?',
+        this.profile,
+      ).n;
+      return this.prompt('timer', drill ?? Object.keys(drills)[count % Object.keys(drills).length]);
+    }
+  }
+  prompt(kind, drill) {
+    const s = this.session;
+    if (!s || this.idle || !Object.hasOwn(drills, drill)) return;
+    const now = this.now();
+    this.run('INSERT INTO prompts(session,at,kind,drill) VALUES(?,?,?,?)', s.id, now, kind, drill);
+    return this.pending();
+  }
+  pending() {
+    return (
+      this.session &&
+      this.get('SELECT id,kind,drill FROM prompts WHERE session=? AND outcome IS NULL', this.session.id)
+    );
   }
   end() {
     if (!this.session) return;
     const s = this.session;
     this.transaction(() => {
       this.persist();
+      this.run(
+        "UPDATE prompts SET outcome='ended',resolved=? WHERE session=? AND outcome IS NULL",
+        this.now(),
+        s.id,
+      );
       this.run('UPDATE sessions SET ended=? WHERE id=?', this.now(), s.id);
     });
     this.session = null;
@@ -148,6 +175,7 @@ export class DeskStore {
       setupResult: profile.setup && deskResult(profile.setup),
       session: this.session && { ...this.session, dueAt: nextDeadline(this.session) },
       idle: this.idle,
+      prompt: this.pending() || null,
       symptoms:
         this.get('SELECT jaw,neck,back FROM symptoms WHERE profile=? AND day=?', this.profile, today) || null,
       history: this.all(

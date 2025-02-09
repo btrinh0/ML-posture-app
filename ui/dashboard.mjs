@@ -105,6 +105,16 @@ function render(next) {
   $('session-button').textContent = session ? 'End session' : 'Start session';
   $('session-status').textContent = !session ? 'Ready' : state.idle ? 'Paused while idle' : 'In progress';
   $('clock').textContent = duration(session?.active_ms ?? 0);
+  $('prompt').hidden = !prompt;
+  if (prompt) {
+    $('prompt-kind').textContent = {
+      timer: 'Scheduled break',
+      drift: 'Sustained posture change',
+      forecast: 'Early movement break',
+    }[prompt.kind];
+    $('prompt-title').textContent = drills[prompt.drill].title;
+    $('prompt-body').textContent = drills[prompt.drill].text;
+  }
   const historyKey = JSON.stringify(state.history);
   if ($('history').dataset.key !== historyKey) {
     $('history').dataset.key = historyKey;
