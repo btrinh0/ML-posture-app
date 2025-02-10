@@ -68,6 +68,9 @@ const actions = {
   },
   setup: (v) => store.saveSetup(v),
   checkIn: (v) => store.checkIn(v),
+  resolve: (v) => {
+    store.resolve(v.id, v.outcome);
+  },
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
 };

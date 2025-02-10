@@ -149,6 +149,19 @@ export class DeskStore {
       this.get('SELECT id,kind,drill FROM prompts WHERE session=? AND outcome IS NULL', this.session.id)
     );
   }
+  resolve(id, outcome, onResolve) {
+    if (!['completed', 'skipped'].includes(outcome))
+      throw new Error('Unknown break response.');
+    const pending = this.pending();
+    if (!pending || pending.id !== id) return;
+    {
+      onResolve?.();
+      this.run('UPDATE prompts SET outcome=?,resolved=? WHERE id=?', outcome, this.now(), id);
+      const interval = this.get('SELECT interval_min FROM profiles WHERE id=?', this.profile).interval_min;
+      this.session.next_break = this.session.active_ms + interval * 60_000;
+      this.persist();
+    }
+  }
   end() {
     if (!this.session) return;
     const s = this.session;

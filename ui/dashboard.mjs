@@ -174,5 +174,15 @@ $('setup-form').onsubmit = (e) => {
     'Desk setup saved.',
   );
 };
+document
+  .querySelectorAll('[data-outcome]')
+  .forEach(
+    (b) =>
+      (b.onclick = () =>
+        act('resolve', {
+          id: state.prompt?.id,
+          outcome: b.dataset.outcome,
+        })),
+  );
 window.desk.onChange(render);
 render(await window.desk.state());
