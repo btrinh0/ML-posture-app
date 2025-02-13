@@ -150,7 +150,7 @@ export class DeskStore {
     );
   }
   resolve(id, outcome, onResolve) {
-    if (!['completed', 'skipped'].includes(outcome))
+    if (!['completed', 'snoozed', 'skipped'].includes(outcome))
       throw new Error('Unknown break response.');
     const pending = this.pending();
     if (!pending || pending.id !== id) return;
@@ -158,7 +158,7 @@ export class DeskStore {
       onResolve?.();
       this.run('UPDATE prompts SET outcome=?,resolved=? WHERE id=?', outcome, this.now(), id);
       const interval = this.get('SELECT interval_min FROM profiles WHERE id=?', this.profile).interval_min;
-      this.session.next_break = this.session.active_ms + interval * 60_000;
+      this.session.next_break = this.session.active_ms + (outcome === 'snoozed' ? 5 : interval) * 60_000;
       this.persist();
     }
   }
