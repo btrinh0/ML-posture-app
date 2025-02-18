@@ -22,6 +22,7 @@ export class DeskStore {
       CREATE TABLE IF NOT EXISTS prompts (
         id INTEGER PRIMARY KEY, session INTEGER NOT NULL REFERENCES sessions, at INTEGER NOT NULL,
         kind TEXT NOT NULL, drill TEXT NOT NULL, outcome TEXT, resolved INTEGER);
+      CREATE UNIQUE INDEX IF NOT EXISTS one_pending ON prompts(session) WHERE outcome IS NULL;
       CREATE TABLE IF NOT EXISTS symptoms (
         profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, jaw INTEGER NOT NULL,
         neck INTEGER NOT NULL, back INTEGER NOT NULL, PRIMARY KEY(profile, day));
@@ -138,7 +139,7 @@ export class DeskStore {
   }
   prompt(kind, drill) {
     const s = this.session;
-    if (!s || this.idle || !Object.hasOwn(drills, drill)) return;
+    if (!s || this.idle || !Object.hasOwn(drills, drill) || this.pending()) return;
     const now = this.now();
     this.run('INSERT INTO prompts(session,at,kind,drill) VALUES(?,?,?,?)', s.id, now, kind, drill);
     return this.pending();
@@ -154,13 +155,13 @@ export class DeskStore {
       throw new Error('Unknown break response.');
     const pending = this.pending();
     if (!pending || pending.id !== id) return;
-    {
+    this.transaction(() => {
       onResolve?.();
       this.run('UPDATE prompts SET outcome=?,resolved=? WHERE id=?', outcome, this.now(), id);
       const interval = this.get('SELECT interval_min FROM profiles WHERE id=?', this.profile).interval_min;
       this.session.next_break = this.session.active_ms + (outcome === 'snoozed' ? 5 : interval) * 60_000;
       this.persist();
-    }
+    });
   }
   end() {
     if (!this.session) return;
