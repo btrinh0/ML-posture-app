@@ -53,7 +53,7 @@ const send = () => {
 function notify() {}
 function tick() {
   if (!store.session) return;
-  const idle = false;
+  const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
   notify(store.tick(idle, false));
   send();
 }
