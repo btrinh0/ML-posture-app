@@ -1,4 +1,3 @@
-import { elapsedSinceStart, nextDeadline } from './wall-clock-break.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
 import { dayBefore, deskResult, drills, localDay } from './companion.mjs';
@@ -126,10 +125,11 @@ export class DeskStore {
     const s = this.session;
     if (!s) return;
     const now = this.now();
-    s.active_ms = elapsedSinceStart(s, now);
+    const gap = now - s.last_tick;
+    if (!idle && !this.idle && gap > 0) s.active_ms += gap;
     s.last_tick = now;
     this.idle = idle;
-    if (!idle && now >= nextDeadline(s) && !this.pending()) {
+    if (!idle && s.active_ms >= s.next_break && !this.pending()) {
       const count = this.get(
         'SELECT count(*) AS n FROM prompts p JOIN sessions s ON p.session=s.id WHERE s.profile=?',
         this.profile,
@@ -187,7 +187,7 @@ export class DeskStore {
       profiles: this.all('SELECT id,alias FROM profiles ORDER BY id'),
       day: today,
       setupResult: profile.setup && deskResult(profile.setup),
-      session: this.session && { ...this.session, dueAt: nextDeadline(this.session) },
+      session: this.session && { ...this.session },
       idle: this.idle,
       prompt: this.pending() || null,
       symptoms:
