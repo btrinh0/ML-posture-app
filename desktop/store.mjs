@@ -126,7 +126,7 @@ export class DeskStore {
     if (!s) return;
     const now = this.now();
     const gap = now - s.last_tick;
-    if (!idle && !this.idle && gap > 0) s.active_ms += gap;
+    if (!idle && !this.idle && gap > 0 && gap <= 5000) s.active_ms += gap;
     s.last_tick = now;
     this.idle = idle;
     if (!idle && s.active_ms >= s.next_break && !this.pending()) {

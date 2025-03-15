@@ -143,6 +143,16 @@ async function start() {
     send();
     return state();
   });
+  for (const key of ['lock-screen', 'suspend'])
+    powerMonitor.on(key, () => {
+      locked = true;
+      tick();
+    });
+  for (const key of ['unlock-screen', 'resume'])
+    powerMonitor.on(key, () => {
+      locked = false;
+      tick();
+    });
   await win.loadURL(home);
   show();
   timer = setInterval(tick, 1000);
