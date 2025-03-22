@@ -21,3 +21,25 @@ test('desk adjustments, symptoms and intervals belong to the selected profile', 
   assert.equal(s.state().profile.setup, null);
   s.close();
 });
+test('a restarted process closes interrupted sessions at the last checkpoint', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'deskframe-store-'));
+  try {
+    let now = Date.now();
+    const path = join(dir, 'desk.sqlite');
+    const first = new DeskStore(path, () => now);
+    first.start();
+    now += 5000;
+    first.tick(false);
+    first.prompt('timer', 'walk');
+    first.db.close();
+    now += 60_000;
+    const second = new DeskStore(path, () => now);
+    const [entry] = second.state().history;
+    assert.equal(entry.active_ms, 5000);
+    assert.equal(entry.ended, now - 60_000);
+    assert.equal(second.get('SELECT outcome FROM prompts').outcome, 'ended');
+    second.close();
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});

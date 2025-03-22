@@ -26,6 +26,10 @@ export class DeskStore {
         profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, jaw INTEGER NOT NULL,
         neck INTEGER NOT NULL, back INTEGER NOT NULL, PRIMARY KEY(profile, day));
     `);
+    this.db
+      .exec(`UPDATE prompts SET outcome='ended',resolved=(SELECT last_tick FROM sessions WHERE sessions.id=prompts.session)
+      WHERE outcome IS NULL AND session IN (SELECT id FROM sessions WHERE ended IS NULL);
+      UPDATE sessions SET ended=last_tick WHERE ended IS NULL;`);
     if (!this.get('SELECT id FROM profiles LIMIT 1')) this.addProfile('My desk');
     this.profile =
       Number(this.get("SELECT value FROM settings WHERE key='profile'")?.value) ||
@@ -129,6 +133,7 @@ export class DeskStore {
     if (!idle && !this.idle && gap > 0 && gap <= 5000) s.active_ms += gap;
     s.last_tick = now;
     this.idle = idle;
+    if (now - this.lastSaved >= 5000) this.persist();
     if (!idle && s.active_ms >= s.next_break && !this.pending()) {
       const count = this.get(
         'SELECT count(*) AS n FROM prompts p JOIN sessions s ON p.session=s.id WHERE s.profile=?',
