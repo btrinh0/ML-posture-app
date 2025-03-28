@@ -197,6 +197,12 @@ export class DeskStore {
       prompt: this.pending() || null,
       symptoms:
         this.get('SELECT jaw,neck,back FROM symptoms WHERE profile=? AND day=?', this.profile, today) || null,
+      completed: this.get(
+        `SELECT count(*) AS n FROM prompts p JOIN sessions s ON s.id=p.session WHERE s.profile=?
+        AND p.outcome='completed' AND date(p.resolved/1000,'unixepoch','localtime')=?`,
+        this.profile,
+        today,
+      ).n,
       history: this.all(
         'SELECT started,ended,active_ms FROM sessions WHERE profile=? AND ended IS NOT NULL ORDER BY id DESC LIMIT 5',
         this.profile,

@@ -105,6 +105,7 @@ function render(next) {
   $('session-button').textContent = session ? 'End session' : 'Start session';
   $('session-status').textContent = !session ? 'Ready' : state.idle ? 'Paused while idle' : 'In progress';
   $('clock').textContent = duration(session?.active_ms ?? 0);
+  $('completed').textContent = state.completed;
   $('prompt').hidden = !prompt;
   if (prompt) {
     $('prompt-kind').textContent = {

@@ -21,6 +21,29 @@ test('desk adjustments, symptoms and intervals belong to the selected profile', 
   assert.equal(s.state().profile.setup, null);
   s.close();
 });
+test('idle and suspension do not advance reminders; retries resolve one prompt once', () => {
+  let now = 1_800_000_000_000;
+  const s = new DeskStore(':memory:', () => now);
+  s.start();
+  for (let i = 0; i < 1800; i++) {
+    now += 1000;
+    s.tick(true);
+  }
+  now += 3_600_000;
+  s.tick(false);
+  assert.equal(s.session.active_ms, 0);
+  for (let i = 0; i < 1800; i++) {
+    now += 1000;
+    s.tick(false);
+  }
+  const p = s.pending();
+  assert.equal(p.kind, 'timer');
+  s.tick(false);
+  s.resolve(p.id, 'completed');
+  s.resolve(p.id, 'completed');
+  assert.equal(s.state().completed, 1);
+  s.close();
+});
 test('a restarted process closes interrupted sessions at the last checkpoint', () => {
   const dir = mkdtempSync(join(tmpdir(), 'deskframe-store-'));
   try {
