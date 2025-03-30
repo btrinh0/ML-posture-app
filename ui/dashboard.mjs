@@ -105,6 +105,15 @@ function render(next) {
   $('session-button').textContent = session ? 'End session' : 'Start session';
   $('session-status').textContent = !session ? 'Ready' : state.idle ? 'Paused while idle' : 'In progress';
   $('clock').textContent = duration(session?.active_ms ?? 0);
+  $('next-break').textContent = session
+    ? state.sensorFresh
+      ? 'Calibrated posture cues active'
+      : 'Movement break in ' + duration(Math.max(0, session.next_break - session.active_ms))
+    : 'Movement break after ' + profile.interval_min + ' active minutes';
+  const full = profile.interval_min * 60_000;
+  $('progress').value = session
+    ? Math.max(0, Math.min(1, 1 - (session.next_break - session.active_ms) / full))
+    : 0;
   $('completed').textContent = state.completed;
   $('prompt').hidden = !prompt;
   if (prompt) {

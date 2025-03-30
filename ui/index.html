@@ -34,8 +34,10 @@
             <span id="session-status">Ready</span>
           </div>
           <p id="clock" aria-label="Active study time">00:00</p>
+          <progress id="progress" max="1" value="0" aria-label="Progress to movement break"></progress>
           <div class="focus-foot">
-            <button id="session-button" class="accent">Start session</button>
+            <span id="next-break">Movement break after 30 active minutes</span
+            ><button id="session-button" class="accent">Start session</button>
           </div>
         </article>
         <article id="prompt" class="notice" hidden>
