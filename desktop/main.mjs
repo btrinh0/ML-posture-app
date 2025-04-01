@@ -16,6 +16,7 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DeskStore } from './store.mjs';
+import { drills } from './companion.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');
@@ -50,7 +51,16 @@ const show = () => {
 const send = () => {
   if (win && !win.isDestroyed()) win.webContents.send('desk:change', state());
 };
-function notify() {}
+function notify(prompt) {
+  if (!prompt || !Notification.isSupported()) return;
+  const note = new Notification({
+    title: 'Time for a movement break',
+    body: drills[prompt.drill].title,
+    silent: true,
+    icon: join(dist, 'assets/icon.png'),
+  });
+  note.show();
+}
 function tick() {
   if (!store.session) return;
   const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
