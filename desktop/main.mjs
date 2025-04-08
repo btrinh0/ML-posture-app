@@ -144,6 +144,12 @@ async function start() {
   win.webContents.on('will-navigate', (e, url) => {
     if (!isHome(url)) e.preventDefault();
   });
+  win.on('close', (e) => {
+    if (!quitting) {
+      e.preventDefault();
+      win.hide();
+    }
+  });
   ipcMain.handle('desk:state', (e) => {
     if (isHome(e.senderFrame.url)) return state();
   });
@@ -153,6 +159,18 @@ async function start() {
     send();
     return state();
   });
+  tray = new Tray(
+    nativeImage.createFromPath(join(dist, 'assets/icon.png')).resize({ width: 32, height: 32 }),
+  );
+  tray.setToolTip('Deskframe • Study companion');
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      { label: 'Open Deskframe', click: show },
+      { type: 'separator' },
+      { label: 'Quit Deskframe', click: () => app.quit() },
+    ]),
+  );
+  tray.on('click', show);
   for (const key of ['lock-screen', 'suspend'])
     powerMonitor.on(key, () => {
       locked = true;
