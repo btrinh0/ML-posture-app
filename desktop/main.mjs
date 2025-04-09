@@ -185,7 +185,9 @@ async function start() {
   show();
   timer = setInterval(tick, 1000);
 }
-{
+if (!app.requestSingleInstanceLock()) app.quit();
+else {
+  app.on('second-instance', show);
   app.on('before-quit', () => {
     quitting = true;
     clearInterval(timer);
