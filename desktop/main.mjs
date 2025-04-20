@@ -59,6 +59,10 @@ function notify(prompt) {
     silent: true,
     icon: join(dist, 'assets/icon.png'),
   });
+  note.on('click', () => {
+    show();
+    win?.webContents.send('desk:showPrompt');
+  });
   note.show();
 }
 function tick() {

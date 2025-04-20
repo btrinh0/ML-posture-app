@@ -195,4 +195,8 @@ document
         })),
   );
 window.desk.onChange(render);
+window.desk.onPromptClick(() => {
+  openPage('today');
+  if (!$('prompt').hidden) $('prompt').scrollIntoView({ block: 'center' });
+});
 render(await window.desk.state());
