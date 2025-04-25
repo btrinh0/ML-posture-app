@@ -102,6 +102,7 @@ function render(next) {
       day: 'numeric',
     });
   }
+  $('profiles').disabled = $('add-profile').disabled = Boolean(session);
   $('session-button').textContent = session ? 'End session' : 'Start session';
   $('session-status').textContent = !session ? 'Ready' : state.idle ? 'Paused while idle' : 'In progress';
   $('clock').textContent = duration(session?.active_ms ?? 0);

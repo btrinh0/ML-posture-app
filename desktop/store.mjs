@@ -58,6 +58,7 @@ export class DeskStore {
     }
   }
   addProfile(alias) {
+    if (this.session) throw new Error('End the current session before changing profiles.');
     if (typeof alias !== 'string' || !alias.trim() || alias.trim().length > 32)
       throw new Error('Use a profile name of 1–32 characters.');
     if (this.get('SELECT id FROM profiles WHERE alias=?', alias.trim()))
@@ -66,6 +67,7 @@ export class DeskStore {
     this.chooseProfile(Number(row.lastInsertRowid));
   }
   chooseProfile(id) {
+    if (this.session) throw new Error('End the current session before changing profiles.');
     if (!Number.isInteger(id) || !this.get('SELECT id FROM profiles WHERE id=?', id))
       throw new Error('Unknown profile.');
     this.run("INSERT OR REPLACE INTO settings VALUES('profile',?)", String(id));

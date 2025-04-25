@@ -25,6 +25,7 @@ test('idle and suspension do not advance reminders; retries resolve one prompt o
   let now = 1_800_000_000_000;
   const s = new DeskStore(':memory:', () => now);
   s.start();
+  assert.throws(() => s.addProfile('Second'));
   for (let i = 0; i < 1800; i++) {
     now += 1000;
     s.tick(true);
