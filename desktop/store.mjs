@@ -137,6 +137,11 @@ export class DeskStore {
     this.idle = idle;
     if (now - this.lastSaved >= 5000) this.persist();
     if (!idle && s.active_ms >= s.next_break && !this.pending()) {
+      const last = this.get(
+        'SELECT kind,drill,outcome FROM prompts WHERE session=? ORDER BY id DESC LIMIT 1',
+        s.id,
+      );
+      if (last?.outcome === 'snoozed') return this.prompt(last.kind, last.drill);
       const count = this.get(
         'SELECT count(*) AS n FROM prompts p JOIN sessions s ON p.session=s.id WHERE s.profile=?',
         this.profile,
