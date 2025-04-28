@@ -11,12 +11,14 @@
     "dev": "npm run desktop",
     "start": "npm run desktop",
     "test": "node --test --test-isolation=none test/*.test.mjs",
-    "desktop": "npm run build && electron ."
+    "desktop": "npm run build && electron .",
+    "test:desktop": "node scripts/smoke-desktop.mjs"
   },
   "engines": {
     "node": ">=24"
   },
   "devDependencies": {
-    "electron": "45.4.1"
+    "electron": "45.4.1",
+    "playwright-core": "1.65.1"
   }
 }
