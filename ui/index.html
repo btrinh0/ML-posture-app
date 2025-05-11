@@ -6,6 +6,7 @@
     <title>Deskframe</title>
     <link rel="stylesheet" href="./style.css" />
     <script type="module" src="./dashboard.mjs"></script>
+    <script type="module" src="./sensor.mjs"></script>
   </head>
   <body>
     <aside class="rail">
@@ -13,6 +14,7 @@
       <nav aria-label="Workspace">
         <button data-page="today" aria-current="page">Study desk</button>
         <button data-page="setup">Desk setup</button>
+        <button data-page="sensor">Pose sensor</button>
       </nav>
       <div class="account">
         <label for="profiles">Local profile</label
@@ -100,6 +102,29 @@
             <div id="drill-library"></div>
             <p class="hint">Follow your clinician’s instructions. Stop if symptoms increase.</p>
           </details>
+        </article>
+      </section>
+      <section id="sensor" class="page" hidden>
+        <h1>Pose sensor</h1>
+        <article class="card">
+          <h2>Camera calibration</h2>
+          <p class="muted" id="framing"></p>
+          <div class="controls sensor-controls">
+            <label
+              >Camera view<select id="view">
+                <option value="side">Side profile</option>
+              </select></label
+            >
+            <button id="camera-button">Start camera</button>
+          </div>
+          <p id="sensor-message" role="status" class="sensor-message">
+            Start a study session to enable the camera.
+          </p>
+          <div class="preview" hidden id="preview">
+            <video id="video" autoplay muted playsinline></video>
+            <p>Local camera preview</p>
+          </div>
+          <div id="readings" class="readings"></div>
         </article>
       </section>
     </main>

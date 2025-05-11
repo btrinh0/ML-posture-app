@@ -123,8 +123,22 @@ async function start() {
     { urls: ['http://*/*', 'https://*/*', 'ws://*/*', 'wss://*/*'] },
     (_d, cb) => cb({ cancel: true }),
   );
-  session.defaultSession.setPermissionRequestHandler((_wc, _permission, cb) => cb(false));
-  session.defaultSession.setPermissionCheckHandler(() => false);
+  session.defaultSession.setPermissionRequestHandler((wc, permission, cb, details) => {
+    cb(
+      wc === win?.webContents &&
+        isHome(wc.getURL()) &&
+        permission === 'media' &&
+        details.mediaTypes?.length === 1 &&
+        details.mediaTypes[0] === 'video',
+    );
+  });
+  session.defaultSession.setPermissionCheckHandler(
+    (wc, permission, origin, details) =>
+      wc === win?.webContents &&
+      ['desk://app', 'desk://app/', home].includes(origin) &&
+      permission === 'media' &&
+      details.mediaType !== 'audio',
+  );
   store = new DeskStore(join(app.getPath('userData'), 'deskframe.sqlite'));
   win = new BrowserWindow({
     width: 1120,
