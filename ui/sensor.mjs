@@ -29,4 +29,5 @@ $('camera-button').onclick = async () => {
 observe(state => {
   session = state.session;
   $('camera-button').disabled = !session;
+  if (!session) stop();
 });
