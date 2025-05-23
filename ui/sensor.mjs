@@ -19,6 +19,7 @@ $('camera-button').onclick = async () => {
   const token = ++attempt;
   try {
     const device = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+    if (token !== attempt || !session) { device.getTracks().forEach(t => t.stop()); return; }
     stream = device;
     video.srcObject = device;
     await video.play();
