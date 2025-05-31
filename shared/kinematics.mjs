@@ -15,5 +15,5 @@ export function point(data, id, w, h) {
     (p.presence ?? 1) < 0.58
   )
     return null;
-  return { x: p.x, y: p.y, quality: Math.min(p.visibility, p.presence ?? 1) };
+  return { x: p.x * w, y: p.y * h, quality: Math.min(p.visibility, p.presence ?? 1) };
 }
