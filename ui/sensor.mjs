@@ -1,6 +1,6 @@
 import { $, observe } from './dashboard.mjs';
 import { drawLandmarks } from './pose-overlay.mjs';
-import { point } from './shared/kinematics.mjs';
+import { geometry } from './shared/kinematics.mjs';
 
 const video = $('video');
 let stream, model, frame, session, attempt = 0;
@@ -21,8 +21,8 @@ function inspect(time) {
     last = video.currentTime;
     const points = model.detectForVideo(video, time).landmarks[0];
     drawLandmarks($('landmark-overlay'), points, video);
-    const nose = point(points, 0, video.videoWidth, video.videoHeight);
-    $('readings').textContent = nose ? 'Nose located' : 'Adjust framing';
+    const g = geometry(points, video.videoWidth, video.videoHeight, $('view').value);
+    $('readings').textContent = g ? g.key : 'Adjust framing';
   }
   frame = requestAnimationFrame(inspect);
 }

@@ -1,7 +1,7 @@
 const degrees = 180 / Math.PI;
 const angle = (y, x) => Math.atan2(y, x) * degrees;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-export function point(data, id, w, h) {
+function point(data, id, w, h) {
   const p = data?.[id];
   if (
     !p ||
@@ -16,4 +16,38 @@ export function point(data, id, w, h) {
   )
     return null;
   return { x: p.x * w, y: p.y * h, quality: Math.min(p.visibility, p.presence ?? 1) };
+}
+
+export function geometry(data, w, h, view, reference = null) {
+  if (!(w > 0 && h > 0)) return null;
+  const p = (id) => point(data, id, w, h);
+  const nose = p(0);
+  if (!nose) return null;
+  const left = p(11),
+    right = p(12);
+  if (view !== 'side') return null;
+  const candidates = [];
+  for (const [id, ear, shoulder, hip] of [
+    ['left', p(7), left, p(23)],
+    ['right', p(8), right, p(24)],
+  ]) {
+    if (!ear || !shoulder || !hip) continue;
+    const torso = distance(shoulder, hip),
+      facing = 1;
+    const key = id + facing;
+    if (reference && reference.key !== key) continue;
+    if (torso < 0.16 * h || shoulder.y >= hip.y || ear.y >= shoulder.y) continue;
+    const forward = facing * (ear.x - shoulder.x);
+    const up = (shoulder.y - ear.y);
+    if (up <= 0.04) continue;
+    const pitch = angle(-(nose.y - ear.y), facing * (nose.x - ear.x));
+    candidates.push({
+      key,
+      view,
+      scale: torso / h,
+      quality: Math.min(ear.quality, shoulder.quality, hip.quality),
+      raw: [forward, up, pitch],
+    });
+  }
+  return candidates.sort((a, b) => b.quality - a.quality)[0] ?? null;
 }
