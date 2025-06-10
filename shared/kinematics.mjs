@@ -33,7 +33,7 @@ export function geometry(data, w, h, view, reference = null) {
   ]) {
     if (!ear || !shoulder || !hip) continue;
     const torso = distance(shoulder, hip),
-      facing = 1;
+      facing = Math.sign(nose.x - ear.x);
     const key = id + facing;
     if (reference && reference.key !== key) continue;
     if (torso < 0.16 * h || shoulder.y >= hip.y || ear.y >= shoulder.y) continue;
