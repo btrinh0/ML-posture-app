@@ -37,8 +37,12 @@ export function geometry(data, w, h, view, reference = null) {
     const key = id + facing;
     if (reference && reference.key !== key) continue;
     if (torso < 0.16 * h || shoulder.y >= hip.y || ear.y >= shoulder.y) continue;
-    const forward = facing * (ear.x - shoulder.x) / torso;
-    const up = (shoulder.y - ear.y) / torso;
+    const ux = (shoulder.x - hip.x) / torso,
+      uy = (shoulder.y - hip.y) / torso;
+    const dx = (ear.x - shoulder.x) / torso,
+      dy = (ear.y - shoulder.y) / torso;
+    const forward = facing * (-uy * dx + ux * dy),
+      up = ux * dx + uy * dy;
     if (up <= 0.04) continue;
     const pitch = angle(-(nose.y - ear.y), facing * (nose.x - ear.x));
     candidates.push({
