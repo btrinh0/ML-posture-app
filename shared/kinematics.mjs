@@ -50,7 +50,7 @@ export function geometry(data, w, h, view, reference = null) {
       view,
       scale: torso / h,
       quality: Math.min(ear.quality, shoulder.quality, hip.quality),
-      raw: [forward, up, pitch],
+      raw: [angle(up, forward), forward, pitch],
     });
   }
   return candidates.sort((a, b) => b.quality - a.quality)[0] ?? null;
