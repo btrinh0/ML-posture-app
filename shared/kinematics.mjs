@@ -45,12 +45,16 @@ export function geometry(data, w, h, view, reference = null) {
       up = ux * dx + uy * dy;
     if (up <= 0.04) continue;
     const pitch = angle(-(nose.y - ear.y), facing * (nose.x - ear.x));
+    const coordinates = [nose, ear, shoulder].flatMap((a) => [
+      (facing * (a.x - hip.x)) / torso,
+      (hip.y - a.y) / torso,
+    ]);
     candidates.push({
       key,
       view,
       scale: torso / h,
       quality: Math.min(ear.quality, shoulder.quality, hip.quality),
-      raw: [angle(up, forward), forward, pitch],
+      raw: [angle(up, forward), forward, pitch, coordinates[4], ...coordinates],
     });
   }
   return candidates.sort((a, b) => b.quality - a.quality)[0] ?? null;
