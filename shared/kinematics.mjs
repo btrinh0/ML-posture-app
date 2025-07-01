@@ -59,3 +59,5 @@ export function geometry(data, w, h, view, reference = null) {
   }
   return candidates.sort((a, b) => b.quality - a.quality)[0] ?? null;
 }
+
+export const forwardMoment = (offset) => Math.max(0, offset) * 0.5 * 10 * 4.44822;
