@@ -61,3 +61,4 @@ export function geometry(data, w, h, view, reference = null) {
 }
 
 export const forwardMoment = (offset) => Math.max(0, offset) * 0.5 * 10 * 4.44822;
+export const leverLoad = (moment) => moment / (0.1 * 4.44822);
