@@ -22,7 +22,7 @@ function inspect(time) {
     const points = model.detectForVideo(video, time).landmarks[0];
     drawLandmarks($('landmark-overlay'), points, video);
     const g = geometry(points, video.videoWidth, video.videoHeight, $('view').value);
-    $('readings').textContent = g ? 'Ear–shoulder angle ' + g.raw[0].toFixed(1) + '°' + ' · shoulder offset ' + g.raw[3].toFixed(2) + ' · moment ' + forwardMoment(g.raw[1]).toFixed(2) + ' N·m' + ' · reference load ' + leverLoad(forwardMoment(g.raw[1])).toFixed(1) + ' lbf' : 'Adjust framing';
+    $('readings').textContent = g ? g.view === 'front' ? 'Shoulder elevation ' + g.raw[0].toFixed(1) + '°' : 'Ear–shoulder angle ' + g.raw[0].toFixed(1) + '°' + ' · shoulder offset ' + g.raw[3].toFixed(2) + ' · moment ' + forwardMoment(g.raw[1]).toFixed(2) + ' N·m' + ' · reference load ' + leverLoad(forwardMoment(g.raw[1])).toFixed(1) + ' lbf' : 'Adjust framing';
   }
   frame = requestAnimationFrame(inspect);
 }

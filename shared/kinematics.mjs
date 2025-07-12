@@ -25,6 +25,15 @@ export function geometry(data, w, h, view, reference = null) {
   if (!nose) return null;
   const left = p(11),
     right = p(12);
+  if (view === 'front') {
+    const lh = p(23),
+      rh = p(24);
+    if (!left || !right || !lh || !rh) return null;
+    const width = Math.abs(left.x - right.x),
+      torso = (distance(left, lh) + distance(right, rh)) / 2;
+    if (width <= 0 || torso <= 0) return null;
+    return { view, key: 'front', scale: torso / h, raw: [angle(right.y - left.y, width)] };
+  }
   if (view !== 'side') return null;
   const candidates = [];
   for (const [id, ear, shoulder, hip] of [
