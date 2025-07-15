@@ -31,7 +31,16 @@ export function geometry(data, w, h, view, reference = null) {
     if (!left || !right || !lh || !rh) return null;
     const width = Math.abs(left.x - right.x),
       torso = (distance(left, lh) + distance(right, rh)) / 2;
-    if (width <= 0 || torso <= 0) return null;
+    if (
+      torso < 0.16 * h ||
+      width < 0.48 * torso ||
+      width > 1.8 * torso ||
+      nose.y >= (left.y + right.y) / 2 ||
+      Math.abs(nose.x - (left.x + right.x) / 2) > 0.6 * width ||
+      Math.abs(lh.x - rh.x) < 0.22 * torso ||
+      left.y + right.y >= lh.y + rh.y
+    )
+      return null;
     return { view, key: 'front', scale: torso / h, raw: [angle(right.y - left.y, width)] };
   }
   if (view !== 'side') return null;
@@ -45,7 +54,16 @@ export function geometry(data, w, h, view, reference = null) {
       facing = Math.sign(nose.x - ear.x);
     const key = id + facing;
     if (reference && reference.key !== key) continue;
-    if (torso < 0.16 * h || shoulder.y >= hip.y || ear.y >= shoulder.y) continue;
+    const faceWidth = Math.abs(nose.x - ear.x) / torso;
+    if (
+      torso < 0.16 * h ||
+      shoulder.y >= hip.y ||
+      ear.y >= shoulder.y ||
+      faceWidth < 0.065 ||
+      faceWidth > 0.65 ||
+      (left && right && Math.abs(left.x - right.x) > torso * 0.48)
+    )
+      continue;
     const ux = (shoulder.x - hip.x) / torso,
       uy = (shoulder.y - hip.y) / torso;
     const dx = (ear.x - shoulder.x) / torso,
