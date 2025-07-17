@@ -87,5 +87,21 @@ export function geometry(data, w, h, view, reference = null) {
   return candidates.sort((a, b) => b.quality - a.quality)[0] ?? null;
 }
 
+export class Calibration {
+  samples = [];
+  reference = null;
+  update(g, time) {
+    if (!g) return 0;
+    this.samples.push({ ...g, time });
+    const progress = Math.min(1, (time - this.samples[0].time) / 10_000);
+    if (progress < 1 || this.samples.length < 10) return progress;
+    const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
+    this.reference = { key: g.key, view: g.view, scale: mean(this.samples.map((s) => s.scale)),
+      raw: g.raw.map((_, i) => mean(this.samples.map((s) => s.raw[i]))) };
+    this.samples = [];
+    return 1;
+  }
+}
+
 export const forwardMoment = (offset) => Math.max(0, offset) * 0.5 * 10 * 4.44822;
 export const leverLoad = (moment) => moment / (0.1 * 4.44822);
