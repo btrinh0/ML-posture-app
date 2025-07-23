@@ -91,6 +91,13 @@ export class Calibration {
   samples = [];
   reference = null;
   update(g, time) {
+    if (
+      !g ||
+      (this.last !== undefined && (time - this.last > 1600 || time <= this.last)) ||
+      this.samples[0]?.key !== g.key
+    )
+      this.samples = [];
+    this.last = time;
     if (!g) return 0;
     this.samples.push({ ...g, time });
     const progress = Math.min(1, (time - this.samples[0].time) / 10_000);
