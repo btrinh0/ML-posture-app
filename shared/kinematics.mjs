@@ -87,6 +87,8 @@ export function geometry(data, w, h, view, reference = null) {
   return candidates.sort((a, b) => b.quality - a.quality)[0] ?? null;
 }
 
+const quantile = (values, fraction) =>
+  values.toSorted((a, b) => a - b)[Math.floor((values.length - 1) * fraction)];
 export class Calibration {
   samples = [];
   reference = null;
@@ -102,9 +104,26 @@ export class Calibration {
     this.samples.push({ ...g, time });
     const progress = Math.min(1, (time - this.samples[0].time) / 10_000);
     if (progress < 1 || this.samples.length < 10) return progress;
-    const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
-    this.reference = { key: g.key, view: g.view, scale: mean(this.samples.map((s) => s.scale)),
-      raw: g.raw.map((_, i) => mean(this.samples.map((s) => s.raw[i]))) };
+    const angles = this.samples.map((v) => v.raw[0]);
+    const scales = this.samples.map((v) => v.scale);
+    if (
+      quantile(angles, 0.9) - quantile(angles, 0.1) > 5 ||
+      quantile(scales, 0.9) / quantile(scales, 0.1) > 1.12
+    ) {
+      this.samples = [];
+      return 0;
+    }
+    this.reference = {
+      key: g.key,
+      view: g.view,
+      scale: quantile(scales, 0.5),
+      raw: g.raw.map((_, i) =>
+        quantile(
+          this.samples.map((v) => v.raw[i]),
+          0.5,
+        ),
+      ),
+    };
     this.samples = [];
     return 1;
   }
