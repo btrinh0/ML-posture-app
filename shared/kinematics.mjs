@@ -1,3 +1,15 @@
+export const channelNames = [
+  'cva_drop_deg',
+  'head_forward_delta',
+  'pitch_delta_deg',
+  'shoulder_forward_delta',
+  'nose_x',
+  'nose_y',
+  'ear_x',
+  'ear_y',
+  'shoulder_x',
+  'shoulder_y',
+];
 const degrees = 180 / Math.PI;
 const angle = (y, x) => Math.atan2(y, x) * degrees;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -129,5 +141,36 @@ export class Calibration {
   }
 }
 
-export const forwardMoment = (offset) => Math.max(0, offset) * 0.5 * 10 * 4.44822;
-export const leverLoad = (moment) => moment / (0.1 * 4.44822);
+export function calibrated(g, ref) {
+  if (!g || !ref)
+    return null;
+  const delta = g.raw.map((v, i) => v - ref.raw[i]);
+  if (g.view === 'front') {
+    return {
+      view: 'front',
+      cva: null,
+      drop: null,
+      forward: null,
+      shoulder: null,
+      asym: delta[0],
+      moment: null,
+      load: null,
+      vector: null,
+    };
+  }
+  const [cva, forward] = g.raw;
+  delta[0] = -delta[0];
+  // Assumes a 10 lbf head, 0.50 m torso and 0.10 m lever.
+  const moment = Math.max(0, forward) * 0.5 * 10 * 4.44822;
+  return {
+    view: 'side',
+    cva,
+    drop: delta[0],
+    forward: delta[1],
+    shoulder: delta[3],
+    asym: null,
+    moment,
+    load: moment / (0.1 * 4.44822),
+    vector: delta,
+  };
+}

@@ -2,6 +2,7 @@ import { $, node, observe, act, feedback } from './dashboard.mjs';
 import { drawLandmarks } from './pose-overlay.mjs';
 import {
   Calibration,
+  calibrated,
   geometry,
 } from './shared/kinematics.mjs';
 
@@ -101,7 +102,7 @@ async function loop(token) {
         message(g ? 'Hold a comfortable neutral position.' : 'Waiting for a visible pose.');
         if (calibration.reference) buttons();
       } else {
-        const m = g ? { view: g.view, cva: g.raw[0] } : null;
+        const m = calibrated(g, calibration.reference);
         if (!m) {
           await noTracking(started);
           message('Tracking paused. Return to the calibrated view or recalibrate.');
