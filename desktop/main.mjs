@@ -87,6 +87,10 @@ const actions = {
   },
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
+  sensorOff: () => {
+  },
+  recalibrate: (v) => {
+  },
 };
 const mime = {
   '.html': 'text/html',

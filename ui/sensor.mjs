@@ -51,6 +51,7 @@ function buttons() {
   $('camera-button').textContent = running ? 'Stop camera' : 'Start camera';
   $('camera-button').disabled = !state?.session;
   $('view').disabled = running;
+  $('recalibrate').disabled = !running || !model;
 }
 function stop(status, inform = true) {
   generation++;
@@ -99,7 +100,11 @@ async function loop(token) {
       );
       if (!calibration.reference) {
         const progress = calibration.update(g, started);
-        message(g ? 'Hold a comfortable neutral position.' : 'Waiting for a visible pose.');
+        message(
+          g
+            ? 'Hold comfortably · ' + Math.min(10, Math.floor(progress * 10)) + ' / 10 seconds'
+            : 'Adjust the camera until the required landmarks are visible.',
+        );
         if (calibration.reference) buttons();
       } else {
         const m = calibrated(g, calibration.reference);
@@ -185,6 +190,12 @@ async function start() {
   }
 }
 $('camera-button').onclick = () => (running ? stop('Camera off. The study timer continues.') : start());
+$('recalibrate').onclick = () => {
+  reset();
+  void act('recalibrate');
+  buttons();
+  message('Hold your comfortable position for 10 seconds.');
+};
 $('view').onchange = framing;
 observe((next) => {
   state = next;
