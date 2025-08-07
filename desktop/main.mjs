@@ -91,6 +91,9 @@ const actions = {
   },
   recalibrate: (v) => {
   },
+  lost: () => {
+    store.freshAt = null;
+  },
 };
 const mime = {
   '.html': 'text/html',

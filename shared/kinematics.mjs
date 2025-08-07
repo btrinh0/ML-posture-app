@@ -142,7 +142,7 @@ export class Calibration {
 }
 
 export function calibrated(g, ref) {
-  if (!g || !ref)
+  if (!g || !ref || g.key !== ref.key || g.view !== ref.view || Math.abs(g.scale / ref.scale - 1) > 0.3)
     return null;
   const delta = g.raw.map((v, i) => v - ref.raw[i]);
   if (g.view === 'front') {

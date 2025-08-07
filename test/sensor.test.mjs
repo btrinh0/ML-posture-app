@@ -22,6 +22,7 @@ test('side-view deltas respect mirror, scale and missing landmarks', () => {
   assert.equal(m.asym, null);
   assert.ok(Math.abs(m.drop - mirror.drop) < 1e-10);
   assert.equal(geometry([], 640, 480, 'side'), null);
+  assert.equal(calibrated({ ...side(), scale: 3 }, side()), null);
 });
 test('front-view elevation needs visible bilateral landmarks and reports anatomical side', () => {
   const pts = [];

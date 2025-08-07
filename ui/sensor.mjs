@@ -73,7 +73,17 @@ function stop(status, inform = true) {
   buttons();
   message(status);
 }
-async function noTracking() {}
+async function noTracking(now) {
+  classifier?.reset();
+  prediction = null;
+  verify = false;
+  pendingCue = false;
+  if (lastValid) {
+    lastValid = false;
+    $('readings').replaceChildren();
+    await act('lost');
+  }
+}
 async function loop(token) {
   if (!running || token !== generation) return;
   const started = performance.now();
