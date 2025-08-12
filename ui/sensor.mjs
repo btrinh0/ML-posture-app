@@ -3,6 +3,7 @@ import { drawLandmarks } from './pose-overlay.mjs';
 import {
   Calibration,
   calibrated,
+  drifting,
   geometry,
 } from './shared/kinematics.mjs';
 
@@ -123,9 +124,22 @@ async function loop(token) {
           message('Tracking paused. Return to the calibrated view or recalibrate.');
         } else {
           lastValid = true;
+          verify = drifting(m);
+          if (!classifier || m.view === 'front') {
+            const cue = verify;
+            pendingCue = verify && (pendingCue || cue);
+          }
           const second = Math.floor(Date.now() / 1000);
           if (second !== lastSecond) {
             $('readings').textContent = m.cva == null ? 'Front view' : 'Ear–shoulder proxy ' + m.cva.toFixed(1) + '°';
+            await window.desk.sample({
+              session: state.session.id,
+              metrics: m,
+              rate,
+              fixed: false,
+              cue: pendingCue,
+              prediction,
+                          });
             if (token !== generation) return;
             pendingCue = false;
             lastSecond = second;

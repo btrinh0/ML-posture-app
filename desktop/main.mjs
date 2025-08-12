@@ -178,6 +178,11 @@ async function start() {
   ipcMain.handle('desk:state', (e) => {
     if (isHome(e.senderFrame.url)) return state();
   });
+  ipcMain.handle('desk:sample', (e, value) => {
+    if (!isHome(e.senderFrame.url) || !store.session || value?.session !== store.session.id || store.idle) return;
+    store.freshAt = Date.now();
+    if (value.cue) notify(store.prompt('drift', value.metrics.view === 'front' ? 'shoulders' : 'chin'));
+  });
   ipcMain.handle('desk:action', async (e, name, value) => {
     if (!isHome(e.senderFrame.url) || !Object.hasOwn(actions, name)) throw new Error('Unknown action.');
     await actions[name](value);

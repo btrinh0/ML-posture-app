@@ -174,3 +174,5 @@ export function calibrated(g, ref) {
     vector: delta,
   };
 }
+export const drifting = (m) =>
+  Boolean(m && (m.view === 'front' ? Math.abs(m.asym) >= 5 : m.drop >= 7 || m.forward >= 0.1));
