@@ -2,6 +2,7 @@ import { $, node, observe, act, feedback } from './dashboard.mjs';
 import { drawLandmarks } from './pose-overlay.mjs';
 import {
   Calibration,
+  DriftGate,
   calibrated,
   drifting,
   geometry,
@@ -37,6 +38,7 @@ function framing() {
 }
 function reset() {
   calibration = new Calibration();
+  gate = new DriftGate();
   classifier?.reset();
   prediction = null;
   verify = false;
@@ -75,6 +77,7 @@ function stop(status, inform = true) {
   message(status);
 }
 async function noTracking(now) {
+  gate.update(null, now);
   classifier?.reset();
   prediction = null;
   verify = false;
@@ -126,7 +129,7 @@ async function loop(token) {
           lastValid = true;
           verify = drifting(m);
           if (!classifier || m.view === 'front') {
-            const cue = verify;
+            const cue = gate.update(verify, started);
             pendingCue = verify && (pendingCue || cue);
           }
           const second = Math.floor(Date.now() / 1000);

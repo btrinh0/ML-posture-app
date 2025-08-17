@@ -176,3 +176,24 @@ export function calibrated(g, ref) {
 }
 export const drifting = (m) =>
   Boolean(m && (m.view === 'front' ? Math.abs(m.asym) >= 5 : m.drop >= 7 || m.forward >= 0.1));
+export class DriftGate {
+  since = null;
+  armed = true;
+  last = null;
+  update(changed, time) {
+    if (this.last === null || time - this.last > 1800 || time <= this.last || changed === null) {
+      this.since = null;
+      this.armed = true;
+    }
+    this.last = time;
+    if (!changed) {
+      this.since = null;
+      this.armed = true;
+      return false;
+    }
+    this.since ??= time;
+    if (!this.armed || time - this.since < 15_000) return false;
+    this.armed = false;
+    return true;
+  }
+}

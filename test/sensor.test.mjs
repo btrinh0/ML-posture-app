@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calibrated, Calibration, geometry } from '../shared/kinematics.mjs';
+import { calibrated, Calibration, DriftGate, geometry } from '../shared/kinematics.mjs';
 import { DeskStore } from '../desktop/store.mjs';
 
 function side(shift = 0, mirror = false) {
@@ -42,4 +42,18 @@ test('front-view elevation needs visible bilateral landmarks and reports anatomi
   assert.equal(m.vector, null);
   pts[12].visibility = 0.2;
   assert.equal(geometry(pts, 640, 480, 'front'), null);
+});
+test('calibration requires ten continuous seconds and drift cues rearm after recovery', () => {
+  const c = new Calibration();
+  for (let t = 0; t < 10_000; t += 500) c.update(side(), t);
+  assert.equal(c.reference, null);
+  c.update(null, 10_000);
+  for (let t = 11_000; t <= 21_000; t += 500) c.update(side(), t);
+  assert.ok(c.reference);
+  const gate = new DriftGate();
+  for (let t = 0; t < 15_000; t += 1000) assert.equal(gate.update(true, t), false);
+  assert.equal(gate.update(true, 15_000), true);
+  assert.equal(gate.update(true, 16_000), false);
+  gate.update(false, 17_000);
+  assert.equal(gate.update(true, 18_000), false);
 });
