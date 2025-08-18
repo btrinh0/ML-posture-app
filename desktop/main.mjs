@@ -43,6 +43,7 @@ let lastPerformance = 0,
 const isHome = (url) => url === home;
 const state = () => ({
   ...store.state(),
+  sensorFresh: Boolean(store?.session && Date.now() - (store.freshAt ?? 0) < 2500),
 });
 const show = () => {
   win?.show();
@@ -68,7 +69,7 @@ function notify(prompt) {
 function tick() {
   if (!store.session) return;
   const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
-  notify(store.tick(idle, false));
+  notify(store.tick(idle, (Date.now() - (store.freshAt ?? 0) < 2500)));
   send();
 }
 const actions = {

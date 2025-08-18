@@ -142,6 +142,7 @@ export class DeskStore {
         s.id,
       );
       if (last?.outcome === 'snoozed') return this.prompt(last.kind, last.drill);
+      if (sensorActive) return;
       const count = this.get(
         'SELECT count(*) AS n FROM prompts p JOIN sessions s ON p.session=s.id WHERE s.profile=?',
         this.profile,
