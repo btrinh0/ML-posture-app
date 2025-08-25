@@ -17,6 +17,7 @@ import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DeskStore } from './store.mjs';
 import { drills } from './companion.mjs';
+import { Telemetry } from './telemetry.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');
@@ -43,7 +44,7 @@ let lastPerformance = 0,
 const isHome = (url) => url === home;
 const state = () => ({
   ...store.state(),
-  sensorFresh: Boolean(store?.session && Date.now() - (store.freshAt ?? 0) < 2500),
+  sensorFresh: telemetry.fresh(),
 });
 const show = () => {
   win?.show();
@@ -69,17 +70,19 @@ function notify(prompt) {
 function tick() {
   if (!store.session) return;
   const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
-  notify(store.tick(idle, (Date.now() - (store.freshAt ?? 0) < 2500)));
+  notify(store.tick(idle, telemetry.fresh()));
   send();
 }
 const actions = {
   start: () => {
     if (!store.session) {
       store.start();
+      telemetry.reset();
     }
   },
   end: () => {
     store.end();
+    telemetry.reset();
   },
   setup: (v) => store.saveSetup(v),
   checkIn: (v) => store.checkIn(v),
@@ -89,11 +92,13 @@ const actions = {
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
   sensorOff: () => {
+    telemetry.reset();
   },
   recalibrate: (v) => {
+    telemetry.reset();
   },
   lost: () => {
-    store.freshAt = null;
+    telemetry.freshAt = null;
   },
 };
 const mime = {
@@ -148,6 +153,7 @@ async function start() {
       details.mediaType !== 'audio',
   );
   store = new DeskStore(join(app.getPath('userData'), 'deskframe.sqlite'));
+  telemetry = new Telemetry(store);
   win = new BrowserWindow({
     width: 1120,
     height: 840,
@@ -180,8 +186,7 @@ async function start() {
     if (isHome(e.senderFrame.url)) return state();
   });
   ipcMain.handle('desk:sample', (e, value) => {
-    if (!isHome(e.senderFrame.url) || !store.session || value?.session !== store.session.id || store.idle) return;
-    store.freshAt = Date.now();
+    if (!isHome(e.senderFrame.url) || !telemetry.sample(value)) return;
     if (value.cue) notify(store.prompt('drift', value.metrics.view === 'front' ? 'shoulders' : 'chin'));
   });
   ipcMain.handle('desk:action', async (e, name, value) => {

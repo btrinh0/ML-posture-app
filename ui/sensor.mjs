@@ -75,6 +75,7 @@ function stop(status, inform = true) {
   reset();
   buttons();
   message(status);
+  if (inform && state?.session) void act('sensorOff');
 }
 async function noTracking(now) {
   gate.update(null, now);
