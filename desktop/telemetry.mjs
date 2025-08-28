@@ -47,10 +47,12 @@ export class Telemetry {
     this.rate = [1, 12, 30].includes(payload.rate) ? payload.rate : 1;
     this.policy = payload.fixed === true ? 'fixed' : 'adaptive';
     this.last = m;
+    if (sec === this.lastSecond) return false;
+    this.lastSecond = sec;
     const label = null;
     const vector = null;
     this.store.run(
-      'INSERT OR REPLACE INTO samples VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      'INSERT OR IGNORE INTO samples VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
       s.id,
       sec,
       s.active_ms,
