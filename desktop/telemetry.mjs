@@ -36,10 +36,25 @@ export class Telemetry {
   }
   sample(payload) {
     const s = this.store.session;
-    if (!s || !payload?.metrics) return false;
+    if (!s || s.id !== payload?.session || this.store.idle) return false;
     if (this.session !== s.id) this.reset();
     const m = payload.metrics,
       side = m?.view === 'side';
+    if (!(side || m?.view === 'front')) return false;
+    if (
+      side &&
+      (!finite(m.cva, 180) ||
+        !finite(m.drop, 180) ||
+        !finite(m.forward, 5) ||
+        !finite(m.shoulder, 5) ||
+        !finite(m.moment, 200) ||
+        !finite(m.load, 500) ||
+        !Array.isArray(m.vector) ||
+        m.vector.length !== channelNames.length ||
+        !m.vector.every((v) => finite(v, 360)))
+    )
+      return false;
+    if (!side && !finite(m.asym, 180)) return false;
     const now = this.store.now(),
       sec = Math.floor(now / 1000);
     const pred = null;
