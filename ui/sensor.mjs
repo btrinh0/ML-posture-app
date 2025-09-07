@@ -1,5 +1,4 @@
 import { $, node, observe, act, feedback } from './dashboard.mjs';
-import { drawLandmarks } from './pose-overlay.mjs';
 import {
   Calibration,
   DriftGate,
@@ -105,7 +104,6 @@ async function loop(token) {
       lastVideoTime = video.currentTime;
       lastFrameAt = started;
       const points = model.detectForVideo(video, started).landmarks[0];
-      drawLandmarks($('landmark-overlay'), points, video);
       const g = geometry(
         points,
         video.videoWidth,
