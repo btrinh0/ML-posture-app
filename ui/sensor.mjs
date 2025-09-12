@@ -76,6 +76,25 @@ function stop(status, inform = true) {
   message(status);
   if (inform && state?.session) void act('sensorOff');
 }
+function readings(m) {
+  const metrics =
+    m.view === 'front'
+      ? [['Shoulder elevation', m.asym, '°']]
+      : [
+          ['CVA proxy', m.cva, '°'],
+          ['CVA drop', m.drop, '°'],
+          ['Protraction proxy', m.shoulder, ' torso'],
+          ['Moment proxy', m.moment, ' N·m'],
+          ['Lever load', m.load, ' lbf'],
+        ];
+  $('readings').replaceChildren(
+    ...metrics.map(([label, value, unit]) => {
+      const d = node('div', undefined, 'reading');
+      d.append(node('span', label), node('strong', value.toFixed(unit === ' torso' ? 2 : 1) + unit));
+      return d;
+    }),
+  );
+}
 async function noTracking(now) {
   gate.update(null, now);
   classifier?.reset();
@@ -133,7 +152,7 @@ async function loop(token) {
           }
           const second = Math.floor(Date.now() / 1000);
           if (second !== lastSecond) {
-            $('readings').textContent = m.cva == null ? 'Front view' : 'Ear–shoulder proxy ' + m.cva.toFixed(1) + '°';
+            readings(m);
             await window.desk.sample({
               session: state.session.id,
               metrics: m,
