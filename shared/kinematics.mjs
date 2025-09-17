@@ -92,6 +92,7 @@ export function geometry(data, w, h, view, reference = null) {
       key,
       view,
       scale: torso / h,
+      anchors: { ear: { x: ear.x / w, y: ear.y / h }, shoulder: { x: shoulder.x / w, y: shoulder.y / h }, facing },
       quality: Math.min(ear.quality, shoulder.quality, hip.quality),
       raw: [angle(up, forward), forward, pitch, coordinates[4], ...coordinates],
     });
