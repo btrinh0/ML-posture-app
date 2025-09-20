@@ -31,5 +31,5 @@ export function patchCenter(frame, center, radius, cyan) {
         Math.min(width, height) >= .45 * Math.max(width, height) && count >= .45 * width * height)
       found.push({ x: x0 + sx / count, y: y0 + sy / count });
   }
-  return found[0] ?? null;
+  return found.length === 1 ? found[0] : null;
 }
