@@ -1,4 +1,4 @@
-export function patchCenter(frame, center, radius, cyan) {
+function patchCenter(frame, center, radius, cyan) {
   const x0 = Math.max(0, Math.floor(center.x - radius)), y0 = Math.max(0, Math.floor(center.y - radius));
   const w = Math.min(frame.width, Math.ceil(center.x + radius + 1)) - x0;
   const h = Math.min(frame.height, Math.ceil(center.y + radius + 1)) - y0;
@@ -32,4 +32,18 @@ export function patchCenter(frame, center, radius, cyan) {
       found.push({ x: x0 + sx / count, y: y0 + sy / count });
   }
   return found.length === 1 ? found[0] : null;
+}
+
+export function markerMeasurement(frame, pose) {
+  if (!pose?.anchors || !frame?.data || pose.view !== 'side') return null;
+  const { ear, shoulder, facing } = pose.anchors;
+  const pixels = (p) => ({ x: p.x * frame.width, y: p.y * frame.height });
+  const torso = pose.scale * frame.height, joint = pixels(shoulder);
+  const tragus = patchCenter(frame, pixels(ear), torso * .19, true);
+  const c7 = patchCenter(frame, joint, torso * .40, false);
+  if (!tragus || !c7) return null;
+  const dx = facing * (tragus.x - c7.x), dy = c7.y - tragus.y;
+  const separation = Math.hypot(dx, dy) / torso;
+  if (dx < 0 || dy <= 0 || separation < .12 || separation > .8) return null;
+  return { cva: Math.atan2(dy, dx) * 180 / Math.PI, shoulder: facing * (joint.x - c7.x) / torso };
 }

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { calibrated, Calibration, DriftGate, geometry } from '../shared/kinematics.mjs';
 import { DeskStore } from '../desktop/store.mjs';
 import { Telemetry } from '../desktop/telemetry.mjs';
+import { markerMeasurement } from '../shared/markers.mjs';
 
 function side(shift = 0, mirror = false) {
   const points = [];
