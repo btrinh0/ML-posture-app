@@ -1,4 +1,5 @@
 import { $, node, observe, act, feedback } from './dashboard.mjs';
+import { markerMeasurement } from './shared/markers.mjs';
 import {
   Calibration,
   DriftGate,
@@ -14,6 +15,22 @@ let state,
   running = false,
   timeout;
 let cameraRate, lastMarkerVisible = false;
+const markerCanvas = document.createElement('canvas');
+const markerPixels = markerCanvas.getContext('2d', { willReadFrequently: true });
+function readMarkers(pose) {
+  const width = Math.min(480, video.videoWidth);
+  const height = Math.round(width * video.videoHeight / video.videoWidth);
+  if (markerCanvas.width !== width || markerCanvas.height !== height) {
+    markerCanvas.width = width;
+    markerCanvas.height = height;
+  }
+  markerPixels.drawImage(video, 0, 0, width, height);
+  try {
+    return markerMeasurement(markerPixels.getImageData(0, 0, width, height), pose);
+  } finally {
+    markerPixels.clearRect(0, 0, width, height);
+  }
+}
 let calibration,
   gate,
   lastSecond,
@@ -30,6 +47,8 @@ const message = (text) => {
   if ($('sensor-message').textContent !== text) $('sensor-message').textContent = text;
 };
 function framing() {
+  $('marker-option').hidden = $('view').value !== 'side';
+  $('marker-help').hidden = $('view').value !== 'side' || !$('markers').checked;
   $('framing').textContent =
     $('view').value === 'side'
       ? 'Level the camera beside you. Keep the near ear, shoulder and hip in frame. Hold still for 10 seconds.'
@@ -82,6 +101,7 @@ function readings(m) {
       ? [['Shoulder elevation', m.asym, '°']]
       : [
           ['CVA proxy', m.cva, '°'],
+          ...(m.marker ? [['Tragus–C7 CVA', m.marker.cva, '°'], ['Shoulder ahead of C7', m.marker.shoulder, ' torso']] : []),
           ['CVA drop', m.drop, '°'],
           ['Protraction proxy', m.shoulder, ' torso'],
           ['Moment proxy', m.moment, ' N·m'],
@@ -152,6 +172,8 @@ async function loop(token) {
           }
           const second = Math.floor(Date.now() / 1000);
           if (second !== lastSecond) {
+            if (m.view === 'side' && $('markers').checked) m.marker = readMarkers(g);
+            lastMarkerVisible = Boolean(m.marker);
             readings(m);
             await window.desk.sample({
               session: state.session.id,
@@ -171,6 +193,7 @@ async function loop(token) {
               rate +
               ' FPS' +
               (track.getSettings?.().frameRate ? ' · camera ' + Math.round(track.getSettings().frameRate) + ' FPS' : '') +
+              (m.view === 'side' && $('markers').checked && !lastMarkerVisible ? ' · markers not located' : '') +
               (prediction ? ' · ' + titles[labels.indexOf(prediction)] : ''),
           );
         }
@@ -242,6 +265,7 @@ $('recalibrate').onclick = () => {
   message('Hold your comfortable position for 10 seconds.');
 };
 $('view').onchange = framing;
+$('markers').onchange = framing;
 observe((next) => {
   state = next;
   if (!state.session && running) stop('Session ended. Camera released.', false);
