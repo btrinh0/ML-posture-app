@@ -59,3 +59,23 @@ test('calibration requires ten continuous seconds and drift cues rearm after rec
   gate.update(false, 17_000);
   assert.equal(gate.update(true, 18_000), false);
 });
+test('two colored landmarks measure the horizontal tragus–C7 angle in either side view', () => {
+  for (const w of [320, 640]) for (const facing of [1, -1]) {
+    const h = w * .75, x = (p) => Math.round((facing === 1 ? p : 1 - p) * w);
+    const frame = { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+    const pose = { view: 'side', scale: .5, anchors: { ear: { x: x(.5) / w, y: .25 },
+      shoulder: { x: x(.45) / w, y: .45 }, facing } };
+    const paint = (cx, cy, color) => {
+      for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++)
+        frame.data.set(color, 4 * ((cy+j)*w + cx+i));
+    };
+    paint(x(.5), h*.25, [10, 215, 230, 255]);
+    assert.equal(markerMeasurement(frame, pose), null);
+    paint(x(.3875), h*.4, [224, 12, 239, 255]);
+    const m = markerMeasurement(frame, pose);
+    assert.ok(Math.abs(m.cva - 45) < 1e-7);
+    assert.ok(Math.abs(m.shoulder - 1/6) < 1e-7);
+    paint(x(.48), h*.25, [10, 215, 230, 255]);
+    assert.equal(markerMeasurement(frame, pose), null);
+  }
+});
