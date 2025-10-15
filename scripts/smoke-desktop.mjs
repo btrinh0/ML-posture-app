@@ -9,6 +9,11 @@ const qa = resolve('.qa');
 await mkdir(qa, { recursive: true });
 const profile = await mkdtemp(join(qa, 'desktop-'));
 const packaged = null;
+const sideImage = process.argv.slice(2).find((v) => v.startsWith('--side-image='))?.slice('--side-image='.length);
+const reference = sideImage || process.argv
+  .slice(2)
+  .find((v) => v.startsWith('--pose-image='))
+  ?.slice('--pose-image='.length);
 const client = await _electron.launch({
   executablePath: (await import('electron')).default,
   args: [
@@ -44,6 +49,101 @@ try {
   await page.getByRole('button', { name: 'Start session' }).click();
   await page.getByRole('button', { name: 'End session' }).waitFor();
   assert.ok(await page.locator('#profiles').isDisabled());
+  await page.getByRole('button', { name: 'Pose sensor' }).click();
+  if (reference) await page.locator('#view').selectOption(sideImage ? 'side' : 'front');
+  const pixels = reference ? (await readFile(reference)).toString('base64') : null;
+  await page.evaluate(async ({ pixels, side, mime }) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    const ctx = canvas.getContext('2d');
+    const source = new Image();
+    if (pixels) {
+      source.src = 'data:' + mime + ';base64,' + pixels;
+      await source.decode();
+    }
+    let frame = 0;
+    const paint = () => {
+      if (pixels && side) {
+        const scale = Math.min(640 / source.width, 480 / source.height);
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(0, 0, 640, 480);
+        ctx.drawImage(source, (640 - source.width*scale)/2, (480 - source.height*scale)/2, source.width*scale, source.height*scale);
+        if (window.testMarkers) {
+          for (const [x, y, color] of [[.449, .109, '#00ebef'], [.417, .189, '#f208ec']]) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc((640-source.width*scale)/2 + x*source.width*scale,
+              (480-source.height*scale)/2 + y*source.height*scale, 3.5, 0, 2*Math.PI);
+            ctx.fill();
+          }
+        }
+      } else if (pixels)
+        ctx.drawImage(
+          source,
+          source.width * 0.15,
+          source.height * 0.12,
+          source.width * 0.7,
+          source.height * 0.79,
+          0,
+          0,
+          640,
+          480,
+        );
+      else {
+        ctx.fillStyle = frame++ % 2 ? '#ddd' : '#eee';
+        ctx.fillRect(0, 0, 640, 480);
+      }
+    };
+    paint();
+    const stream = canvas.captureStream(30);
+    const timer = setInterval(paint, 33);
+    window.testTrack = stream.getVideoTracks()[0];
+    window.testEndFrames = () => clearInterval(timer);
+    Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+      value: async (constraints) => {
+        if (constraints.audio !== false) throw new Error('Unexpected microphone request.');
+        return stream;
+      },
+    });
+  }, { pixels, side: Boolean(sideImage), mime: reference?.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg' });
+  await page.getByRole('button', { name: 'Start camera' }).click();
+  await page
+    .waitForFunction(
+      () =>
+        !document.querySelector('#recalibrate').disabled ||
+        /unavailable|stopped|denied|disconnected|No camera/.test(
+          document.querySelector('#sensor-message').textContent,
+        ),
+      null,
+      { timeout: 25_000 },
+    )
+    .catch(async (err) => {
+      throw new Error((await page.locator('#sensor-message').textContent()) + ' / ' + err.message);
+    });
+  assert.ok(
+    await page.locator('#recalibrate').isEnabled(),
+    await page.locator('#sensor-message').textContent(),
+  );
+  if (reference) {
+    await page
+      .locator('#readings strong')
+      .first()
+      .waitFor({ timeout: 40_000 })
+      .catch(async (err) => {
+        throw new Error((await page.locator('#sensor-message').textContent()) + ' / ' + err.message);
+      });
+  }
+  await page.getByRole('button', { name: 'Stop camera' }).click();
+  assert.equal(await page.locator('video').evaluate((v) => v.srcObject), null);
+  assert.equal(
+    await page.evaluate(() => {
+      window.testEndFrames();
+      return window.testTrack.readyState;
+    }),
+    'ended',
+  );
+  await page.getByRole('button', { name: 'Study desk', exact: true }).click();
   for (const [id, value] of [
     ['jaw', '0'],
     ['neck', '2'],
