@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { DeskStore } from './store.mjs';
 import { drills } from './companion.mjs';
 import { Telemetry } from './telemetry.mjs';
+import { labels } from '../shared/kinematics.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');

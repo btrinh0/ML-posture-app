@@ -1,3 +1,4 @@
+export const labels = ['neutral', 'slouch', 'writing', 'reading', 'reaching'];
 export const channelNames = [
   'cva_drop_deg',
   'head_forward_delta',

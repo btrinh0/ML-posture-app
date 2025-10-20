@@ -1,4 +1,4 @@
-import { channelNames, drifting } from '../shared/kinematics.mjs';
+import { channelNames, labels, drifting } from '../shared/kinematics.mjs';
 
 const finite = (v, bound) => Number.isFinite(v) && Math.abs(v) <= bound;
 export class Telemetry {
