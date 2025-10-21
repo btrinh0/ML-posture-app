@@ -46,6 +46,8 @@ const isHome = (url) => url === home;
 const state = () => ({
   ...store.state(),
   sensorFresh: telemetry.fresh(),
+  collecting: telemetry.collecting,
+  label: telemetry.label,
 });
 const show = () => {
   win?.show();
@@ -74,6 +76,9 @@ function tick() {
   notify(store.tick(idle, telemetry.fresh()));
   send();
 }
+function setCapture(enabled) {
+  telemetry.collect(enabled);
+}
 const actions = {
   start: () => {
     if (!store.session) {
@@ -82,6 +87,7 @@ const actions = {
     }
   },
   end: () => {
+    setCapture(false);
     store.end();
     telemetry.reset();
   },
@@ -92,10 +98,13 @@ const actions = {
   },
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
+  capture: (v) => setCapture(v === true),
   sensorOff: () => {
+    setCapture(false);
     telemetry.reset();
   },
   recalibrate: (v) => {
+    setCapture(false);
     telemetry.reset();
   },
   lost: () => {

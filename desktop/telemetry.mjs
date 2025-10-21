@@ -37,6 +37,17 @@ export class Telemetry {
       this.store.now() - this.freshAt < 2500
     );
   }
+  mark(value) {
+    if (!this.collecting || !this.store.session || (value !== null && !labels.includes(value)))
+      throw new Error('Enable labeled capture during a study session.');
+    this.label = value;
+  }
+  collect(enabled) {
+    if (enabled && !this.store.session) throw new Error('Start a study session first.');
+    this.collecting = enabled === true;
+    this.label = null;
+    this.recent = [];
+  }
   sample(payload) {
     const s = this.store.session;
     if (!s || s.id !== payload?.session || this.store.idle) return false;
