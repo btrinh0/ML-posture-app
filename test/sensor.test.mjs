@@ -59,6 +59,28 @@ test('calibration requires ten continuous seconds and drift cues rearm after rec
   gate.update(false, 17_000);
   assert.equal(gate.update(true, 18_000), false);
 });
+test('one numeric record per second, with research vectors only during labeled capture', () => {
+  let now = Date.now();
+  const s = new DeskStore(':memory:', () => now);
+  s.start();
+  const t = new Telemetry(s),
+    metrics = calibrated(side(), side());
+  const p = { session: s.session.id, metrics, rate: 1 };
+  assert.equal(t.sample(p), true);
+  assert.equal(t.sample(p), false);
+  t.collect(true);
+  t.mark('writing');
+  now += 1000;
+  t.sample(p);
+  t.collect(false);
+  now += 1000;
+  t.sample(p);
+  assert.equal(s.get('SELECT count(*) AS n FROM samples').n, 3);
+  assert.equal(s.get("SELECT count(*) AS n FROM samples WHERE vector IS NOT NULL").n, 1);
+  s.end();
+  s.addProfile('other');
+  s.close();
+});
 test('two colored landmarks measure the horizontal tragus–C7 angle in either side view', () => {
   for (const w of [320, 640]) for (const facing of [1, -1]) {
     const h = w * .75, x = (p) => Math.round((facing === 1 ? p : 1 - p) * w);

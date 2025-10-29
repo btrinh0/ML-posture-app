@@ -78,8 +78,8 @@ export class Telemetry {
     this.last = m;
     if (sec === this.lastSecond) return false;
     this.lastSecond = sec;
-    const label = null;
-    const vector = null;
+    const label = this.collecting && side ? this.label : null;
+    const vector = label ? JSON.stringify(m.vector.map((v) => Number(v.toFixed(5)))) : null;
     this.store.run(
       'INSERT OR IGNORE INTO samples VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
       s.id,
