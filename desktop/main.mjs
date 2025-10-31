@@ -99,6 +99,7 @@ const actions = {
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
   capture: (v) => setCapture(v === true),
+  label: (v) => telemetry.mark(v),
   sensorOff: () => {
     setCapture(false);
     telemetry.reset();

@@ -76,6 +76,12 @@ function buttons() {
   $('recalibrate').disabled = !running || !model;
   $('capture').checked = state?.collecting || false;
   $('capture').disabled = !running || !calibration?.reference || $('view').value !== 'side';
+  $('labels')
+    .querySelectorAll('button')
+    .forEach((b, i) => {
+      b.disabled = !state?.collecting;
+      b.setAttribute('aria-pressed', String(state?.label === labels[i]));
+    });
 }
 function stop(status, inform = true) {
   generation++;
@@ -270,6 +276,11 @@ $('recalibrate').onclick = () => {
 $('view').onchange = framing;
 $('markers').onchange = framing;
 $('capture').onchange = (e) => act('capture', e.target.checked);
+labels.forEach((label, i) => {
+  const b = node('button', i + 1 + ' · ' + titles[i]);
+  b.onclick = () => act('label', label);
+  $('labels').append(b);
+});
 observe((next) => {
   state = next;
   if (!state.session && running) stop('Session ended. Camera released.', false);

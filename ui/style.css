@@ -470,3 +470,11 @@ dialog .stack {
   margin-top: 4px;
   display: block;
 }
+button[aria-pressed='true'] {
+  background: var(--pale);
+  border-color: #78906e;
+}
+#labels {
+  margin-top: 10px;
+}
+.trend-title,
