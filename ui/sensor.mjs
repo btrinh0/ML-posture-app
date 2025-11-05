@@ -82,6 +82,11 @@ function buttons() {
       b.disabled = !state?.collecting;
       b.setAttribute('aria-pressed', String(state?.label === labels[i]));
     });
+  $('shortcut-info').textContent = state?.collecting
+    ? state.shortcutsReady
+      ? 'Press Ctrl + Alt + 1–5 from any window.'
+      : 'Use these buttons or the 1–5 keys in this window.'
+    : 'Capture is off.';
 }
 function stop(status, inform = true) {
   generation++;
@@ -280,6 +285,22 @@ labels.forEach((label, i) => {
   const b = node('button', i + 1 + ' · ' + titles[i]);
   b.onclick = () => act('label', label);
   $('labels').append(b);
+});
+document.addEventListener('keydown', (e) => {
+  if (
+    !state?.collecting ||
+    e.repeat ||
+    e.altKey ||
+    e.ctrlKey ||
+    e.metaKey ||
+    /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)
+  )
+    return;
+  const label = labels[Number(e.key) - 1];
+  if (label) {
+    e.preventDefault();
+    void act('label', label);
+  }
 });
 observe((next) => {
   state = next;
