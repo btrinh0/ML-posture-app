@@ -48,6 +48,7 @@ const state = () => ({
   sensorFresh: telemetry.fresh(),
   collecting: telemetry.collecting,
   label: telemetry.label,
+  shortcutsReady,
 });
 const show = () => {
   win?.show();
@@ -78,6 +79,17 @@ function tick() {
 }
 function setCapture(enabled) {
   telemetry.collect(enabled);
+  globalShortcut.unregisterAll();
+  shortcutsReady = false;
+  if (!enabled) return;
+  shortcutsReady = labels
+    .map((label, i) =>
+      globalShortcut.register('CommandOrControl+Alt+' + (i + 1), () => {
+        telemetry.mark(label);
+        send();
+      }),
+    )
+    .every(Boolean);
 }
 const actions = {
   start: () => {
