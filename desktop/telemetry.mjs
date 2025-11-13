@@ -41,11 +41,13 @@ export class Telemetry {
     if (!this.collecting || !this.store.session || (value !== null && !labels.includes(value)))
       throw new Error('Enable labeled capture during a study session.');
     this.label = value;
+    this.segment++;
   }
   collect(enabled) {
     if (enabled && !this.store.session) throw new Error('Start a study session first.');
     this.collecting = enabled === true;
     this.label = null;
+    this.segment++;
     this.recent = [];
   }
   sample(payload) {

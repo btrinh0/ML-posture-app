@@ -122,6 +122,7 @@ const actions = {
   },
   lost: () => {
     telemetry.freshAt = null;
+    telemetry.segment++;
   },
 };
 const mime = {
