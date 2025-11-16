@@ -91,6 +91,16 @@ function setCapture(enabled) {
     )
     .every(Boolean);
 }
+async function exportLabels() {
+  const rows = telemetry.exportRows();
+  if (!rows.length) throw new Error('This profile has no labeled side-view samples to export.');
+  const file = await dialog.showSaveDialog(win, {
+    title: 'Export this profile’s labeled measurements',
+    defaultPath: 'desk-study.jsonl',
+    filters: [{ name: 'Study data', extensions: ['jsonl'] }],
+  });
+  if (!file.canceled) await writeFile(file.filePath, rows.map((r) => JSON.stringify(r)).join('\n') + '\n');
+}
 const actions = {
   start: () => {
     if (!store.session) {
@@ -112,6 +122,7 @@ const actions = {
   profile: (v) => store.chooseProfile(v),
   capture: (v) => setCapture(v === true),
   label: (v) => telemetry.mark(v),
+  exportLabels,
   sensorOff: () => {
     setCapture(false);
     telemetry.reset();

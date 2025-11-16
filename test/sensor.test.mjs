@@ -76,7 +76,11 @@ test('one numeric record per second, with research vectors only during labeled c
   now += 1000;
   t.sample(p);
   assert.equal(s.get('SELECT count(*) AS n FROM samples').n, 3);
-  assert.equal(s.get("SELECT count(*) AS n FROM samples WHERE vector IS NOT NULL").n, 1);
+  const rows = t.exportRows();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].label, 'writing');
+  assert.equal(rows[0].vector.length, 10);
+  assert.equal(rows[0].alias, undefined);
   s.end();
   s.addProfile('other');
   s.close();
