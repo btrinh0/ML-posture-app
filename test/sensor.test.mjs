@@ -68,6 +68,7 @@ test('one numeric record per second, with research vectors only during labeled c
   const p = { session: s.session.id, metrics, rate: 1 };
   assert.equal(t.sample(p), true);
   assert.equal(t.sample(p), false);
+  assert.deepEqual(t.exportRows(), []);
   t.collect(true);
   t.mark('writing');
   now += 1000;
@@ -83,6 +84,7 @@ test('one numeric record per second, with research vectors only during labeled c
   assert.equal(rows[0].alias, undefined);
   s.end();
   s.addProfile('other');
+  assert.deepEqual(t.exportRows(), []);
   s.close();
 });
 test('two colored landmarks measure the horizontal tragus–C7 angle in either side view', () => {

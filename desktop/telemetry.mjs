@@ -112,7 +112,8 @@ export class Telemetry {
         `SELECT p.study_id AS participant,s.study_id AS session,
       t.sec-CAST(s.started/1000 AS INTEGER) AS second,t.segment,t.label,t.vector
       FROM samples t JOIN sessions s ON t.session=s.id JOIN profiles p ON s.profile=p.id
-      WHERE t.label IS NOT NULL AND t.vector IS NOT NULL ORDER BY s.id,t.sec`,
+      WHERE p.id=? AND t.label IS NOT NULL AND t.vector IS NOT NULL ORDER BY s.id,t.sec`,
+        this.store.profile,
       )
       .map((r) => ({ ...r, version: 1, vector: JSON.parse(r.vector) }));
   }
