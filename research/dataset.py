@@ -39,5 +39,7 @@ def validated_sessions(rows):
         if v.shape != (len(CHANNELS),) or not np.isfinite(v).all():
             raise ValueError("Expected ten finite calibrated channels.")
         value = (r["label"], r["segment"], v.tolist())
+        if sec in grouped[session] and grouped[session][sec] != value:
+            raise ValueError("Conflicting samples in overlapping exports.")
         grouped[session][sec] = value
     return grouped
