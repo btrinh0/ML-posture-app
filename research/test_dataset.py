@@ -1,0 +1,22 @@
+import unittest
+import numpy as np
+
+from dataset import windows
+
+
+def record(sec, label="neutral", segment=1):
+    return dict(participant="p", session="v", version=1, second=sec, label=label, segment=segment, vector=[0]*10)
+
+
+class StudyWindowsTest(unittest.TestCase):
+    def test_gaps_cannot_be_bridged_and_repeat_exports_are_deduplicated(self):
+        rows = [record(i) for i in list(range(12)) + list(range(15,40))]
+        w = windows(rows+rows)
+        np.testing.assert_array_equal(w.second,np.arange(34,40))
+        with self.assertRaisesRegex(ValueError,"Conflicting"):
+            windows(rows + [record(39,"slouch")])
+
+
+
+if __name__ == "__main__":
+    unittest.main()

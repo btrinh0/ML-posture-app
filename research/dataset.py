@@ -12,6 +12,15 @@ CHANNELS = ["cva_drop_deg", "head_forward_delta", "pitch_delta_deg", "shoulder_f
 WINDOW = 20
 
 
+@dataclass
+class Windows:
+    x: np.ndarray
+    y: np.ndarray
+    user: np.ndarray
+    session: np.ndarray
+    second: np.ndarray
+    trainable: np.ndarray
+
 
 def load(paths):
     rows = []
@@ -25,7 +34,7 @@ def load(paths):
     return rows
 
 
-def validated_sessions(rows):
+def windows(rows):
     grouped = defaultdict(dict)
     owners = {}
     for r in rows:
@@ -42,7 +51,30 @@ def validated_sessions(rows):
         if sec in grouped[session] and grouped[session][sec] != value:
             raise ValueError("Conflicting samples in overlapping exports.")
         grouped[session][sec] = value
-    return grouped
+    x, y, users, sessions, secs, training = [], [], [], [], [], []
+    for session, data in sorted(grouped.items()):
+        block = []
+        previous = None
+        for sec, sample in sorted(data.items()):
+            if previous is None or sec != previous + 1:
+                block = []
+            previous = sec
+            block.append(sample)
+            block = block[-WINDOW:]
+            if len(block) < WINDOW:
+                continue
+            if any(v[0] != sample[0] for v in block):
+                continue
+            x.append([v[2] for v in block])
+            y.append(LABELS.index(sample[0]))
+            users.append(owners[session])
+            sessions.append(session)
+            secs.append(sec)
+            training.append(True)
+    if not x:
+        raise ValueError("No complete 20-second labeled windows. Record longer continuous blocks.")
+    return Windows(np.asarray(x, np.float32), np.asarray(y), np.asarray(users), np.asarray(sessions),
+                   np.asarray(secs), np.asarray(training))
 
 
 

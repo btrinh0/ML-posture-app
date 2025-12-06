@@ -11,6 +11,7 @@ export const channelNames = [
   'shoulder_x',
   'shoulder_y',
 ];
+export const secondsPerWindow = 20;
 const degrees = 180 / Math.PI;
 const angle = (y, x) => Math.atan2(y, x) * degrees;
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
