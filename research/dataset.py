@@ -63,8 +63,6 @@ def windows(rows):
             block = block[-WINDOW:]
             if len(block) < WINDOW:
                 continue
-            if any(v[0] != sample[0] for v in block):
-                continue
             x.append([v[2] for v in block])
             y.append(LABELS.index(sample[0]))
             users.append(owners[session])
