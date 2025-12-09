@@ -68,7 +68,7 @@ def windows(rows):
             users.append(owners[session])
             sessions.append(session)
             secs.append(sec)
-            training.append(True)
+            training.append(sec % 5 == 0 and all(v[:2] == sample[:2] for v in block))
     if not x:
         raise ValueError("No complete 20-second labeled windows. Record longer continuous blocks.")
     return Windows(np.asarray(x, np.float32), np.asarray(y), np.asarray(users), np.asarray(sessions),

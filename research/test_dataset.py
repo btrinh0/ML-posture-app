@@ -16,6 +16,12 @@ class StudyWindowsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"Conflicting"):
             windows(rows + [record(39,"slouch")])
 
+    def test_transition_windows_are_scored_and_excluded_from_fitting(self):
+        w = windows([record(i) if i<21 else record(i,"writing",2) for i in range(42)])
+        self.assertIn(25,w.second)
+        self.assertNotIn(25,w.second[w.trainable])
+        np.testing.assert_array_equal(w.second[w.trainable],[20,40])
+
 
 
 if __name__ == "__main__":
