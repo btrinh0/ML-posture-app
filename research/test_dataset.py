@@ -22,6 +22,10 @@ class StudyWindowsTest(unittest.TestCase):
         self.assertNotIn(25,w.second[w.trainable])
         np.testing.assert_array_equal(w.second[w.trainable],[20,40])
 
+    def test_short_activities_have_eligible_endpoint_windows(self):
+        data=windows([record(i) if i<21 else record(i,"reading",2) for i in range(28)])
+        self.assertIn(25,data.second[data.trainable])
+
 
 
 if __name__ == "__main__":

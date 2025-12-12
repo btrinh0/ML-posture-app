@@ -68,7 +68,9 @@ def windows(rows):
             users.append(owners[session])
             sessions.append(session)
             secs.append(sec)
-            training.append(sec % 5 == 0 and all(v[:2] == sample[:2] for v in block))
+            # Reading and reaching can end before a full window fits.
+            required = block[-2:] if sample[0] in ("reading", "reaching") else block
+            training.append(sec % 5 == 0 and all(v[:2] == sample[:2] for v in required))
     if not x:
         raise ValueError("No complete 20-second labeled windows. Record longer continuous blocks.")
     return Windows(np.asarray(x, np.float32), np.asarray(y), np.asarray(users), np.asarray(sessions),
