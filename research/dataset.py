@@ -77,6 +77,9 @@ def windows(rows):
                    np.asarray(secs), np.asarray(training))
 
 
+def rolling(x):
+    a = x.astype(np.float64)
+    return np.column_stack([a.mean(axis=1), a.std(axis=1)]).astype(np.float32)
 
 
 def fixture():
