@@ -79,7 +79,9 @@ def windows(rows):
 
 def rolling(x):
     a = x.astype(np.float64)
-    return np.column_stack([a.mean(axis=1), a.std(axis=1)]).astype(np.float32)
+    time = np.arange(WINDOW) - (WINDOW-1)/2
+    slopes = (a * time[None, :, None]).sum(axis=1) / np.dot(time, time)
+    return np.column_stack([a.mean(axis=1), a.std(axis=1), slopes, a[:, -1, :]]).astype(np.float32)
 
 
 def fixture():
