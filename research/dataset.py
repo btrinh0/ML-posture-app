@@ -80,8 +80,11 @@ def windows(rows):
 def rolling(x):
     a = x.astype(np.float64)
     time = np.arange(WINDOW) - (WINDOW-1)/2
-    slopes = (a * time[None, :, None]).sum(axis=1) / np.dot(time, time)
-    return np.column_stack([a.mean(axis=1), a.std(axis=1), slopes, a[:, -1, :]]).astype(np.float32)
+    drift = (a[:, :, 0] >= 7) | (a[:, :, 1] >= np.float32(.10))
+    dwell = np.cumprod(drift[:, ::-1], axis=1).sum(axis=1)
+    return np.column_stack([a.mean(axis=1), a.std(axis=1),
+                            (a * time[None, :, None]).sum(axis=1) / np.dot(time, time),
+                            a[:, -1, :], drift.mean(axis=1), dwell]).astype(np.float32)
 
 
 def fixture():
