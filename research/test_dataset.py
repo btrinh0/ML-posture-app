@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from dataset import windows
-from benchmark import partition
+from benchmark import metrics, partition
 
 
 def record(sec, label="neutral", segment=1):
@@ -22,6 +22,13 @@ class StudyWindowsTest(unittest.TestCase):
         self.assertIn(25,w.second)
         self.assertNotIn(25,w.second[w.trainable])
         np.testing.assert_array_equal(w.second[w.trainable],[20,40])
+
+    def test_false_alert_rate_counts_events_and_observed_seconds(self):
+        rows = [("a",i,2,1) for i in range(60)] + [("b",i,1,1) for i in range(60)]
+        result = metrics(rows)
+        self.assertEqual(result["alerts"],2)
+        self.assertEqual(result["false_alerts"],1)
+        self.assertEqual(result["false_alerts_per_hour"],30)
 
     def test_short_activities_have_eligible_endpoint_windows(self):
         data=windows([record(i) if i<21 else record(i,"reading",2) for i in range(28)])
