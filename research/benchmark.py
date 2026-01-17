@@ -5,6 +5,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+from sklearn.metrics import confusion_matrix, f1_score
 
 from dataset import CHANNELS, LABELS, WINDOW, fixture, load, rolling, windows
 
@@ -33,8 +34,10 @@ def metrics(records):
         else:
             since, armed = None, True
         last_session, last_sec = session, sec
-    return dict(alerts=alerts, false_alerts=int(false_alerts), evaluated_seconds=len(records),
-                false_alerts_per_hour=float(false_alerts*3600/len(records)))
+    return dict(macro_f1=float(f1_score(truth,pred,labels=classes,average="macro",zero_division=0)),
+                class_f1=dict(zip(LABELS,f1_score(truth,pred,labels=classes,average=None,zero_division=0).tolist())),
+                confusion=confusion_matrix(truth,pred,labels=classes).tolist(), evaluated_seconds=len(records),
+                alerts=alerts, false_alerts=int(false_alerts), false_alerts_per_hour=float(false_alerts*3600/len(records)))
 
 
 
