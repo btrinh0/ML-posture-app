@@ -19,5 +19,8 @@ def fit(kind, x, y, epochs):
         model = LGBMClassifier(n_estimators=24, max_depth=3, num_leaves=8, min_child_samples=4,
                                random_state=17, verbosity=-1, n_jobs=1, deterministic=True, force_col_wise=True)
         features = rolling(x)
+        if kind == "tree_levels_only":
+            features[:,10:30] = 0
+            features[:,-2:] = 0
         model.fit(features,y)
         return model
