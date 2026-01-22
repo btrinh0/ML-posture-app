@@ -1,5 +1,7 @@
 import numpy as np
+import torch
 from lightgbm import LGBMClassifier
+from torch import nn
 
 from dataset import CHANNELS, LABELS, WINDOW, rolling
 
@@ -8,6 +10,15 @@ from dataset import CHANNELS, LABELS, WINDOW, rolling
 
 
 
+class TemporalCNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(nn.Conv1d(6,12,3,padding=1), nn.ReLU(),
+                                 nn.Conv1d(12,12,3,padding=1), nn.ReLU(),
+                                 nn.AdaptiveAvgPool1d(1), nn.Flatten(), nn.Linear(12,len(LABELS)))
+
+    def forward(self,x):
+        return self.net(x)
 
 
 
