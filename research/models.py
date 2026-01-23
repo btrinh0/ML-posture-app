@@ -35,3 +35,7 @@ def fit(kind, x, y, epochs):
             features[:,-2:] = 0
         model.fit(features,y)
         return model
+
+def normalize_training(x):
+    landmark = x[:, :, 4:]
+    return landmark.mean(axis=(0, 1)), landmark.std(axis=(0, 1)).clip(.001)
