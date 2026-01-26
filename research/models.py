@@ -35,7 +35,18 @@ def fit(kind, x, y, epochs):
             features[:,-2:] = 0
         model.fit(features,y)
         return model
-
-def normalize_training(x):
-    landmark = x[:, :, 4:]
-    return landmark.mean(axis=(0, 1)), landmark.std(axis=(0, 1)).clip(.001)
+    torch.manual_seed(17)
+    torch.set_num_threads(1)
+    base = x[:,:,4:]
+    mean = base.mean(axis=(0,1))
+    scale = base.std(axis=(0,1)).clip(.001)
+    data = torch.from_numpy(((base-mean)/scale).transpose(0,2,1).copy())
+    target = torch.tensor(y,dtype=torch.long)
+    model = TemporalCNN()
+    optim = torch.optim.Adam(model.parameters(),lr=.005)
+    for _ in range(epochs):
+        for batch in torch.randperm(len(data)).split(48):
+            optim.zero_grad()
+            nn.functional.cross_entropy(model(data[batch]),target[batch]).backward()
+            optim.step()
+    return model.eval(), mean, scale
