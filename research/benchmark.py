@@ -8,6 +8,9 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, f1_score
 
 from dataset import CHANNELS, LABELS, WINDOW, fixture, load, rolling, windows
+from native_score import fit, inference
+
+KINDS = ("rules", "tree", "cnn", "tree_levels_only")
 
 
 
@@ -40,6 +43,26 @@ def metrics(records):
                 alerts=alerts, false_alerts=int(false_alerts), false_alerts_per_hour=float(false_alerts*3600/len(records)))
 
 
+def splits(data, epochs):
+    report = {}
+    for scheme, groups in [("leave_one_session_out",data.session),("leave_one_participant_out",data.user)]:
+        folds, aggregate, times = defaultdict(dict), defaultdict(list), defaultdict(list)
+        if len(set(groups)) < 2:
+            raise ValueError(f"{scheme} needs at least two independent groups.")
+        for group in sorted(set(groups)):
+            test = groups == group
+            train = ~test & data.trainable
+            if set(data.y[train]) != set(range(len(LABELS))):
+                raise ValueError(f"Training fold excluding {group} needs stable examples of all five activities.")
+            for kind in KINDS:
+                graph = fit(kind, data.x[train], data.y[train], epochs)
+                guesses, latency = inference(graph,kind,data.x[test])
+                records = list(zip(data.session[test],data.second[test],data.y[test],guesses))
+                aggregate[kind].extend(records)
+                times[kind].extend(latency)
+                folds[kind][group] = metrics(records)
+        report[scheme] = {kind: {**metrics(aggregate[kind]), "folds": folds[kind]} for kind in KINDS}
+    return report
 
 
 
