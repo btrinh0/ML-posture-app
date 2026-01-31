@@ -65,6 +65,22 @@ def splits(data, epochs):
     return report
 
 
+def transfer(data, epochs):
+    results = {}
+    for user in sorted(set(data.user)):
+        train = data.trainable & (data.user == user)
+        if len(set(data.y[train])) != len(LABELS):
+            results[user] = {"eligible": False, "reason": "Missing training activities"}
+            continue
+        results[user] = {}
+        for kind in KINDS:
+            graph = fit(kind,data.x[train],data.y[train],epochs)
+            for other in sorted(set(data.user)-{user}):
+                test = data.user == other
+                pred,_ = inference(graph,kind,data.x[test])
+                results[user].setdefault(other,{})[kind] = metrics(list(zip(
+                    data.session[test],data.second[test],data.y[test],pred)))
+    return results
 
 
 def partition(rows):
