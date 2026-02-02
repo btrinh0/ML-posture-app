@@ -1,11 +1,47 @@
 import numpy as np
+import onnx
 import torch
 from lightgbm import LGBMClassifier
+from onnx import TensorProto, helper, numpy_helper
 from torch import nn
 
 from dataset import CHANNELS, LABELS, WINDOW, rolling
 
 
+class Graph:
+    def __init__(self):
+        self.nodes, self.constants = [], []
+
+    def const(self, name, array):
+        self.constants.append(numpy_helper.from_array(np.asarray(array), name))
+        return name
+
+    def op(self, kind, inputs, name, **attrs):
+        self.nodes.append(helper.make_node(kind, inputs, [name], **attrs))
+        return name
+
+    def finish(self, shape):
+        info = helper.make_tensor_value_info
+        graph = helper.make_graph(self.nodes, "deskframe", [info("input", TensorProto.FLOAT, shape)],
+                                  [info("scores", TensorProto.FLOAT, [1, len(LABELS)])], self.constants)
+        model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 17)], ir_version=10,
+                                  producer_name="deskframe")
+        onnx.checker.check_model(model)
+        return model.SerializeToString()
+
+
+
+def rules_graph():
+    g = Graph()
+    row = g.op("Gather", ["input",g.const("end",np.int64(WINDOW-1))], "last", axis=1)
+    flags = []
+    for i, cutoff in enumerate([7, .1]):
+        val = g.op("Gather",[row,g.const(f"id{i}",np.int64(i))],f"val{i}",axis=1)
+        flags.append(g.op("GreaterOrEqual",[val,g.const(f"cut{i}",np.float32(cutoff))],f"flag{i}"))
+    flag = g.op("Or",flags,"changed")
+    g.op("Where",[flag,g.const("slouch",np.asarray([[0,1,0,0,0]],np.float32)),
+                  g.const("neutral",np.asarray([[1,0,0,0,0]],np.float32))],"scores")
+    return g.finish([1,WINDOW,len(CHANNELS)])
 
 
 
