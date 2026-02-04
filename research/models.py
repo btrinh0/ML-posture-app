@@ -44,6 +44,51 @@ def rules_graph():
     return g.finish([1,WINDOW,len(CHANNELS)])
 
 
+def tree_graph(model):
+    trees = model.booster_.dump_model()["tree_info"]
+    depth = 3
+    size = 2 ** (depth+1)-1
+    n = len(trees)
+    feature = np.zeros(n*size, np.int64)
+    threshold = np.zeros(n*size, np.float32)
+    left = np.zeros(n*size, np.int64)
+    leaves = np.zeros((n,size), np.float32)
+
+    def visit(tree, tree_id, index, level):
+        pos = tree_id*size + index
+        if level == depth:
+            leaves[tree_id,index] = tree["leaf_value"]
+            return
+        left[pos] = tree_id*size + 2*index + 1
+        if "leaf_value" in tree:
+            a = b = tree
+        else:
+            if tree["decision_type"] != "<=":
+                raise ValueError("Unsupported LightGBM split.")
+            feature[pos], threshold[pos] = tree["split_feature"], tree["threshold"]
+            a, b = tree["left_child"], tree["right_child"]
+        visit(a, tree_id, 2*index+1, level+1)
+        visit(b, tree_id, 2*index+2, level+1)
+
+    for i, tree in enumerate(trees):
+        visit(tree["tree_structure"], i, 0, 0)
+    g = Graph()
+    root = g.const("roots", np.arange(n,dtype=np.int64)*size)
+    fields, cuts, child = g.const("fields",feature), g.const("cuts",threshold), g.const("left",left)
+    flat = g.op("Flatten",["input"],"flat",axis=0)
+    flat = g.op("Reshape",[flat,g.const("one_dim",np.asarray([-1],np.int64))],"features")
+    for d in range(depth):
+        ids = g.op("Gather",[fields,root],f"ids{d}")
+        values = g.op("Gather",[flat,ids],f"values{d}")
+        lim = g.op("Gather",[cuts,root],f"lim{d}")
+        bit = g.op("Greater",[values,lim],f"right{d}")
+        offset = g.op("Cast",[bit],f"offset{d}",to=TensorProto.INT64)
+        base = g.op("Gather",[child,root],f"base{d}")
+        root = g.op("Add",[base,offset],f"nodes{d}")
+    logits = g.op("Gather",[g.const("leaves",leaves.flatten()),root],"logits")
+    scores = g.op("Reshape",[logits,g.const("shape",np.asarray([-1,len(LABELS)],np.int64))],"rounds")
+    g.op("ReduceSum",[scores,g.const("axis",np.asarray([0],np.int64))],"scores",keepdims=1)
+    return g.finish([1,4*len(CHANNELS)+2])
 
 
 class TemporalCNN(nn.Module):
