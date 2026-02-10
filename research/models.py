@@ -106,6 +106,23 @@ class TemporalCNN(nn.Module):
         return self.net(x)
 
 
+def cnn_graph(model, mean, scale):
+    g = Graph()
+    seq = g.op("Gather",["input",g.const("channels",np.arange(4,10,dtype=np.int64))],"landmarks",axis=2)
+    seq = g.op("Sub",[seq,g.const("mean",mean)],"centered")
+    seq = g.op("Div",[seq,g.const("scale",scale)],"normalized")
+    layer = g.op("Transpose",[seq],"transposed",perm=[0,2,1])
+    for idx in [0,2]:
+        conv = model.net[idx]
+        weight = g.const(f"weight{idx}",conv.weight.detach().numpy())
+        bias = g.const(f"bias{idx}",conv.bias.detach().numpy())
+        layer = g.op("Conv",[layer,weight,bias],f"conv{idx}",pads=[1,1],kernel_shape=[3])
+        layer = g.op("Relu",[layer],f"act{idx}")
+    layer = g.op("GlobalAveragePool",[layer],"pooled")
+    layer = g.op("Flatten",[layer],"embedding",axis=1)
+    head = model.net[-1]
+    g.op("Gemm",[layer,g.const("head",head.weight.detach().numpy()),g.const("bias",head.bias.detach().numpy())],"scores",transB=1)
+    return g.finish([1,WINDOW,len(CHANNELS)])
 
 
 def fit(kind, x, y, epochs):
