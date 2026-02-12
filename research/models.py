@@ -29,6 +29,11 @@ class Graph:
         onnx.checker.check_model(model)
         return model.SerializeToString()
 
+    def quantized(self, name, value):
+        scale = np.float32(max(float(np.abs(value).max()) / 127, 1e-9))
+        q = np.clip(np.rint(value / scale), -127, 127).astype(np.int8)
+        return self.op("DequantizeLinear", [self.const(name+"_q", q), self.const(name+"_scale", scale),
+                                           self.const(name+"_zero", np.int8(0))], name)
 
 
 def rules_graph():
@@ -114,14 +119,14 @@ def cnn_graph(model, mean, scale):
     layer = g.op("Transpose",[seq],"transposed",perm=[0,2,1])
     for idx in [0,2]:
         conv = model.net[idx]
-        weight = g.const(f"weight{idx}",conv.weight.detach().numpy())
+        weight = g.quantized(f"weight{idx}",conv.weight.detach().numpy())
         bias = g.const(f"bias{idx}",conv.bias.detach().numpy())
         layer = g.op("Conv",[layer,weight,bias],f"conv{idx}",pads=[1,1],kernel_shape=[3])
         layer = g.op("Relu",[layer],f"act{idx}")
     layer = g.op("GlobalAveragePool",[layer],"pooled")
     layer = g.op("Flatten",[layer],"embedding",axis=1)
     head = model.net[-1]
-    g.op("Gemm",[layer,g.const("head",head.weight.detach().numpy()),g.const("bias",head.bias.detach().numpy())],"scores",transB=1)
+    g.op("Gemm",[layer,g.quantized("head",head.weight.detach().numpy()),g.const("bias",head.bias.detach().numpy())],"scores",transB=1)
     return g.finish([1,WINDOW,len(CHANNELS)])
 
 
