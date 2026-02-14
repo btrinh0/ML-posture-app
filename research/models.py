@@ -132,7 +132,7 @@ def cnn_graph(model, mean, scale):
 
 def fit(kind, x, y, epochs):
     if kind == "rules":
-        return lambda rows: ((rows[:,-1,0] >= 7) | (rows[:,-1,1] >= np.float32(.1))).astype(int)
+        return rules_graph()
     if kind.startswith("tree"):
         model = LGBMClassifier(n_estimators=24, max_depth=3, num_leaves=8, min_child_samples=4,
                                random_state=17, verbosity=-1, n_jobs=1, deterministic=True, force_col_wise=True)
@@ -141,7 +141,7 @@ def fit(kind, x, y, epochs):
             features[:,10:30] = 0
             features[:,-2:] = 0
         model.fit(features,y)
-        return model
+        return tree_graph(model)
     torch.manual_seed(17)
     torch.set_num_threads(1)
     base = x[:,:,4:]
@@ -156,4 +156,4 @@ def fit(kind, x, y, epochs):
             optim.zero_grad()
             nn.functional.cross_entropy(model(data[batch]),target[batch]).backward()
             optim.step()
-    return model.eval(), mean, scale
+    return cnn_graph(model.eval(),mean,scale)

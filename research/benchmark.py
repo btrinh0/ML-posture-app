@@ -5,14 +5,22 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+import onnxruntime as ort
 from sklearn.metrics import confusion_matrix, f1_score
 
 from dataset import CHANNELS, LABELS, WINDOW, fixture, load, rolling, windows
-from native_score import fit, inference
+from models import fit
 
 KINDS = ("rules", "tree", "cnn", "tree_levels_only")
 
 
+def inference(graph, kind, x):
+    options = ort.SessionOptions()
+    options.intra_op_num_threads = options.inter_op_num_threads = 1
+    session = ort.InferenceSession(graph, options, providers=["CPUExecutionProvider"])
+    inputs = rolling(x) if kind.startswith("tree") else x
+    pred = [int(session.run(None, {"input": np.ascontiguousarray(row[None])})[0].argmax()) for row in inputs]
+    return np.asarray(pred), []
 
 
 def metrics(records):
@@ -96,3 +104,30 @@ def partition(rows):
     if {r["session"] for r in development} & {r["session"] for r in followup}:
         raise ValueError("A session crosses the development and follow-up boundary.")
     return sources.pop(), windows(development), windows(followup) if followup else None
+
+
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("exports",nargs="*",type=Path)
+    parser.add_argument("--out",required=True,type=Path)
+    parser.add_argument("--epochs",type=int,default=18)
+    parser.add_argument("--smoke",action="store_true",help="Use synthetic fixtures.")
+    args = parser.parse_args()
+    if args.smoke == bool(args.exports) or args.epochs < 1:
+        parser.error("Supply either real profile exports or --smoke, and a positive epoch count.")
+    if args.smoke:
+        source,data,followup = "synthetic_smoke",windows(fixture()),None
+    else:
+        source,data,followup = partition(load(args.exports))
+    results = splits(data,args.epochs)
+    report = dict(provenance=source, sessions=len(set(data.session)), results=results)
+    args.out.mkdir(parents=True,exist_ok=True)
+    (args.out/"benchmark.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
+    print(f"Saved benchmark for {report['sessions']} sessions.")
+    print(f"Report and model saved to {args.out}.")
+
+
+if __name__ == "__main__":
+    main()
