@@ -1,8 +1,10 @@
 """Benchmark activity models on held-out sessions and participants."""
 import argparse
 import json
+import platform
 from collections import defaultdict
 from pathlib import Path
+from time import perf_counter_ns
 
 import numpy as np
 import onnxruntime as ort
@@ -19,8 +21,14 @@ def inference(graph, kind, x):
     options.intra_op_num_threads = options.inter_op_num_threads = 1
     session = ort.InferenceSession(graph, options, providers=["CPUExecutionProvider"])
     inputs = rolling(x) if kind.startswith("tree") else x
-    pred = [int(session.run(None, {"input": np.ascontiguousarray(row[None])})[0].argmax()) for row in inputs]
-    return np.asarray(pred), []
+    session.run(None, {"input": inputs[:1]})
+    pred, latency = [], []
+    for row in inputs:
+        start = perf_counter_ns()
+        scores, = session.run(None, {"input": np.ascontiguousarray(row[None])})
+        latency.append((perf_counter_ns()-start)/1e6)
+        pred.append(int(scores.argmax()))
+    return np.asarray(pred), latency
 
 
 def metrics(records):
@@ -69,7 +77,8 @@ def splits(data, epochs):
                 aggregate[kind].extend(records)
                 times[kind].extend(latency)
                 folds[kind][group] = metrics(records)
-        report[scheme] = {kind: {**metrics(aggregate[kind]), "folds": folds[kind]} for kind in KINDS}
+        report[scheme] = {kind:{**metrics(aggregate[kind]),"p50_ms":float(np.median(times[kind])),
+                                "p95_ms":float(np.percentile(times[kind],95)),"folds":folds[kind]} for kind in KINDS}
     return report
 
 
