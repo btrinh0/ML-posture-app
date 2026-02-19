@@ -131,7 +131,15 @@ def main():
     else:
         source,data,followup = partition(load(args.exports))
     results = splits(data,args.epochs)
-    report = dict(provenance=source, sessions=len(set(data.session)), results=results)
+    scores = results["leave_one_session_out"]
+    candidates = [k for k in KINDS if scores[k]["p95_ms"] < 15]
+    if candidates:
+        chosen = max(candidates,key=lambda k:(scores[k]["macro_f1"],-scores[k]["false_alerts_per_hour"],-scores[k]["p95_ms"]))
+    else:
+        chosen = min(KINDS,key=lambda k:scores[k]["p95_ms"])
+    report = dict(provenance=source, participants=len(set(data.user)), sessions=len(set(data.session)),
+                  window_seconds=WINDOW, labels=LABELS, selected=chosen, met_latency_target=bool(candidates),
+                  environment={"os":platform.platform(),"onnxruntime":ort.__version__}, results=results)
     args.out.mkdir(parents=True,exist_ok=True)
     (args.out/"benchmark.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
     print(f"Saved benchmark for {report['sessions']} sessions.")
