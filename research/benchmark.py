@@ -140,6 +140,15 @@ def main():
     report = dict(provenance=source, participants=len(set(data.user)), sessions=len(set(data.session)),
                   window_seconds=WINDOW, labels=LABELS, selected=chosen, met_latency_target=bool(candidates),
                   environment={"os":platform.platform(),"onnxruntime":ort.__version__}, results=results)
+    report["single_participant_transfer"]=transfer(data,args.epochs)
+    if followup is not None:
+        report["follow_up"]={"sessions":len(set(followup.session)),"participants":len(set(followup.user)),"models":{}}
+    for kind in (KINDS if followup is not None else ("rules","tree","cnn") if args.smoke else (chosen,)):
+        graph = fit(kind,data.x[data.trainable],data.y[data.trainable],args.epochs)
+        if followup is not None:
+            pred,timing=inference(graph,kind,followup.x)
+            report["follow_up"]["models"][kind]={**metrics(list(zip(followup.session,followup.second,followup.y,pred))),
+                                                 "p95_ms":float(np.percentile(timing,95))}
     args.out.mkdir(parents=True,exist_ok=True)
     (args.out/"benchmark.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
     print(f"Saved benchmark for {report['sessions']} sessions.")
