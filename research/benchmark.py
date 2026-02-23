@@ -1,5 +1,6 @@
 """Benchmark activity models on held-out sessions and participants."""
 import argparse
+import base64
 import json
 import platform
 from collections import defaultdict
@@ -115,6 +116,13 @@ def partition(rows):
     return sources.pop(), windows(development), windows(followup) if followup else None
 
 
+def bundle(kind, graph, source):
+    result = dict(format="deskframe.model.v1", kind="tree" if kind.startswith("tree") else kind,
+                  labels=LABELS, channels=CHANNELS, seconds=WINDOW, provenance=source,
+                  model=base64.b64encode(graph).decode("ascii"))
+    if kind == "tree_levels_only":
+        result["variant"] = "mean_and_latest"
+    return result
 
 
 def main():
@@ -140,6 +148,7 @@ def main():
     report = dict(provenance=source, participants=len(set(data.user)), sessions=len(set(data.session)),
                   window_seconds=WINDOW, labels=LABELS, selected=chosen, met_latency_target=bool(candidates),
                   environment={"os":platform.platform(),"onnxruntime":ort.__version__}, results=results)
+    args.out.mkdir(parents=True,exist_ok=True)
     report["single_participant_transfer"]=transfer(data,args.epochs)
     if followup is not None:
         report["follow_up"]={"sessions":len(set(followup.session)),"participants":len(set(followup.user)),"models":{}}
@@ -149,9 +158,17 @@ def main():
             pred,timing=inference(graph,kind,followup.x)
             report["follow_up"]["models"][kind]={**metrics(list(zip(followup.session,followup.second,followup.y,pred))),
                                                  "p95_ms":float(np.percentile(timing,95))}
-    args.out.mkdir(parents=True,exist_ok=True)
+        if not args.smoke and kind != chosen:
+            continue
+        name = f"fixture-{kind}.deskmodel" if args.smoke else "activity.deskmodel"
+        (args.out/name).write_text(json.dumps(bundle(kind,graph,source)),encoding="utf-8")
+        if args.smoke:
+            indices = np.linspace(0,len(data.x)-1,10,dtype=int)
+            tests = data.x[indices]
+            pred,_ = inference(graph,kind,tests)
+            (args.out/f"parity-{kind}.json").write_text(json.dumps(dict(x=tests.tolist(),y=pred.tolist())),encoding="utf-8")
     (args.out/"benchmark.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
-    print(f"Saved benchmark for {report['sessions']} sessions.")
+    print(f"{source}: {report['sessions']} sessions, {report['participants']} participants; selected {chosen}.")
     print(f"Report and model saved to {args.out}.")
 
 
