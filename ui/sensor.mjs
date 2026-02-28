@@ -42,6 +42,13 @@ let calibration,
   pendingCue,
   prediction = null;
 let classifier = null;
+export function setClassifier(value) {
+  classifier = value;
+  classifier?.reset();
+  prediction = null;
+  gate = new DriftGate();
+  pendingCue = false;
+}
 const video = $('video');
 const titles = ['Neutral', 'Sustained slouch', 'Writing', 'Brief reading', 'Reaching / shifting'];
 const message = (text) => {
@@ -180,7 +187,7 @@ async function loop(token) {
         } else {
           lastValid = true;
           verify = drifting(m);
-          if (!classifier || m.view === 'front') {
+          {
             const cue = gate.update(verify, started);
             pendingCue = verify && (pendingCue || cue);
           }
@@ -188,6 +195,12 @@ async function loop(token) {
           if (second !== lastSecond) {
             if (m.view === 'side' && $('markers').checked) m.marker = readMarkers(g);
             lastMarkerVisible = Boolean(m.marker);
+            const activeClassifier = classifier;
+            const scored =
+              m.vector && activeClassifier ? await activeClassifier.push(second, m.vector) : null;
+            if (token !== generation) return;
+            const result = activeClassifier === classifier ? scored : null;
+            prediction = result?.label ?? null;
             readings(m);
             await window.desk.sample({
               session: state.session.id,

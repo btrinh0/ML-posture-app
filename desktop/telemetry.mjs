@@ -73,7 +73,7 @@ export class Telemetry {
     if (!side && !finite(m.asym, 180)) return false;
     const now = this.store.now(),
       sec = Math.floor(now / 1000);
-    const pred = null;
+    const pred = labels.includes(payload.prediction) ? payload.prediction : null;
     this.freshAt = now;
     this.rate = [1, 12, 30].includes(payload.rate) ? payload.rate : 1;
     this.policy = payload.fixed === true ? 'fixed' : 'adaptive';

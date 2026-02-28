@@ -31,5 +31,9 @@ await cp(sensor, join(assets, 'pose.task'));
 const vision = join(root, 'node_modules/@mediapipe/tasks-vision');
 await cp(join(vision, 'vision_bundle.mjs'), join(out, 'vendor/vision.mjs'));
 await cp(join(vision, 'wasm'), join(out, 'vendor/vision'), { recursive: true });
+for (const name of ['ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']) {
+  await cp(join(root, 'node_modules/onnxruntime-web/dist', name), join(out, 'vendor', name));
+}
+await cp(join(root, 'assets/onnx-license.txt'), join(assets, 'onnx-license.txt'));
 await cp(join(root, 'assets/mediapipe-license.txt'), join(assets, 'mediapipe-license.txt'));
 console.log('Built the offline Deskframe desktop interface.');
