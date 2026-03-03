@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('desk', {
   state: () => ipcRenderer.invoke('desk:state'),
   sample: (value) => ipcRenderer.invoke('desk:sample', value),
+  model: (pick) => ipcRenderer.invoke('desk:model', pick),
   onPromptClick: (listener) => {
     const handler = () => listener();
     ipcRenderer.on('desk:showPrompt', handler);

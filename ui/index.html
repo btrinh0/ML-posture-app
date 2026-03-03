@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./style.css" />
     <script type="module" src="./dashboard.mjs"></script>
     <script type="module" src="./sensor.mjs"></script>
+    <script type="module" src="./model-controls.mjs"></script>
   </head>
   <body>
     <aside class="rail">
@@ -142,6 +143,14 @@
           <div id="labels" class="controls"></div>
           <p id="shortcut-info" class="hint"></p>
           <button class="link" id="export-labels">Export this profile’s labeled data ↗</button>
+        </article>
+        <article class="card" id="model-panel">
+          <h2>Activity classifier</h2>
+          <p id="model-name" class="muted">Static posture rules</p>
+          <div class="controls sensor-controls">
+            <button id="import-model">Import trained model</button
+            ><button id="remove-model" hidden>Use built-in rules</button>
+          </div>
         </article>
       </section>
     </main>

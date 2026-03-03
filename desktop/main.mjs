@@ -19,6 +19,7 @@ import { DeskStore } from './store.mjs';
 import { drills } from './companion.mjs';
 import { Telemetry } from './telemetry.mjs';
 import { labels } from '../shared/kinematics.mjs';
+import { validateBundle } from '../shared/model-format.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');
@@ -135,6 +136,15 @@ const actions = {
     telemetry.freshAt = null;
     telemetry.segment++;
   },
+  installModel: () => {
+    if (!candidate) throw new Error('Select and verify a model first.');
+    store.run("INSERT OR REPLACE INTO settings VALUES('model',?)", JSON.stringify(candidate));
+    candidate = null;
+  },
+  removeModel: () => {
+    store.run("INSERT OR REPLACE INTO settings VALUES('model','null')");
+    candidate = null;
+  },
 };
 const mime = {
   '.html': 'text/html',
@@ -219,6 +229,25 @@ async function start() {
   });
   ipcMain.handle('desk:state', (e) => {
     if (isHome(e.senderFrame.url)) return state();
+  });
+  ipcMain.handle('desk:model', async (e, pick) => {
+    if (!isHome(e.senderFrame.url)) return null;
+    if (!pick) {
+      const saved = store.get("SELECT value FROM settings WHERE key='model'");
+      if (saved) return JSON.parse(saved.value);
+      return null;
+    }
+    candidate = null;
+    const file = await dialog.showOpenDialog(win, {
+      title: 'Choose the benchmarked model',
+      properties: ['openFile'],
+      filters: [{ name: 'Deskframe activity model', extensions: ['deskmodel'] }],
+    });
+    if (file.canceled) return null;
+    if ((await stat(file.filePaths[0])).size > 9 * 1024 * 1024)
+      throw new Error('The model file exceeds 9 MB.');
+    candidate = validateBundle(JSON.parse(await readFile(file.filePaths[0], 'utf8')));
+    return candidate;
   });
   ipcMain.handle('desk:sample', (e, value) => {
     if (!isHome(e.senderFrame.url) || !telemetry.sample(value)) return;
