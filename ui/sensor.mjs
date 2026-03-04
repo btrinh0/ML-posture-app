@@ -187,7 +187,7 @@ async function loop(token) {
         } else {
           lastValid = true;
           verify = drifting(m);
-          {
+          if (!classifier || m.view === 'front') {
             const cue = gate.update(verify, started);
             pendingCue = verify && (pendingCue || cue);
           }
@@ -201,6 +201,10 @@ async function loop(token) {
             if (token !== generation) return;
             const result = activeClassifier === classifier ? scored : null;
             prediction = result?.label ?? null;
+            if (m.vector && classifier) {
+              const classified = prediction === null ? null : prediction === 'slouch';
+              pendingCue ||= gate.update(classified, started);
+            }
             readings(m);
             await window.desk.sample({
               session: state.session.id,
