@@ -9,6 +9,10 @@ const qa = resolve('.qa');
 await mkdir(qa, { recursive: true });
 const profile = await mkdtemp(join(qa, 'desktop-'));
 const packaged = null;
+const fixtures = process.argv
+  .slice(2)
+  .find((v) => v.startsWith('--fixtures='))
+  ?.slice('--fixtures='.length);
 const sideImage = process.argv.slice(2).find((v) => v.startsWith('--side-image='))?.slice('--side-image='.length);
 const reference = sideImage || process.argv
   .slice(2)
@@ -158,6 +162,44 @@ try {
   assert.equal(state.history.length, 1);
   assert.equal(state.symptoms.neck, 2);
   assert.equal(state.setupResult.score, 1);
+  {
+    const suites = [];
+    if (fixtures) for (const kind of ['rules', 'tree', 'cnn']) {
+      suites.push({ kind, bundle: JSON.parse(await readFile(join(fixtures, 'fixture-' + kind + '.deskmodel'), 'utf8')),
+        ...JSON.parse(await readFile(join(fixtures, 'parity-' + kind + '.json'), 'utf8')) });
+    }
+    const latency = {};
+    for (const { kind, bundle, x, y } of suites) {
+      const actual = await page.evaluate(
+        async ({ bundle, x }) => {
+          const { openClassifier } = await import('./classifier.mjs');
+          const model = await openClassifier(bundle, true);
+          try {
+            const results = [];
+            for (const rows of x) results.push(bundle.labels.indexOf((await model.classify(rows)).label));
+            const times = [];
+            for (let i = 0; i < 100; i++) times.push((await model.classify(x[i % x.length])).latency);
+            times.sort((a, b) => a - b);
+            return {
+              results,
+              p50_ms: times[49],
+              p95_ms: times[94],
+              mean_ms: times.reduce((a, b) => a + b, 0) / times.length,
+            };
+          } finally {
+            await model.close();
+          }
+        },
+        { bundle, x },
+      );
+      assert.deepEqual(actual.results, y, kind + ' browser/Python predictions differ');
+      const { results, ...timing } = actual;
+      latency[kind] = timing;
+    }
+    console.log('Python and desktop CPU predictions matched for ' + suites.map((suite) => suite.kind).join(', ') + '.');
+    await writeFile(join(qa, 'onnx-replay.json'), JSON.stringify(latency, null, 2));
+    console.log('Warm desktop ONNX window timings (ms):', JSON.stringify(latency));
+  }
   assert.deepEqual(errors, []);
   await client.close();
   const restarted = await _electron.launch({
