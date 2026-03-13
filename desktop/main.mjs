@@ -20,6 +20,7 @@ import { drills } from './companion.mjs';
 import { Telemetry } from './telemetry.mjs';
 import { labels } from '../shared/kinematics.mjs';
 import { validateBundle } from '../shared/model-format.mjs';
+import { Insights } from './insights.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');
@@ -199,6 +200,7 @@ async function start() {
   );
   store = new DeskStore(join(app.getPath('userData'), 'deskframe.sqlite'));
   telemetry = new Telemetry(store);
+  insights = new Insights(store);
   win = new BrowserWindow({
     width: 1120,
     height: 840,
