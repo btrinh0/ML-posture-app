@@ -14,7 +14,7 @@ export class Insights {
       `SELECT t.session, date(sec,'unixepoch','localtime') AS day,
       CAST(t.active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS "drop" FROM samples t
       JOIN sessions s ON s.id=t.session WHERE s.profile=? AND s.ended IS NOT NULL AND t.view='side'
-      AND t.sec>=?
+      AND (prediction IS NULL OR prediction IN ('neutral','slouch')) AND t.sec>=?
       GROUP BY t.session,day,minute HAVING count(*)>=10 ORDER BY t.session,minute`,
       s.profile,
       Math.floor(now / 1000) - 56 * 86400,
