@@ -2,6 +2,13 @@ import { dayBefore, localDay } from './companion.mjs';
 
 const average = (values) => (values.length ? values.reduce((a, b) => a + b, 0) / values.length : null);
 const sum = (rows, key) => rows.reduce((n, r) => n + (r[key] ?? 0), 0);
+export function slope(points) {
+  if (points.length < 2) return null;
+  const x = average(points.map((p) => p.minute)),
+    y = average(points.map((p) => p.drop));
+  const denom = points.reduce((n, p) => n + (p.minute - x) ** 2, 0);
+  return denom ? points.reduce((n, p) => n + (p.minute - x) * (p.drop - y), 0) / denom : null;
+}
 export class Insights {
   constructor(store) {
     this.s = store;
@@ -19,7 +26,12 @@ export class Insights {
       s.profile,
       Math.floor(now / 1000) - 56 * 86400,
     );
-    const result = rows;
+    const series = Map.groupBy(rows, (p) => p.session);
+    const slopes = [...series.values()]
+      .filter((p) => p.length >= 8 && p.at(-1).minute - p[0].minute >= 9)
+      .map(slope)
+      .filter(Number.isFinite);
+    const result = slopes;
     return result;
   }
 }
