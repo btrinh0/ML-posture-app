@@ -31,7 +31,12 @@ export class Insights {
       .filter((p) => p.length >= 8 && p.at(-1).minute - p[0].minute >= 9)
       .map(slope)
       .filter(Number.isFinite);
-    const result = slopes;
+    const days = new Set(rows.map((p) => p.day)).size;
+    const result = {
+      days,
+      sessions: slopes.length,
+      slope: average(slopes),
+    };
     return result;
   }
 }
