@@ -35,7 +35,7 @@ export class Insights {
     const result = {
       days,
       sessions: slopes.length,
-      slope: average(slopes),
+      slope: days >= 14 && slopes.length >= 3 ? average(slopes) : null,
     };
     return result;
   }
