@@ -478,3 +478,98 @@ button[aria-pressed='true'] {
   margin-top: 10px;
 }
 .trend-title,
+.plot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.trend-title label,
+.plot-head label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plot-head {
+  justify-content: flex-start;
+  margin: 14px 0;
+}
+.plot-head select,
+.trend-title select {
+  font-size: 0.82rem;
+}
+.trend-title h1 { flex: 1 1 180px; }
+#drill-library h3, #change-results h3 { margin-top: 16px; }
+#drill-library p { margin-top: 4px; }
+#change-form { align-items: flex-end; }
+#change-form label { align-items: flex-start; flex-direction: column; }
+#trend-plot {
+  width: 100%;
+  height: 238px;
+  display: block;
+}
+.empty {
+  padding: 24px 18px;
+  background: #f3f5ee;
+  border-radius: 10px;
+  margin: 12px 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+details {
+  margin-top: 14px;
+}
+summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--green);
+  padding-block: 6px;
+}
+.table-wrap {
+  overflow: auto;
+}
+.table-wrap table,
+#responses table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.78rem;
+  margin-top: 12px;
+}
+.table-wrap :is(td, th),
+#responses :is(td, th) {
+  text-align: right;
+  padding: 9px 6px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table-wrap th:first-child,
+#responses th:first-child {
+  text-align: left;
+}
+.table-wrap thead th,
+#responses thead th {
+  color: var(--muted);
+  font-weight: 560;
+}
+.text-block {
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+.missing {
+  color: #858f87;
+}
+.h0 {
+  background: #eef2e7;
+}
+.h1 {
+  background: #dcdfb2;
+}
+.h2 {
+  background: #ead4a4;
+}
+.h3 {
+  background: #e4ba9b;
+}

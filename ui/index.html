@@ -8,6 +8,7 @@
     <script type="module" src="./dashboard.mjs"></script>
     <script type="module" src="./sensor.mjs"></script>
     <script type="module" src="./model-controls.mjs"></script>
+    <script type="module" src="./trends.mjs"></script>
   </head>
   <body>
     <aside class="rail">
@@ -16,6 +17,7 @@
         <button data-page="today" aria-current="page">Study desk</button>
         <button data-page="setup">Desk setup</button>
         <button data-page="sensor">Pose sensor</button>
+        <button data-page="trends">Trends</button>
       </nav>
       <div class="account">
         <label for="profiles">Local profile</label
@@ -152,6 +154,17 @@
             ><button id="remove-model" hidden>Use built-in rules</button>
           </div>
         </article>
+      </section>
+      <section id="trends" class="page" hidden>
+        <div class="trend-title">
+          <h1>Trends</h1>
+        </div>
+        <div class="columns">
+          <article class="card">
+            <h2>Fatigue forecast</h2>
+            <p id="forecast-state" class="text-block"></p>
+          </article>
+        </div>
       </section>
     </main>
     <dialog id="profile-dialog">

@@ -232,6 +232,9 @@ async function start() {
   ipcMain.handle('desk:state', (e) => {
     if (isHome(e.senderFrame.url)) return state();
   });
+  ipcMain.handle('desk:report', (e, days) => {
+    if (isHome(e.senderFrame.url)) return { history: insights.historicalSlope() };
+  });
   ipcMain.handle('desk:model', async (e, pick) => {
     if (!isHome(e.senderFrame.url)) return null;
     if (!pick) {
