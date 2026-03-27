@@ -39,4 +39,21 @@ export class Insights {
     };
     return result;
   }
+  forecast() {
+    const s = this.s,
+      session = s.session;
+    if (!session || session.active_ms < 10 * 60_000) return null;
+    const personal = this.historicalSlope();
+    if (personal.slope === null) return null;
+    const points = s.all(
+      `SELECT CAST(active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS "drop"
+      FROM samples WHERE session=? AND view='side' AND prediction IN ('neutral','slouch') AND active_ms>=?
+      GROUP BY minute HAVING count(*)>=10 ORDER BY minute`,
+      session.id,
+      session.active_ms - 8 * 60_000,
+    );
+    const tail = points.slice(-6);
+    if (tail.length < 6) return null;
+    return tail;
+  }
 }
