@@ -54,6 +54,9 @@ export class Insights {
     );
     const tail = points.slice(-6);
     if (tail.length < 6) return null;
-    return tail;
+    const recent = slope(tail.slice(-3)),
+      prior = slope(tail.slice(0,3)),
+      current = tail.at(-1).drop;
+    return recent > prior && recent > 0 ? { recent, prior, current } : null;
   }
 }
