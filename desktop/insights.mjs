@@ -53,7 +53,9 @@ export class Insights {
       session.active_ms - 8 * 60_000,
     );
     const tail = points.slice(-6);
-    if (tail.length < 6) return null;
+    if (tail.length < 6 || tail.at(-1).minute < Math.floor(session.active_ms / 60000) - 1 ||
+        tail.at(-1).minute - tail[0].minute > 7 || tail.some((p,i) => i && p.minute - tail[i-1].minute > 2))
+      return null;
     const recent = slope(tail.slice(-3)),
       prior = slope(tail.slice(0,3)),
       current = tail.at(-1).drop;
