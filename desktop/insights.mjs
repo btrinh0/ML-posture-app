@@ -59,6 +59,8 @@ export class Insights {
     const recent = slope(tail.slice(-3)),
       prior = slope(tail.slice(0,3)),
       current = tail.at(-1).drop;
-    return recent > prior && recent > 0 ? { recent, prior, current } : null;
+    const estimate = 0.75 * recent + 0.25 * personal.slope;
+    if (recent <= 0 || recent <= prior || estimate <= 0 || current < 1 || current >= 7) return null;
+    return { slope: estimate, current };
   }
 }
