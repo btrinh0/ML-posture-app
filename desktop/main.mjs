@@ -256,7 +256,8 @@ async function start() {
   });
   ipcMain.handle('desk:sample', (e, value) => {
     if (!isHome(e.senderFrame.url) || !telemetry.sample(value)) return;
-    if (value.cue) notify(store.prompt('drift', value.metrics.view === 'front' ? 'shoulders' : 'chin'));
+    const p = insights.sensorReminder(value.cue === true, value.metrics, value.prediction);
+    notify(p);
   });
   ipcMain.handle('desk:action', async (e, name, value) => {
     if (!isHome(e.senderFrame.url) || !Object.hasOwn(actions, name)) throw new Error('Unknown action.');

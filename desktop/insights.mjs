@@ -61,6 +61,17 @@ export class Insights {
       current = tail.at(-1).drop;
     const estimate = 0.75 * recent + 0.25 * personal.slope;
     if (recent <= 0 || recent <= prior || estimate <= 0 || current < 1 || current >= 7) return null;
-    return { slope: estimate, current };
+    const minutes = (7 - current) / estimate;
+    return minutes <= 3 ? { minutes, slope: estimate } : null;
+  }
+  sensorReminder(cue, metrics, prediction) {
+    const s = this.s;
+    if (!s.session || s.idle) return;
+    let kind;
+    if (cue) kind = 'drift';
+    else {
+      if (this.forecast()) kind = 'forecast';
+    }
+    if (kind) return s.prompt(kind, (metrics.view === 'front' ? 'shoulders' : 'chin'));
   }
 }
