@@ -69,7 +69,7 @@ export class Insights {
     if (!s.session || s.idle) return;
     let kind;
     if (cue) kind = 'drift';
-    else {
+    else if (metrics.view === 'side' && ['neutral','slouch'].includes(prediction) && metrics.drop > 0 && metrics.drop < 7) {
       if (this.forecast()) kind = 'forecast';
     }
     if (kind) return s.prompt(kind, (metrics.view === 'front' ? 'shoulders' : 'chin'));
