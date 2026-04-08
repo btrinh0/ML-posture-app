@@ -154,6 +154,13 @@ export class DeskStore {
     const s = this.session;
     if (!s || this.idle || !Object.hasOwn(drills, drill) || this.pending()) return;
     const now = this.now();
+    const recent = this.get(
+      'SELECT resolved,outcome FROM prompts WHERE session=? ORDER BY id DESC LIMIT 1',
+      s.id,
+    );
+    if (recent?.outcome === 'snoozed' && s.active_ms < s.next_break) return;
+    if (recent?.resolved && now - recent.resolved < (recent.outcome === 'snoozed' ? 300_000 : 120_000))
+      return;
     this.run('INSERT INTO prompts(session,at,kind,drill) VALUES(?,?,?,?)', s.id, now, kind, drill);
     return this.pending();
   }
