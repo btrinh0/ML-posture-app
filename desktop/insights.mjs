@@ -17,6 +17,8 @@ export class Insights {
     const s = this.s,
       session = s.session?.id ?? -1,
       now = s.now();
+    const key = s.profile + '-' + session;
+    if (this.past?.key === key && now - this.past.at < 300_000) return this.past.result;
     const rows = s.all(
       `SELECT t.session, date(sec,'unixepoch','localtime') AS day,
       CAST(t.active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS "drop" FROM samples t
@@ -37,6 +39,7 @@ export class Insights {
       sessions: slopes.length,
       slope: days >= 14 && slopes.length >= 3 ? average(slopes) : null,
     };
+    this.past = { key, at: now, result };
     return result;
   }
   forecast() {
@@ -69,7 +72,11 @@ export class Insights {
     if (!s.session || s.idle) return;
     let kind;
     if (cue) kind = 'drift';
-    else if (metrics.view === 'side' && ['neutral','slouch'].includes(prediction) && metrics.drop > 0 && metrics.drop < 7) {
+    else if (metrics.view === 'side' && (prediction === 'neutral' || prediction === 'slouch') &&
+        metrics.drop > 0 && metrics.drop < 7 &&
+        (this.lastForecastSession !== s.session.id || s.now() - this.lastForecastAt >= 30_000)) {
+      this.lastForecastSession = s.session.id;
+      this.lastForecastAt = s.now();
       if (this.forecast()) kind = 'forecast';
     }
     if (kind) return s.prompt(kind, (metrics.view === 'front' ? 'shoulders' : 'chin'));
