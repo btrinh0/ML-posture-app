@@ -37,6 +37,33 @@ function rig() {
   }
   return { store, telemetry, insights, advance, sample };
 }
+test('forecast waits for two weeks, then detects accelerating drift in a classified session', () => {
+  const { store: s, telemetry: t, insights, advance, sample } = rig();
+  for (let day = 0; day < 14; day++) {
+    advance(day);
+    s.start();
+    t.reset();
+    for (let m = 0; m < 10; m++)
+      for (let sec = 0; sec < 12; sec++) {
+        advance(day, m, sec);
+        sample(m * 0.2, m, sec);
+      }
+    s.end();
+    if (day === 12) assert.equal(insights.historicalSlope().slope, null);
+  }
+  advance(14);
+  s.start();
+  t.reset();
+  assert.equal(insights.historicalSlope().days, 14);
+  for (let m = 4; m <= 10; m++)
+    for (let sec = 0; sec < 12; sec++) {
+      advance(14, m, sec);
+      sample([0.4, 0.6, 0.8, 1.1, 2.2, 4, 5.8][m - 4], m, sec);
+    }
+  const forecast = insights.forecast();
+  assert.ok(forecast && forecast.minutes < 3);
+  s.close();
+});
 test('a window resets across missing seconds and rolling slopes use elapsed seconds', () => {
   const b = new WindowBuffer();
   for (let sec = 0; sec < 19; sec++) assert.equal(b.push(sec, vector(sec)), null);
