@@ -13,6 +13,21 @@ export class Insights {
   constructor(store) {
     this.s = store;
   }
+  weeklyPattern() {
+    const now = this.s.now(),
+      key = this.s.profile;
+    if (this.patternCache?.profile === key && now - this.patternCache.at < 60_000)
+      return this.patternCache.value;
+    const from = new Date(dayBefore(localDay(now), 6) + 'T00:00:00').getTime() / 1000;
+    const totals = this.s.get(
+      `SELECT sum(CASE WHEN drop_deg>=7 OR forward>=0.10 THEN 1 ELSE 0 END) AS head
+      FROM samples t JOIN sessions s ON s.id=t.session WHERE s.profile=? AND t.sec>=?
+      AND (prediction IS NULL OR prediction IN ('neutral','slouch'))`,
+      key,
+      from,
+    );
+    return totals;
+  }
   historicalSlope() {
     const s = this.s,
       session = s.session?.id ?? -1,
