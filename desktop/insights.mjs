@@ -20,7 +20,9 @@ export class Insights {
       return this.patternCache.value;
     const from = new Date(dayBefore(localDay(now), 6) + 'T00:00:00').getTime() / 1000;
     const totals = this.s.get(
-      `SELECT sum(CASE WHEN drop_deg>=7 OR forward>=0.10 THEN 1 ELSE 0 END) AS head
+      `SELECT sum(CASE WHEN drop_deg>=7 OR forward>=0.10 THEN 1 ELSE 0 END) AS head,
+      sum(CASE WHEN shoulder>=0.08 THEN 1 ELSE 0 END) AS protraction,
+      sum(CASE WHEN asym>=5 THEN 1 ELSE 0 END) AS left,sum(CASE WHEN asym<=-5 THEN 1 ELSE 0 END) AS right
       FROM samples t JOIN sessions s ON s.id=t.session WHERE s.profile=? AND t.sec>=?
       AND (prediction IS NULL OR prediction IN ('neutral','slouch'))`,
       key,
