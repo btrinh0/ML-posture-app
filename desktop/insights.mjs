@@ -9,6 +9,12 @@ export function slope(points) {
   const denom = points.reduce((n, p) => n + (p.minute - x) ** 2, 0);
   return denom ? points.reduce((n, p) => n + (p.minute - x) * (p.drop - y), 0) / denom : null;
 }
+const patterns = [
+  { key: 'head', title: 'Forward head drift' },
+  { key: 'protraction', title: 'Forward shoulder drift' },
+  { key: 'left', title: 'Left shoulder elevation' },
+  { key: 'right', title: 'Right shoulder elevation' },
+];
 export class Insights {
   constructor(store) {
     this.s = store;
@@ -28,7 +34,10 @@ export class Insights {
       key,
       from,
     );
-    return totals;
+    const best = patterns.toSorted((a, b) => totals[b.key] - totals[a.key])[0];
+    const value = totals[best.key] >= 15 ? { ...best, seconds: totals[best.key] } : null;
+    this.patternCache = { at: now, profile: key, value };
+    return value;
   }
   historicalSlope() {
     const s = this.s,
