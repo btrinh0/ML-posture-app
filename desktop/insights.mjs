@@ -10,10 +10,10 @@ export function slope(points) {
   return denom ? points.reduce((n, p) => n + (p.minute - x) * (p.drop - y), 0) / denom : null;
 }
 const patterns = [
-  { key: 'head', title: 'Forward head drift' },
-  { key: 'protraction', title: 'Forward shoulder drift' },
-  { key: 'left', title: 'Left shoulder elevation' },
-  { key: 'right', title: 'Right shoulder elevation' },
+  { key: 'head', title: 'Forward head drift', drill: 'chin' },
+  { key: 'protraction', title: 'Forward shoulder drift', drill: 'back' },
+  { key: 'left', title: 'Left shoulder elevation', drill: 'shoulders' },
+  { key: 'right', title: 'Right shoulder elevation', drill: 'shoulders' },
 ];
 export class Insights {
   constructor(store) {

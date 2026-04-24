@@ -53,6 +53,18 @@ function plot() {}
 function render() {
   const r = report;
   plot();
+  $('pattern').replaceChildren(
+    ...(r.pattern
+      ? [
+          node('h3', r.pattern.title),
+          node(
+            'p',
+            drills[r.pattern.drill].title + ' · ' + r.pattern.seconds + ' observed seconds this week.',
+            'muted',
+          ),
+        ]
+      : [node('p', 'More tracking is needed to suggest a drill.', 'muted')]),
+  );
   $('forecast-state').textContent =
     r.history.slope === null
       ? r.history.days +
