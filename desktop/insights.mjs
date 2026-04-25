@@ -105,6 +105,6 @@ export class Insights {
       this.lastForecastAt = s.now();
       if (this.forecast()) kind = 'forecast';
     }
-    if (kind) return s.prompt(kind, (metrics.view === 'front' ? 'shoulders' : 'chin'));
+    if (kind) return s.prompt(kind, this.weeklyPattern()?.drill ?? (metrics.view === 'front' ? 'shoulders' : 'chin'));
   }
 }

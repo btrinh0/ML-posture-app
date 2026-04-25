@@ -76,7 +76,7 @@ function notify(prompt) {
 function tick() {
   if (!store.session) return;
   const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
-  notify(store.tick(idle, telemetry.fresh()));
+  notify(store.tick(idle, telemetry.fresh(), insights.weeklyPattern()?.drill));
   send();
 }
 function setCapture(enabled) {
