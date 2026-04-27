@@ -107,4 +107,66 @@ export class Insights {
     }
     if (kind) return s.prompt(kind, this.weeklyPattern()?.drill ?? (metrics.view === 'front' ? 'shoulders' : 'chin'));
   }
+  report(days = 28) {
+    const s = this.s,
+      now = s.now(),
+      today = localDay(now);
+    if (![7, 28, 84].includes(days)) throw new Error('Unsupported trend range.');
+    const first = dayBefore(today, days - 1),
+      from = new Date(first + 'T00:00:00').getTime() / 1000;
+    const profile = s.profile;
+    const daily = s.all(
+      `SELECT date(sec,'unixepoch','localtime') AS day,count(*) AS seconds,sum(cva) AS cva_sum,
+      sum(neutral) AS neutral FROM samples t JOIN sessions s ON s.id=t.session
+      WHERE s.profile=? AND t.sec>=? AND view='side' GROUP BY day ORDER BY day`,
+      profile,
+      from,
+    );
+    const symptoms = new Map();
+    const markers = new Map();
+    const observed = new Map(daily.map((d) => [d.day, d]));
+    const completed = new Map();
+    const series = Array.from({ length: days }, (_, i) => {
+      const day = dayBefore(today, days - i - 1),
+        r = observed.get(day),
+        p = symptoms.get(day);
+      return {
+        day,
+        seconds: r?.seconds ?? 0,
+        cva_sum: r?.cva_sum ?? 0,
+        neutral: r?.neutral ?? 0,
+        cva: r ? r.cva_sum / r.seconds : null,
+        marker_seconds: markers.get(day)?.n ?? 0,
+        marker_sum: markers.get(day)?.total ?? 0,
+        marker_cva: markers.has(day) ? markers.get(day).total / markers.get(day).n : null,
+        neutral_pct: r ? (100 * r.neutral) / r.seconds : null,
+        pain: p ? (p.jaw + p.neck + p.back) / 3 : null,
+        jaw: p?.jaw ?? null,
+        neck: p?.neck ?? null,
+        back: p?.back ?? null,
+        completed: completed.get(day) ?? 0,
+      };
+    });
+    const weeks = [];
+    const heat = [];
+    const performance = [];
+    const prompts = s.all(
+      `SELECT kind,coalesce(outcome,'pending') AS outcome,count(*) AS n FROM prompts p
+      JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY kind,outcome`,
+      profile,
+      from * 1000,
+    );
+    const forecastHeat = [];
+    return {
+      weeks,
+      series,
+      changes: [],
+      heat,
+      forecastHeat,
+      performance,
+      prompts,
+      pattern: this.weeklyPattern(),
+      history: this.historicalSlope(),
+    };
+  }
 }
