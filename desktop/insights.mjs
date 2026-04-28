@@ -148,6 +148,33 @@ export class Insights {
       };
     });
     const weeks = [];
+    for (let i = 0; i < days; i += 7) {
+      const week = series.slice(i, i + 7),
+        seconds = sum(week, 'seconds');
+      const pairs = week.filter((d) => d.cva !== null && d.pain !== null);
+      const markerPairs = week.filter((d) => d.marker_cva !== null && d.pain !== null);
+      const cva = seconds ? sum(week, 'cva_sum') / seconds : null;
+      const markerSeconds = sum(week, 'marker_seconds');
+      const markerCva = markerSeconds ? sum(week, 'marker_sum') / markerSeconds : null;
+      const pain = average(week.map((d) => d.pain).filter(Number.isFinite)),
+        prev = weeks.at(-1);
+      weeks.push({
+        start: week[0].day,
+        end: week.at(-1).day,
+        seconds,
+        cva,
+        marker_cva: markerCva,
+        marker_seconds: markerSeconds,
+        marker_paired: markerPairs.length,
+        pain,
+        completed: sum(week, 'completed'),
+        ...Object.fromEntries(
+          ['jaw', 'neck', 'back'].map((k) => [k, average(week.map((d) => d[k]).filter(Number.isFinite))]),
+        ),
+        neutral_pct: seconds ? (100 * sum(week, 'neutral')) / seconds : null,
+        paired: pairs.length,
+      });
+    }
     const heat = [];
     const performance = [];
     const prompts = s.all(
