@@ -4,6 +4,7 @@ import { calibrated, Calibration, DriftGate, geometry } from '../shared/kinemati
 import { DeskStore } from '../desktop/store.mjs';
 import { Telemetry } from '../desktop/telemetry.mjs';
 import { markerMeasurement } from '../shared/markers.mjs';
+import { Insights } from '../desktop/insights.mjs';
 
 function side(shift = 0, mirror = false) {
   const points = [];
@@ -106,4 +107,19 @@ test('two colored landmarks measure the horizontal tragus–C7 angle in either s
     paint(x(.48), h*.25, [10, 215, 230, 255]);
     assert.equal(markerMeasurement(frame, pose), null);
   }
+});
+test('marker telemetry preserves separate denominators for measured and estimated angles', () => {
+  let now = Date.now();
+  const s = new DeskStore(':memory:', () => now);
+  s.start();
+  const t = new Telemetry(s), m = calibrated(side(), side());
+  t.sample({ session: s.session.id, metrics: { ...m, marker: { cva: 45, shoulder: .11 } } });
+  now += 1000;
+  t.sample({ session: s.session.id, metrics: m });
+  const d = new Insights(s).report(7).series.at(-1);
+  assert.equal(d.seconds, 2);
+  assert.equal(d.marker_seconds, 1);
+  assert.equal(d.marker_cva, 45);
+  assert.equal(d.cva, m.cva);
+  s.close();
 });

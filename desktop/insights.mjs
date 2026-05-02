@@ -123,7 +123,10 @@ export class Insights {
       from,
     );
     const symptoms = new Map();
-    const markers = new Map();
+    const markers = new Map(s.all(
+      `SELECT date(m.sec,'unixepoch','localtime') AS day,count(*) AS n,sum(m.cva) AS total
+       FROM marker_samples m JOIN sessions s ON s.id=m.session WHERE s.profile=? AND m.sec>=? GROUP BY day`,
+      profile, from).map((row) => [row.day, row]));
     const observed = new Map(daily.map((d) => [d.day, d]));
     const completed = new Map();
     const series = Array.from({ length: days }, (_, i) => {
