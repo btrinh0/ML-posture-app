@@ -122,7 +122,7 @@ export class Insights {
       profile,
       from,
     );
-    const symptoms = new Map();
+    const symptoms = new Map(s.symptomsSince(days).map((r) => [r.day, r]));
     const markers = new Map(s.all(
       `SELECT date(m.sec,'unixepoch','localtime') AS day,count(*) AS n,sum(m.cva) AS total
        FROM marker_samples m JOIN sessions s ON s.id=m.session WHERE s.profile=? AND m.sec>=? GROUP BY day`,
