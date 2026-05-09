@@ -9,6 +9,14 @@ export function slope(points) {
   const denom = points.reduce((n, p) => n + (p.minute - x) ** 2, 0);
   return denom ? points.reduce((n, p) => n + (p.minute - x) * (p.drop - y), 0) / denom : null;
 }
+function correlation(pairs) {
+  if (pairs.length < 3) return null;
+  const mx = average(pairs.map((p) => p[0])),
+    my = average(pairs.map((p) => p[1]));
+  const sx = pairs.reduce((s, [x]) => s + (x - mx) ** 2, 0),
+    sy = pairs.reduce((s, [, y]) => s + (y - my) ** 2, 0);
+  return sx && sy ? pairs.reduce((s, [x, y]) => s + (x - mx) * (y - my), 0) / Math.sqrt(sx * sy) : null;
+}
 const patterns = [
   { key: 'head', title: 'Forward head drift', drill: 'chin' },
   { key: 'protraction', title: 'Forward shoulder drift', drill: 'back' },
@@ -169,6 +177,7 @@ export class Insights {
         marker_cva: markerCva,
         marker_seconds: markerSeconds,
         marker_paired: markerPairs.length,
+        r_marker: correlation(markerPairs.map((d) => [d.marker_cva, d.pain])),
         pain,
         completed: sum(week, 'completed'),
         ...Object.fromEntries(
@@ -176,6 +185,8 @@ export class Insights {
         ),
         neutral_pct: seconds ? (100 * sum(week, 'neutral')) / seconds : null,
         paired: pairs.length,
+        r_cva: correlation(pairs.map((d) => [d.cva, d.pain])),
+        r_neutral: correlation(pairs.map((d) => [d.neutral_pct, d.pain])),
       });
     }
     const heat = [];
