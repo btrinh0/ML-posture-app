@@ -37,6 +37,35 @@ function rig() {
   }
   return { store, telemetry, insights, advance, sample };
 }
+test('weekly associations use paired days, tracked seconds, and profile-specific observations', () => {
+  const { store: s, telemetry: t, insights, advance, sample } = rig();
+  for (let day = 0; day < 3; day++) {
+    advance(day);
+    s.start();
+    t.reset();
+    s.checkIn({ jaw: day, neck: day, back: day });
+    for (let sec = 0; sec < 20; sec++) {
+      advance(day, 0, sec);
+      sample(day * 4, 0, sec);
+    }
+    const p = s.prompt('timer', 'walk');
+    s.resolve(p.id, 'completed');
+    s.end();
+  }
+  const report = insights.report(7),
+    week = report.weeks[0];
+  assert.equal(week.paired, 3);
+  assert.equal(week.seconds, 60);
+  assert.equal(week.cva, 66);
+  assert.equal(week.r_cva, -1);
+  assert.equal(week.completed, 3);
+  assert.equal(report.series.filter((d) => d.cva === null).length, 4);
+  assert.equal(insights.weeklyPattern().drill, 'chin');
+  s.addProfile('Different');
+  assert.equal(insights.report(7).weeks[0].cva, null);
+  assert.equal(insights.weeklyPattern(), null);
+  s.close();
+});
 test('forecast waits for two weeks, then detects accelerating drift in a classified session', () => {
   const { store: s, telemetry: t, insights, advance, sample } = rig();
   for (let day = 0; day < 14; day++) {

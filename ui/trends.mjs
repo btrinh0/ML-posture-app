@@ -72,6 +72,14 @@ function render() {
         r.history.sessions +
         ' qualifying sessions. Forecasts need 14 days, 3 sessions and a classifier.'
       : 'History ready. During a classified session, drift can trigger a break up to three minutes early.';
+  $('responses').replaceChildren(
+    r.prompts.length
+      ? table(
+          ['Reminder', 'Response', 'Count'],
+          r.prompts.map((p) => [p.kind.replace('_', ' '), p.outcome.replace('_', ' '), String(p.n)]),
+        )
+      : node('p', 'No break responses yet.', 'muted'),
+  );
 }
 window.addEventListener('desk-page', (e) => {
   if (e.detail === 'trends') void refresh();

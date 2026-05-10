@@ -136,7 +136,16 @@ export class Insights {
        FROM marker_samples m JOIN sessions s ON s.id=m.session WHERE s.profile=? AND m.sec>=? GROUP BY day`,
       profile, from).map((row) => [row.day, row]));
     const observed = new Map(daily.map((d) => [d.day, d]));
-    const completed = new Map();
+    const completed = new Map(
+      s
+        .all(
+          `SELECT date(p.resolved/1000,'unixepoch','localtime') AS day,count(*) AS n FROM prompts p
+      JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.outcome='completed' AND p.resolved>=? GROUP BY day`,
+          profile,
+          from * 1000,
+        )
+        .map((r) => [r.day, r.n]),
+    );
     const series = Array.from({ length: days }, (_, i) => {
       const day = dayBefore(today, days - i - 1),
         r = observed.get(day),
@@ -175,6 +184,7 @@ export class Insights {
         seconds,
         cva,
         marker_cva: markerCva,
+        marker_change: markerCva !== null && prev?.marker_cva != null ? markerCva - prev.marker_cva : null,
         marker_seconds: markerSeconds,
         marker_paired: markerPairs.length,
         r_marker: correlation(markerPairs.map((d) => [d.marker_cva, d.pain])),
@@ -183,6 +193,8 @@ export class Insights {
         ...Object.fromEntries(
           ['jaw', 'neck', 'back'].map((k) => [k, average(week.map((d) => d[k]).filter(Number.isFinite))]),
         ),
+        cva_change: cva !== null && prev?.cva != null ? cva - prev.cva : null,
+        pain_change: pain !== null && prev?.pain != null ? pain - prev.pain : null,
         neutral_pct: seconds ? (100 * sum(week, 'neutral')) / seconds : null,
         paired: pairs.length,
         r_cva: correlation(pairs.map((d) => [d.cva, d.pain])),
