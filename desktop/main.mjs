@@ -117,6 +117,7 @@ const actions = {
   },
   setup: (v) => store.saveSetup(v),
   checkIn: (v) => store.checkIn(v),
+  markChange: (v) => store.markChange(v),
   resolve: (v) => {
     store.resolve(v.id, v.outcome);
   },

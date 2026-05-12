@@ -81,6 +81,13 @@ function render() {
       : node('p', 'No break responses yet.', 'muted'),
   );
 }
+$('change-form').onsubmit = async (event) => {
+  event.preventDefault();
+    if (await act('markChange', { day: $('change-date').value, title: $('change-title').value }, 'Change recorded.')) {
+    $('change-title').value = '';
+    await refresh();
+  }
+};
 window.addEventListener('desk-page', (e) => {
   if (e.detail === 'trends') void refresh();
 });
@@ -88,6 +95,8 @@ observe((next) => {
   const key = JSON.stringify([next.day, next.symptoms, next.session?.id, next.completed, next.prompt?.id]);
   const changed = profile !== next.profile.id || key !== stateKey;
   state = next;
+  $('change-date').max = next.day;
+  if (!$('change-date').value) $('change-date').value = next.day;
   profile = state.profile.id;
   stateKey = key;
   if (!$('trends').hidden && (changed || Date.now() - last > 60_000)) {

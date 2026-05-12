@@ -25,6 +25,9 @@ export class DeskStore {
       CREATE TABLE IF NOT EXISTS symptoms (
         profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, jaw INTEGER NOT NULL,
         neck INTEGER NOT NULL, back INTEGER NOT NULL, PRIMARY KEY(profile, day));
+      CREATE TABLE IF NOT EXISTS interventions (
+        profile INTEGER NOT NULL REFERENCES profiles, day TEXT NOT NULL, title TEXT NOT NULL,
+        PRIMARY KEY(profile,day,title));
     `);
     this.db
       .exec(`UPDATE prompts SET outcome='ended',resolved=(SELECT last_tick FROM sessions WHERE sessions.id=prompts.session)
@@ -98,6 +101,15 @@ export class DeskStore {
       localDay(this.now()),
       ...scores,
     );
+  }
+  markChange({ day, title }) {
+    const date = new Date(day + 'T12:00:00');
+    if (typeof day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day) ||
+        localDay(date) !== day || day > localDay(this.now()))
+      throw new Error('Choose a valid change date through today.');
+    if (typeof title !== 'string' || !title.trim() || title.trim().length > 80)
+      throw new Error('Describe your change in 1–80 characters.');
+    this.run('INSERT OR IGNORE INTO interventions(profile,day,title) VALUES(?,?,?)', this.profile, day, title.trim());
   }
   start() {
     if (this.session) return;

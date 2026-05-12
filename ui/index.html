@@ -159,6 +159,16 @@
         <div class="trend-title">
           <h1>Trends</h1>
         </div>
+        <article class="card">
+          <h2>Desk and routine changes</h2>
+          <p class="muted">Compare the week before a change with the week starting that day.</p>
+          <form id="change-form" class="plot-head">
+            <label>Change date<input type="date" required id="change-date" /></label>
+            <label>What changed?<input type="text" required maxlength="80" id="change-title" placeholder="Moved keyboard closer" /></label>
+            <button type="submit">Record change</button>
+          </form>
+          <div id="change-results" class="table-wrap"></div>
+        </article>
         <div class="columns">
           <article class="card">
             <h2>Weekly movement focus</h2>
