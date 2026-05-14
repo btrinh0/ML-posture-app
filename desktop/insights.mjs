@@ -115,6 +115,27 @@ export class Insights {
     }
     if (kind) return s.prompt(kind, this.weeklyPattern()?.drill ?? (metrics.view === 'front' ? 'shoulders' : 'chin'));
   }
+  changePeriod(first, last) {
+    const s = this.s;
+    const start = new Date(first + 'T00:00:00').getTime();
+    const end = Math.min(s.now() + 1, new Date(dayBefore(last, -1) + 'T00:00:00').getTime());
+    const tracking = s.get(
+      `SELECT count(*) AS seconds, count(DISTINCT date(sec,'unixepoch','localtime')) AS tracked_days,
+       avg(cva) AS cva, 100.0*avg(neutral) AS neutral_pct FROM samples t
+       JOIN sessions s ON t.session=s.id WHERE s.profile=? AND t.view='side' AND sec>=? AND sec<?`,
+      s.profile, start / 1000, end / 1000);
+    return { first, last, ...tracking };
+  }
+  changes(first, today) {
+    return this.s.all(
+      'SELECT day,title FROM interventions WHERE profile=? AND day BETWEEN ? AND ? ORDER BY day DESC,title',
+      this.s.profile, first, today,
+    ).map((change) => {
+      const before = this.changePeriod(dayBefore(change.day, 7), dayBefore(change.day, 1));
+      const after = this.changePeriod(change.day, dayBefore(change.day, -6));
+      return { ...change, before, after, inProgress: false };
+    });
+  }
   report(days = 28) {
     const s = this.s,
       now = s.now(),
@@ -213,7 +234,7 @@ export class Insights {
     return {
       weeks,
       series,
-      changes: [],
+      changes: this.changes(first, today),
       heat,
       forecastHeat,
       performance,
