@@ -124,7 +124,19 @@ export class Insights {
        avg(cva) AS cva, 100.0*avg(neutral) AS neutral_pct FROM samples t
        JOIN sessions s ON t.session=s.id WHERE s.profile=? AND t.view='side' AND sec>=? AND sec<?`,
       s.profile, start / 1000, end / 1000);
-    return { first, last, ...tracking };
+    const checkIns = s.get(
+      `SELECT count(*) AS logged_days, avg(jaw) AS jaw, avg(neck) AS neck, avg(back) AS back,
+       avg((jaw+neck+back)/3.0) AS pain FROM symptoms WHERE profile=? AND day BETWEEN ? AND ?`,
+      s.profile, first, last < localDay(s.now()) ? last : localDay(s.now()));
+    const { completed } = s.get(
+      `SELECT count(*) AS completed FROM prompts p JOIN sessions s ON s.id=p.session
+       WHERE s.profile=? AND p.outcome='completed' AND p.resolved>=? AND p.resolved<?`,
+      s.profile, start, end);
+    const marker = s.get(
+      `SELECT avg(m.cva) AS marker_cva,count(*) AS marker_seconds FROM marker_samples m
+       JOIN sessions s ON s.id=m.session WHERE s.profile=? AND m.sec>=? AND m.sec<?`,
+      s.profile, start / 1000, end / 1000);
+    return { first, last, ...tracking, ...marker, ...checkIns, completed };
   }
   changes(first, today) {
     return this.s.all(
