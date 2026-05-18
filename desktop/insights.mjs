@@ -145,7 +145,7 @@ export class Insights {
     ).map((change) => {
       const before = this.changePeriod(dayBefore(change.day, 7), dayBefore(change.day, 1));
       const after = this.changePeriod(change.day, dayBefore(change.day, -6));
-      return { ...change, before, after, inProgress: false };
+      return { ...change, before, after, inProgress: today <= after.last };
     });
   }
   report(days = 28) {
