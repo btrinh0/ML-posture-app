@@ -141,7 +141,7 @@ export class Insights {
   changes(first, today) {
     return this.s.all(
       'SELECT day,title FROM interventions WHERE profile=? AND day BETWEEN ? AND ? ORDER BY day DESC,title',
-      this.s.profile, first, today,
+      this.s.profile, dayBefore(first, 6), today,
     ).map((change) => {
       const before = this.changePeriod(dayBefore(change.day, 7), dayBefore(change.day, 1));
       const after = this.changePeriod(change.day, dayBefore(change.day, -6));
