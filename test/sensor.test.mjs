@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calibrated, Calibration, DriftGate, geometry } from '../shared/kinematics.mjs';
+import { calibrated, Calibration, DriftGate, geometry, samplingRate } from '../shared/kinematics.mjs';
 import { DeskStore } from '../desktop/store.mjs';
 import { Telemetry } from '../desktop/telemetry.mjs';
 import { markerMeasurement } from '../shared/markers.mjs';
@@ -59,6 +59,9 @@ test('calibration requires ten continuous seconds and drift cues rearm after rec
   assert.equal(gate.update(true, 16_000), false);
   gate.update(false, 17_000);
   assert.equal(gate.update(true, 18_000), false);
+  assert.equal(samplingRate({ idle: true, fixed: true }), 0);
+  assert.equal(samplingRate({ calibrated: true }), 1);
+  assert.equal(samplingRate({ calibrated: true, verify: true }), 12);
 });
 test('one numeric record per second, with research vectors only during labeled capture', () => {
   let now = Date.now();

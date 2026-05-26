@@ -179,6 +179,10 @@ export function calibrated(g, ref) {
 }
 export const drifting = (m) =>
   Boolean(m && (m.view === 'front' ? Math.abs(m.asym) >= 5 : m.drop >= 7 || m.forward >= 0.1));
+export function samplingRate({ idle, calibrated: ready, verify, fixed }) {
+  if (idle) return 0;
+  return !ready || verify ? 12 : 1;
+}
 export class DriftGate {
   since = null;
   armed = true;
