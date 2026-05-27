@@ -7,6 +7,7 @@ import {
   drifting,
   geometry,
   labels,
+  samplingRate,
 } from './shared/kinematics.mjs';
 
 let state,
@@ -151,7 +152,12 @@ async function noTracking(now) {
 async function loop(token) {
   if (!running || token !== generation) return;
   const started = performance.now();
-  const rate = 12;
+  const rate = samplingRate({
+    idle: false,
+    calibrated: Boolean(calibration.reference),
+    verify,
+    fixed: false,
+  });
   try {
     const track = device.getVideoTracks()[0];
     if (!rate || !video.videoWidth || video.readyState < 2 || video.currentTime === lastVideoTime) {
