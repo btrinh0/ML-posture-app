@@ -153,13 +153,14 @@ async function loop(token) {
   if (!running || token !== generation) return;
   const started = performance.now();
   const rate = samplingRate({
-    idle: false,
+    idle: state.idle,
     calibrated: Boolean(calibration.reference),
     verify,
     fixed: false,
   });
   try {
     const track = device.getVideoTracks()[0];
+    track.enabled = rate > 0;
     if (!rate || !video.videoWidth || video.readyState < 2 || video.currentTime === lastVideoTime) {
       if (!rate || started - lastFrameAt > 1800) {
         if (!calibration.reference) calibration.samples = [];
