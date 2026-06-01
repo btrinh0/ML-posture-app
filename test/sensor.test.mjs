@@ -4,6 +4,7 @@ import { calibrated, Calibration, DriftGate, geometry, samplingRate } from '../s
 import { DeskStore } from '../desktop/store.mjs';
 import { Telemetry } from '../desktop/telemetry.mjs';
 import { markerMeasurement } from '../shared/markers.mjs';
+import { CameraRate } from '../shared/camera-rate.mjs';
 import { Insights } from '../desktop/insights.mjs';
 
 function side(shift = 0, mirror = false) {

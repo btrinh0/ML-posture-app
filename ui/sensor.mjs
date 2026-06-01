@@ -1,5 +1,6 @@
 import { $, node, observe, act, feedback } from './dashboard.mjs';
 import { markerMeasurement } from './shared/markers.mjs';
+import { CameraRate } from './shared/camera-rate.mjs';
 import {
   Calibration,
   DriftGate,
@@ -160,7 +161,7 @@ async function loop(token) {
   });
   try {
     const track = device.getVideoTracks()[0];
-    track.enabled = rate > 0;
+    void cameraRate.set(rate);
     if (!rate || !video.videoWidth || video.readyState < 2 || video.currentTime === lastVideoTime) {
       if (!rate || started - lastFrameAt > 1800) {
         if (!calibration.reference) calibration.samples = [];
@@ -263,6 +264,7 @@ async function start() {
       return;
     }
     device = stream;
+    cameraRate = new CameraRate(device.getVideoTracks()[0]);
     device.getVideoTracks()[0].onended = () =>
       stop('Camera disconnected. You can continue the study session.');
     video.srcObject = stream;
