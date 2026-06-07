@@ -16,7 +16,12 @@ export class CameraRate {
       let limits;
       try { limits = track.getCapabilities?.().frameRate; } catch { /* Some cameras omit capabilities. */ }
       const fps = Math.max(limits?.min ?? 0, Math.min(rate, limits?.max ?? rate));
-      await track.applyConstraints({ frameRate: { ideal: fps, max: fps } }).catch(() => {});
+      try {
+        await track.applyConstraints({ frameRate: { ideal: fps, max: fps } });
+      } catch {
+        if (this.revision === revision && track.readyState !== 'ended')
+          await track.applyConstraints({ frameRate: { ideal: fps } }).catch(() => {});
+      }
     });
     return this.pending;
   }

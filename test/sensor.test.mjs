@@ -127,3 +127,28 @@ test('marker telemetry preserves separate denominators for measured and estimate
   assert.equal(d.cva, m.cva);
   s.close();
 });
+test('adaptive camera requests serialize changes, respect hardware limits and pause the track at idle', async () => {
+  const applied = [];
+  let release;
+  const track = { enabled: true, getCapabilities: () => ({ frameRate: { min: 5, max: 24 } }),
+    async applyConstraints(options) {
+      applied.push(options.frameRate);
+      if (applied.length === 1) await new Promise((r) => { release = r; });
+    } };
+  const control = new CameraRate(track);
+  const pending = control.set(12);
+  await Promise.resolve();
+  control.set(1);
+  control.set(0);
+  assert.equal(track.enabled, false);
+  release();
+  await pending;
+  await control.set(1);
+  await control.set(1);
+  await control.set(30);
+  assert.equal(track.enabled, true);
+  assert.deepEqual(applied.map((o) => o.max), [12, 5, 24]);
+  const unsupported = new CameraRate({ enabled: false, async applyConstraints(){ throw Error('unsupported'); } });
+  await unsupported.set(1);
+  assert.equal(unsupported.track.enabled, true);
+});
