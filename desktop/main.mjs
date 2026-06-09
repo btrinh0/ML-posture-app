@@ -133,10 +133,14 @@ const actions = {
   recalibrate: (v) => {
     setCapture(false);
     telemetry.reset();
+    telemetry.policy = v === 'fixed' ? 'fixed' : 'adaptive';
   },
   lost: () => {
     telemetry.freshAt = null;
     telemetry.segment++;
+  },
+  sensorPolicy: (v) => {
+    if (store.session) telemetry.policy = v === 'fixed' ? 'fixed' : 'adaptive';
   },
   installModel: () => {
     if (!candidate) throw new Error('Select and verify a model first.');

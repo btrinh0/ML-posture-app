@@ -157,7 +157,7 @@ async function loop(token) {
     idle: state.idle,
     calibrated: Boolean(calibration.reference),
     verify,
-    fixed: false,
+    fixed: $('policy').value === 'fixed',
   });
   try {
     const track = device.getVideoTracks()[0];
@@ -218,7 +218,7 @@ async function loop(token) {
               session: state.session.id,
               metrics: m,
               rate,
-              fixed: false,
+              fixed: $('policy').value === 'fixed',
               cue: pendingCue,
               prediction,
                           });
@@ -257,7 +257,7 @@ async function start() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: false ? 30 : 12, max: 30 } },
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: $('policy').value === 'fixed' ? 30 : 12, max: 30 } },
     });
     if (token !== generation) {
       stream.getTracks().forEach((t) => t.stop());
@@ -284,6 +284,7 @@ async function start() {
       return;
     }
     model = task;
+    await act('sensorPolicy', $('policy').value);
     buttons();
     void loop(token);
   } catch (err) {
@@ -300,12 +301,15 @@ async function start() {
 $('camera-button').onclick = () => (running ? stop('Camera off. The study timer continues.') : start());
 $('recalibrate').onclick = () => {
   reset();
-  void act('recalibrate');
+  void act('recalibrate', $('policy').value);
   buttons();
   message('Hold your comfortable position for 10 seconds.');
 };
 $('view').onchange = framing;
 $('markers').onchange = framing;
+$('policy').onchange = () => {
+  if (running) void act('sensorPolicy', $('policy').value);
+};
 $('capture').onchange = (e) => act('capture', e.target.checked);
 $('export-labels').onclick = () => act('exportLabels');
 labels.forEach((label, i) => {
