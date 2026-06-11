@@ -77,6 +77,14 @@ function tick() {
   if (!store.session) return;
   const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
   notify(store.tick(idle, telemetry.fresh(), insights.weeklyPattern()?.drill));
+  if (Date.now() - lastPerformance >= 10_000) {
+    lastPerformance = Date.now();
+    const processes = app.getAppMetrics();
+    telemetry.recordPerformance(
+      processes.reduce((n, p) => n + p.cpu.percentCPUUsage, 0),
+      processes.reduce((n, p) => n + p.memory.workingSetSize / 1024, 0),
+    );
+  }
   send();
 }
 function setCapture(enabled) {

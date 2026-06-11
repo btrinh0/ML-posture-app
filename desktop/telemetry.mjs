@@ -13,6 +13,9 @@ export class Telemetry {
       CREATE TABLE IF NOT EXISTS marker_samples (
         session INTEGER NOT NULL, sec INTEGER NOT NULL, cva REAL NOT NULL, shoulder REAL NOT NULL,
         PRIMARY KEY(session,sec), FOREIGN KEY(session,sec) REFERENCES samples(session,sec));
+      CREATE TABLE IF NOT EXISTS performance (
+        session INTEGER NOT NULL REFERENCES sessions, at INTEGER NOT NULL, policy TEXT NOT NULL,
+        cpu REAL NOT NULL, ram_mb REAL NOT NULL, inference_ms REAL, rate INTEGER NOT NULL);
     `);
     this.reset();
   }
@@ -105,6 +108,19 @@ export class Telemetry {
     if (side && finite(marker?.cva, 90) && marker.cva >= 0 && finite(marker.shoulder, 2))
       this.store.run('INSERT OR IGNORE INTO marker_samples VALUES(?,?,?,?)', s.id, sec, marker.cva, marker.shoulder);
     return true;
+  }
+  recordPerformance(cpu, ram) {
+    if (this.store.session)
+      this.store.run(
+        'INSERT INTO performance VALUES(?,?,?,?,?,?,?)',
+        this.store.session.id,
+        this.store.now(),
+        this.policy,
+        cpu,
+        ram,
+        null,
+        this.fresh() ? this.rate : 0,
+      );
   }
   exportRows() {
     return this.store
