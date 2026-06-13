@@ -221,7 +221,8 @@ async function loop(token) {
               fixed: $('policy').value === 'fixed',
               cue: pendingCue,
               prediction,
-                          });
+              latency: result?.latency ?? null,
+            });
             if (token !== generation) return;
             pendingCue = false;
             lastSecond = second;

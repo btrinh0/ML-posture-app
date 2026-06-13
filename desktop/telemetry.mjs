@@ -80,6 +80,7 @@ export class Telemetry {
     this.freshAt = now;
     this.rate = [1, 12, 30].includes(payload.rate) ? payload.rate : 1;
     this.policy = payload.fixed === true ? 'fixed' : 'adaptive';
+    this.inference = finite(payload.latency, 60_000) ? payload.latency : null;
     this.last = m;
     if (sec === this.lastSecond) return false;
     this.lastSecond = sec;
@@ -118,7 +119,7 @@ export class Telemetry {
         this.policy,
         cpu,
         ram,
-        null,
+        this.fresh() ? this.inference : null,
         this.fresh() ? this.rate : 0,
       );
   }
