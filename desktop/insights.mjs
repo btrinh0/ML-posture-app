@@ -235,7 +235,12 @@ export class Insights {
       });
     }
     const heat = [];
-    const performance = [];
+    const performance = s.all(
+      `SELECT policy,count(*) AS n,avg(cpu) AS cpu,avg(ram_mb) AS ram,avg(inference_ms) AS latency,count(inference_ms) AS timed_windows
+      FROM performance p JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY policy`,
+      profile,
+      from * 1000,
+    );
     const prompts = s.all(
       `SELECT kind,coalesce(outcome,'pending') AS outcome,count(*) AS n FROM prompts p
       JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY kind,outcome`,

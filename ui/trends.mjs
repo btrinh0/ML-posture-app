@@ -80,6 +80,21 @@ function render() {
         )
       : node('p', 'No break responses yet.', 'muted'),
   );
+  $('performance').replaceChildren(
+    r.performance.length
+      ? table(
+          ['Sampling', 'Observations', 'Mean CPU', 'Working set', 'Timed windows', 'Mean ONNX window'],
+          r.performance.map((p) => [
+            p.policy,
+            String(p.n),
+            display(p.cpu, '%'),
+            display(p.ram, ' MiB', 0),
+            String(p.timed_windows),
+            display(p.latency, ' ms', 2),
+          ]),
+        )
+      : node('p', 'Start a session to measure performance.', 'muted'),
+  );
 }
 $('change-form').onsubmit = async (event) => {
   event.preventDefault();
