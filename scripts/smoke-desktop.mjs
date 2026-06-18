@@ -14,6 +14,7 @@ const fixtures = process.argv
   .find((v) => v.startsWith('--fixtures='))
   ?.slice('--fixtures='.length);
 const sideImage = process.argv.slice(2).find((v) => v.startsWith('--side-image='))?.slice('--side-image='.length);
+const verifyOnly = process.argv.includes('--verify-only');
 const reference = sideImage || process.argv
   .slice(2)
   .find((v) => v.startsWith('--pose-image='))
@@ -137,6 +138,47 @@ try {
       .catch(async (err) => {
         throw new Error((await page.locator('#sensor-message').textContent()) + ' / ' + err.message);
       });
+  }
+  if (reference && !verifyOnly) {
+    const summaries = {};
+    for (const policy of ['adaptive', 'fixed']) {
+      await page.locator('#policy').selectOption(policy);
+      await delay(4000);
+      const metrics = () =>
+        client.evaluate(({ app }) => {
+          const p = app.getAppMetrics();
+          return {
+            cpu: p.reduce((n, v) => n + v.cpu.percentCPUUsage, 0),
+            mb: p.reduce((n, v) => n + v.memory.workingSetSize / 1024, 0),
+          };
+        });
+      await metrics();
+      const readings = [];
+      for (let i = 0; i < 8; i++) {
+        await delay(3000);
+        readings.push(await metrics());
+      }
+      summaries[policy] = {
+        samples: readings.length,
+        mean_cpu: readings.reduce((n, r) => n + r.cpu, 0) / readings.length,
+        mean_working_set_mb: readings.reduce((n, r) => n + r.mb, 0) / readings.length,
+      };
+      const perf = (await page.evaluate(() => window.desk.report(7))).performance.find((p) => p.policy === policy);
+      summaries[policy].sampled_onnx_windows = perf?.timed_windows ?? 0;
+      summaries[policy].mean_sampled_onnx_ms = perf?.latency ?? null;
+    }
+    const result = {
+      cpu: cpus()[0].model,
+      logical_processors: cpus().length,
+      os: release(),
+      seconds_per_mode: 24,
+      source:
+        sideImage ? 'Generated seated side view at 640×480. Real pose sensor and bundled activity classifier in an isolated profile.' :
+          'Public MediaPipe pose.jpg, replayed at 640×480 in an active isolated profile. Stable front-view reference.',
+      summaries,
+    };
+    await writeFile(join(qa, sideImage ? 'edge-side-replay.json' : 'edge-replay.json'), JSON.stringify(result, null, 2));
+    console.log('Measured reference replay:', JSON.stringify(result));
   }
   await page.getByRole('button', { name: 'Stop camera' }).click();
   assert.equal(await page.locator('video').evaluate((v) => v.srcObject), null);
