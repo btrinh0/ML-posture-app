@@ -5,6 +5,26 @@ import { openClassifier } from './classifier.mjs';
 const names = { rules: 'Benchmarked static rules', tree: 'LightGBM', cnn: 'Temporal 1D CNN' };
 let current;
 
+function lazyClassifier(bundle) {
+  let loading;
+  let revision = 0;
+  return {
+    reset() {
+      revision++;
+      loading?.then((model) => model.reset(), () => {});
+    },
+    async push(second, vector) {
+      const at = revision;
+      loading ??= openClassifier(bundle);
+      const model = await loading;
+      return revision === at ? model.push(second, vector) : null;
+    },
+    async close() {
+      revision++;
+      if (loading) await loading.then((model) => model.close(), () => {});
+    },
+  };
+}
 async function select(mode) {
   const controls = ['import-model', 'remove-model'].map($);
   controls.forEach((button) => { button.disabled = true; });
@@ -13,7 +33,7 @@ async function select(mode) {
     const pick = mode === 'import';
     const bundle = mode === 'rules' ? null : await window.desk.model(pick);
     if (pick && !bundle) return;
-    const replacement = bundle ? await openClassifier(bundle) : null;
+    const replacement = bundle ? (pick ? await openClassifier(bundle) : lazyClassifier(bundle)) : null;
     if (pick && !(await act('installModel'))) {
       await replacement.close();
       return;
