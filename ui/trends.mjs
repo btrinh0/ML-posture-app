@@ -40,8 +40,9 @@ async function refresh() {
   const id = ++version;
   try {
     const source = 'personal';
-    const days = 28;
+    const days = Number($('range').value);
     const next = await window.desk.report(days);
+    if (id !== version) return;
     report = next;
     last = Date.now();
     render();
@@ -96,6 +97,7 @@ function render() {
       : node('p', 'Start a session to measure performance.', 'muted'),
   );
 }
+$('range').onchange = refresh;
 $('change-form').onsubmit = async (event) => {
   event.preventDefault();
     if (await act('markChange', { day: $('change-date').value, title: $('change-title').value }, 'Change recorded.')) {
