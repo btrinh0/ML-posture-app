@@ -173,6 +173,29 @@
           >
         </div>
         <article class="card">
+          <h2>Posture and discomfort</h2>
+          <p id="report-context" class="muted">Gaps indicate missing measurements.</p>
+          <div class="plot-head">
+            <label
+              >Group by<select id="plot-group">
+                <option value="weekly">Week</option>
+                <option value="daily">Day</option>
+              </select></label
+            >
+            <label
+              >Posture<select id="plot-metric">
+                <option value="cva">CVA proxy (degrees)</option>
+                <option value="marker_cva">Tragus–C7 CVA (degrees)</option>
+                <option value="neutral_pct">Neutral tracked time (%)</option>
+              </select></label
+            >
+          </div>
+          <div id="plot-empty" class="empty" hidden>
+            Start a calibrated session or save a check-in to see trends.
+          </div>
+          <canvas id="trend-plot" role="img" aria-label="Daily posture and discomfort trajectories"></canvas>
+        </article>
+        <article class="card">
           <h2>Desk and routine changes</h2>
           <p class="muted">Compare the week before a change with the week starting that day.</p>
           <form id="change-form" class="plot-head">

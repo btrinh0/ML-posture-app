@@ -50,7 +50,83 @@ async function refresh() {
     feedback(err.message);
   }
 }
-function plot() {}
+function plot() {
+  if (!report || $('trends').hidden) return;
+  const canvas = $('trend-plot'),
+    metric = $('plot-metric').value;
+  const weekly = $('plot-group').value === 'weekly';
+  const points = weekly ? report.weeks.map((w) => ({ ...w, day: w.end })) : report.series;
+  canvas.setAttribute('aria-label', (weekly ? 'Weekly' : 'Daily') + ' posture and discomfort trajectories');
+  const any = points.some((p) => p[metric] !== null);
+  $('plot-empty').hidden = any;
+  canvas.hidden = !any;
+  if (!any) return;
+  const width = Math.max(300, canvas.clientWidth),
+    height = 238,
+    dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  const c = canvas.getContext('2d');
+  c.scale(dpr, dpr);
+  c.font = '11px Inter, sans-serif';
+  const left = 42,
+    right = width - 16;
+  const x = (i) =>
+    points.length > 1 ? left + ((right - left) * i) / (points.length - 1) : (left + right) / 2;
+  function line(key, title, top, bottom, range, color) {
+    c.textAlign = 'left';
+    c.fillStyle = color;
+    c.fillText(title, left, top - 9);
+    for (const frac of [0, 0.5, 1]) {
+      const y = bottom - frac * (bottom - top);
+      c.strokeStyle = '#dce1d7';
+      c.beginPath();
+      c.moveTo(left, y);
+      c.lineTo(right, y);
+      c.stroke();
+      c.fillStyle = '#506059';
+      c.textAlign = 'right';
+      c.fillText(String(Math.round(range[0] + frac * (range[1] - range[0]))), left - 7, y + 3);
+    }
+    c.strokeStyle = color;
+    c.fillStyle = color;
+    c.lineWidth = 2;
+    let previous = null;
+    points.forEach((p, i) => {
+      if (p[key] === null) {
+        return;
+      }
+      const here = [x(i), bottom - ((p[key] - range[0]) / (range[1] - range[0])) * (bottom - top)];
+      if (previous) {
+        c.beginPath();
+        c.moveTo(...previous);
+        c.lineTo(...here);
+        c.stroke();
+      }
+      c.beginPath();
+      c.arc(...here, 2.7, 0, Math.PI * 2);
+      c.fill();
+      previous = here;
+    });
+    c.lineWidth = 1;
+  }
+  const values = points.map((p) => p[metric]).filter(Number.isFinite);
+  const low = values.length ? Math.floor((Math.min(...values) - 2) / 5) * 5 : 0;
+  const high = values.length ? Math.ceil((Math.max(...values) + 2) / 5) * 5 : 90;
+  line(
+    metric,
+    $('plot-metric').selectedOptions[0].text,
+    25,
+    89,
+    metric === 'neutral_pct' ? [0, 100] : [low, high],
+    '#245b40',
+  );
+  c.fillStyle = '#52615a';
+  c.textAlign = 'left';
+  c.fillText(points[0].day, left, 228);
+  c.textAlign = 'right';
+  c.fillText(points.at(-1).day, right, 228);
+}
 function render() {
   const r = report;
   plot();
@@ -105,6 +181,8 @@ $('change-form').onsubmit = async (event) => {
     await refresh();
   }
 };
+$('plot-group').onchange = $('plot-metric').onchange = plot;
+window.addEventListener('resize', plot);
 window.addEventListener('desk-page', (e) => {
   if (e.detail === 'trends') void refresh();
 });
