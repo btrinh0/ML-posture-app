@@ -53,11 +53,12 @@ async function refresh() {
 function plot() {
   if (!report || $('trends').hidden) return;
   const canvas = $('trend-plot'),
-    metric = $('plot-metric').value;
+    metric = $('plot-metric').value,
+    pain = $('plot-pain').value;
   const weekly = $('plot-group').value === 'weekly';
   const points = weekly ? report.weeks.map((w) => ({ ...w, day: w.end })) : report.series;
   canvas.setAttribute('aria-label', (weekly ? 'Weekly' : 'Daily') + ' posture and discomfort trajectories');
-  const any = points.some((p) => p[metric] !== null);
+  const any = points.some((p) => p[metric] !== null || p[pain] !== null);
   $('plot-empty').hidden = any;
   canvas.hidden = !any;
   if (!any) return;
@@ -121,6 +122,7 @@ function plot() {
     metric === 'neutral_pct' ? [0, 100] : [low, high],
     '#245b40',
   );
+  line(pain, $('plot-pain').selectedOptions[0].text + ' (0–10)', 138, 202, [0, 10], '#935d39');
   c.fillStyle = '#52615a';
   c.textAlign = 'left';
   c.fillText(points[0].day, left, 228);
@@ -181,7 +183,7 @@ $('change-form').onsubmit = async (event) => {
     await refresh();
   }
 };
-$('plot-group').onchange = $('plot-metric').onchange = plot;
+$('plot-group').onchange = $('plot-metric').onchange = $('plot-pain').onchange = plot;
 window.addEventListener('resize', plot);
 window.addEventListener('desk-page', (e) => {
   if (e.detail === 'trends') void refresh();
