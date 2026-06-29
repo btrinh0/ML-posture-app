@@ -95,6 +95,7 @@ function plot() {
     let previous = null;
     points.forEach((p, i) => {
       if (p[key] === null) {
+        previous = null;
         return;
       }
       const here = [x(i), bottom - ((p[key] - range[0]) / (range[1] - range[0])) * (bottom - top)];
