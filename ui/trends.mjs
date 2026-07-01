@@ -133,6 +133,44 @@ function plot() {
 function render() {
   const r = report;
   plot();
+  $('weekly').replaceChildren(
+    table(
+      [
+        'Week ending',
+        'Tracked',
+        'CVA proxy',
+        'Tragus–C7 CVA',
+        'Δ proxy',
+        'Neutral',
+        'Discomfort',
+        'Δ discomfort',
+        'Drills done',
+        'Pairs',
+        'r · CVA',
+        'r · neutral',
+        'Marker pairs',
+        'r · marker CVA',
+        'Δ marker CVA',
+      ],
+      r.weeks.map((w) => [
+        w.end,
+        display(w.seconds / 60, ' min'),
+        display(w.cva, '°'),
+        display(w.marker_cva, '°'),
+        display(w.cva_change, '°'),
+        display(w.neutral_pct, '%'),
+        display(w.pain),
+        display(w.pain_change),
+        String(w.completed),
+        String(w.paired),
+        display(w.r_cva, '', 2),
+        display(w.r_neutral, '', 2),
+        String(w.marker_paired),
+        display(w.r_marker, '', 2),
+        display(w.marker_change, '°'),
+      ]),
+    ),
+  );
   $('pattern').replaceChildren(
     ...(r.pattern
       ? [
