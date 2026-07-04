@@ -171,6 +171,22 @@ function render() {
       ]),
     ),
   );
+  const details = r.changes.map(({ title, day, before, after, inProgress }) => {
+    const section = node('section');
+    section.append(node('h3', title), node('p', day + (inProgress ? ' · Follow-up in progress' : ''), 'hint'));
+    section.append(table(['Measure', before.first + ' – ' + before.last, after.first + ' – ' + after.last, 'Change'],
+      [['CVA proxy', 'cva', '°'], ['Tragus–C7 CVA', 'marker_cva', '°'], ['Neutral tracked time', 'neutral_pct', '%'], ['Mean discomfort', 'pain', ''],
+       ['Jaw tension', 'jaw', ''], ['Neck stiffness', 'neck', ''], ['Upper-back soreness', 'back', ''],
+       ['Completed drills', 'completed', ''], ['Days with tracking', 'tracked_days', ''], ['Days with check-ins', 'logged_days', '']]
+        .map(([label, key, unit], index) => {
+          const a = before[key], b = after[key];
+          const delta = Number.isFinite(a) && Number.isFinite(b) ? b - a : null;
+          return [label, display(a, unit, index >= 7 ? 0 : 1), display(b, unit, index >= 7 ? 0 : 1),
+            display(delta, key === 'neutral_pct' ? ' pp' : unit, index >= 7 ? 0 : 1)];
+        })));
+    return section;
+  });
+  $('change-results').replaceChildren(...(details.length ? details : [node('p', 'No recorded changes in this period.', 'hint')]));
   $('pattern').replaceChildren(
     ...(r.pattern
       ? [
