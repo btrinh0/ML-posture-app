@@ -206,6 +206,34 @@ function render() {
         r.history.sessions +
         ' qualifying sessions. Forecasts need 14 days, 3 sessions and a classifier.'
       : 'History ready. During a classified session, drift can trigger a break up to three minutes early.';
+  const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const buckets = ['00–04', '04–08', '08–12', '12–16', '16–20', '20–24'];
+  const forecasts = $('heat-type').value === 'forecast';
+  $('heat-caption').textContent = forecasts
+    ? 'Number of early movement reminders triggered by the personal drift forecast.'
+    : 'Percentage of tracked side-view seconds with a CVA drop of 7° or more.';
+  $('heat').replaceChildren(
+    table(
+      ['Day', ...buckets],
+      [1, 2, 3, 4, 5, 6, 0].map((d) => [
+        names[d],
+        ...buckets.map((_, i) => {
+          const b = r.heat.find((h) => h.weekday === d && h.block === i);
+          if (forecasts && b) {
+            const n = r.forecastHeat.find((h) => h.weekday === d && h.block === i)?.n ?? 0;
+            return { text: String(n), title: n + ' forecast nudges', cls: 'heat h' + Math.min(3, n) };
+          }
+          return b
+            ? {
+                text: display(b.drift, '%', 0),
+                title: b.seconds + ' tracked seconds',
+                cls: 'heat h' + Math.min(3, Math.floor(b.drift / 25)),
+              }
+            : { text: '—', title: 'No tracked seconds', cls: 'missing' };
+        }),
+      ]),
+    ),
+  );
   $('responses').replaceChildren(
     r.prompts.length
       ? table(
@@ -237,6 +265,9 @@ $('change-form').onsubmit = async (event) => {
     $('change-title').value = '';
     await refresh();
   }
+};
+$('heat-type').onchange = () => {
+  if (report) render();
 };
 $('plot-group').onchange = $('plot-metric').onchange = $('plot-pain').onchange = plot;
 window.addEventListener('resize', plot);

@@ -234,7 +234,15 @@ export class Insights {
         r_neutral: correlation(pairs.map((d) => [d.neutral_pct, d.pain])),
       });
     }
-    const heat = [];
+    const heat = s.all(
+      `SELECT CAST(strftime('%w',sec,'unixepoch','localtime') AS INTEGER) AS weekday,
+      CAST(strftime('%H',sec,'unixepoch','localtime') AS INTEGER)/4 AS block,
+      count(*) AS seconds,100.0*sum(CASE WHEN drop_deg>=7 THEN 1 ELSE 0 END)/count(*) AS drift
+      FROM samples t JOIN sessions s ON s.id=t.session WHERE s.profile=? AND view='side' AND sec>=?
+      GROUP BY weekday,block`,
+      profile,
+      from,
+    );
     const performance = s.all(
       `SELECT policy,count(*) AS n,avg(cpu) AS cpu,avg(ram_mb) AS ram,avg(inference_ms) AS latency,count(inference_ms) AS timed_windows
       FROM performance p JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY policy`,
