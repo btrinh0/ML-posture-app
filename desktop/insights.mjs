@@ -255,7 +255,14 @@ export class Insights {
       profile,
       from * 1000,
     );
-    const forecastHeat = [];
+    const forecastHeat = s.all(
+      `SELECT CAST(strftime('%w',p.at/1000,'unixepoch','localtime') AS INTEGER) AS weekday,
+      CAST(strftime('%H',p.at/1000,'unixepoch','localtime') AS INTEGER)/4 AS block,count(*) AS n
+      FROM prompts p JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.kind='forecast' AND p.at>=?
+      GROUP BY weekday,block`,
+      profile,
+      from * 1000,
+    );
     return {
       weeks,
       series,
