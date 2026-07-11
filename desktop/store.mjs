@@ -183,7 +183,7 @@ export class DeskStore {
     );
   }
   resolve(id, outcome, onResolve) {
-    if (!['completed', 'snoozed', 'skipped'].includes(outcome))
+    if (!['completed', 'snoozed', 'false_positive', 'skipped'].includes(outcome))
       throw new Error('Unknown break response.');
     const pending = this.pending();
     if (!pending || pending.id !== id) return;

@@ -125,6 +125,7 @@ function render(next) {
     }[prompt.kind];
     $('prompt-title').textContent = drills[prompt.drill].title;
     $('prompt-body').textContent = drills[prompt.drill].text;
+    $('override').hidden = prompt.kind === 'timer';
   }
   const historyKey = JSON.stringify(state.history);
   if ($('history').dataset.key !== historyKey) {
