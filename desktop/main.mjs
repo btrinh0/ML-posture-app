@@ -50,6 +50,7 @@ const state = () => ({
   sensorFresh: telemetry.fresh(),
   collecting: telemetry.collecting,
   label: telemetry.label,
+  correctionId: telemetry.review?.id,
   shortcutsReady,
 });
 const show = () => {
@@ -146,6 +147,7 @@ const actions = {
   lost: () => {
     telemetry.freshAt = null;
     telemetry.segment++;
+    telemetry.recent = [];
   },
   sensorPolicy: (v) => {
     if (store.session) telemetry.policy = v === 'fixed' ? 'fixed' : 'adaptive';
@@ -270,6 +272,7 @@ async function start() {
   ipcMain.handle('desk:sample', (e, value) => {
     if (!isHome(e.senderFrame.url) || !telemetry.sample(value)) return;
     const p = insights.sensorReminder(value.cue === true, value.metrics, value.prediction);
+    telemetry.freezeCorrection(p);
     notify(p);
   });
   ipcMain.handle('desk:action', async (e, name, value) => {

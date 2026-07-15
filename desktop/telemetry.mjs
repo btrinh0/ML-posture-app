@@ -85,6 +85,10 @@ export class Telemetry {
     if (sec === this.lastSecond) return false;
     this.lastSecond = sec;
     const label = this.collecting && side ? this.label : null;
+    if (this.collecting && side) {
+      this.recent = this.recent.filter((row) => row.sec > sec - 20);
+      this.recent.push({ sec, vector: JSON.stringify(m.vector.map((v) => Number(v.toFixed(5)))) });
+    }
     const vector = label ? JSON.stringify(m.vector.map((v) => Number(v.toFixed(5)))) : null;
     this.store.run(
       'INSERT OR IGNORE INTO samples VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
@@ -109,6 +113,10 @@ export class Telemetry {
     if (side && finite(marker?.cva, 90) && marker.cva >= 0 && finite(marker.shoulder, 2))
       this.store.run('INSERT OR IGNORE INTO marker_samples VALUES(?,?,?,?)', s.id, sec, marker.cva, marker.shoulder);
     return true;
+  }
+  freezeCorrection(prompt) {
+    if (prompt && this.collecting && this.recent.length)
+      this.review = { id: prompt.id, rows: [...this.recent] };
   }
   recordPerformance(cpu, ram) {
     if (this.store.session)
