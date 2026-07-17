@@ -126,6 +126,11 @@ function render(next) {
     $('prompt-title').textContent = drills[prompt.drill].title;
     $('prompt-body').textContent = drills[prompt.drill].text;
     $('override').hidden = prompt.kind === 'timer';
+    $('correction-field').hidden = state.correctionId !== prompt.id;
+    if ($('correction').dataset.prompt !== String(prompt.id)) {
+      $('correction').value = '';
+      $('correction').dataset.prompt = prompt.id;
+    }
   }
   const historyKey = JSON.stringify(state.history);
   if ($('history').dataset.key !== historyKey) {
@@ -194,6 +199,10 @@ document
         act('resolve', {
           id: state.prompt?.id,
           outcome: b.dataset.outcome,
+          correction:
+            b.dataset.outcome === 'false_positive' && !$('correction-field').hidden
+              ? $('correction').value
+              : null,
         })),
   );
 window.desk.onChange(render);

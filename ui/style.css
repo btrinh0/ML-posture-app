@@ -573,3 +573,7 @@ summary {
 .h3 {
   background: #e4ba9b;
 }
+#correction-field {
+  margin-top: 12px;
+  max-width: 320px;
+}

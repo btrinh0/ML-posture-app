@@ -118,6 +118,27 @@ export class Telemetry {
     if (prompt && this.collecting && this.recent.length)
       this.review = { id: prompt.id, rows: [...this.recent] };
   }
+  correct(id, label) {
+    if (
+      !this.review ||
+      id !== this.review.id ||
+      !this.collecting ||
+      !labels.includes(label) ||
+      label === 'slouch'
+    )
+      throw new Error('No matching activity correction is available.');
+    const segment = ++this.segment;
+    for (const row of this.review.rows)
+      this.store.run(
+        'UPDATE samples SET label=?,segment=?,vector=? WHERE session=? AND sec=?',
+        label,
+        segment,
+        row.vector,
+        this.store.session.id,
+        row.sec,
+      );
+    this.segment++;
+  }
   recordPerformance(cpu, ram) {
     if (this.store.session)
       this.store.run(

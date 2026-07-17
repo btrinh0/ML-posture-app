@@ -128,7 +128,10 @@ const actions = {
   checkIn: (v) => store.checkIn(v),
   markChange: (v) => store.markChange(v),
   resolve: (v) => {
-    store.resolve(v.id, v.outcome);
+    store.resolve(v.id, v.outcome, () => {
+      if (v.correction && v.outcome === 'false_positive') telemetry.correct(v.id, v.correction);
+    });
+    if (telemetry.review?.id === v.id) telemetry.review = null;
   },
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
