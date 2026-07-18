@@ -52,6 +52,7 @@ export class Telemetry {
     this.label = null;
     this.segment++;
     this.recent = [];
+    this.review = null;
   }
   sample(payload) {
     const s = this.store.session;
