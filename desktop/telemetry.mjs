@@ -157,7 +157,9 @@ export class Telemetry {
     return this.store
       .all(
         `SELECT p.study_id AS participant,s.study_id AS session,
-      t.sec-CAST(s.started/1000 AS INTEGER) AS second,t.segment,t.label,t.vector
+      t.sec-CAST(s.started/1000 AS INTEGER) AS second,t.segment,t.label,t.vector,
+      EXISTS(SELECT 1 FROM prompts a WHERE a.session=s.id AND a.outcome='false_positive'
+        AND t.sec BETWEEN CAST(a.at/1000 AS INTEGER)-19 AND CAST(a.at/1000 AS INTEGER)) AS overridden
       FROM samples t JOIN sessions s ON t.session=s.id JOIN profiles p ON s.profile=p.id
       WHERE p.id=? AND t.label IS NOT NULL AND t.vector IS NOT NULL ORDER BY s.id,t.sec`,
         this.store.profile,

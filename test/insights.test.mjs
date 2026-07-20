@@ -93,6 +93,27 @@ test('forecast waits for two weeks, then detects accelerating drift in a classif
   assert.ok(forecast && forecast.minutes < 3);
   s.close();
 });
+test('explicit false-alarm feedback relabels its frozen opt-in interval only', () => {
+  const { store: s, telemetry: t, advance, sample } = rig();
+  s.start();
+  t.reset();
+  t.collect(true);
+  for (let sec = 0; sec < 21; sec++) {
+    advance(0, 0, sec);
+    sample(9, 0, sec);
+  }
+  const p = s.prompt('drift', 'chin');
+  t.freezeCorrection(p);
+  advance(0, 0, 21);
+  sample(9, 0, 21);
+  s.resolve(p.id, 'false_positive', () => t.correct(p.id, 'writing'));
+  const r = t.exportRows();
+  assert.equal(r.length, 20);
+  assert.equal(r[0].second, 1);
+  assert.equal(r.at(-1).second, 20);
+  assert.ok(r.every((v) => v.overridden === 1 && v.label === 'writing'));
+  s.close();
+});
 test('a window resets across missing seconds and rolling slopes use elapsed seconds', () => {
   const b = new WindowBuffer();
   for (let sec = 0; sec < 19; sec++) assert.equal(b.push(sec, vector(sec)), null);
