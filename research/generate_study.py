@@ -113,8 +113,21 @@ def generate(out, model=None):
                         participant="sim-"+name.lower(),session=key,day=day_text,second=int(sec),
                         segment=int(segment[sec]),label=LABELS[state[sec]],overridden=0,
                         vector=np.round(x[sec].astype(float),5).tolist()))
+            rng = np.random.default_rng([SEED+1,person,day])
+            hour = int(rng.choice([9,12,15,18,20]))
+            after = day>=14
+            shift = (1.05,.10,.60)[person] * after
+            discomfort = 3.1 + [1.0,.2,.65][person] + .65*np.sin(day*.55) - shift
+            scores=np.clip(np.rint(discomfort+np.array([-.6,.7,-.2])+rng.normal(0,.85,3)),0,10).astype(int)
+            symptoms = None if day in (5+person,21+person) else dict(zip(("jaw","neck","back"),map(int,scores)))
+            diary.append(dict(provenance="simulated_study",participant="sim-"+name.lower(),day=day_text,
+                session=key,local_hour=hour,active_minutes=45,symptoms=symptoms,drill=["chin","back","shoulders"][person],
+                response=str(rng.choice(["completed","skipped","snoozed"],p=[.73,.18,.09])),
+                intervention=CHANGES[person][0] if day==14 else None))
         if not model:
             write_gzip(out/f"{name.lower()}-labels.jsonl.gz",exported)
+    if not model:
+        write_json(out/"diary.json",dict(provenance="simulated_study",seed=SEED,people=list(PEOPLE),days=diary))
 
 
 if __name__ == "__main__":

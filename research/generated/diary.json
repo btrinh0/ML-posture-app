@@ -1,0 +1,1331 @@
+{
+  "provenance": "simulated_study",
+  "seed": 41723,
+  "people": [
+    "Aster",
+    "Birch",
+    "Cedar"
+  ],
+  "days": [
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-15",
+      "session": "sim-aster-2026-06-15",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 7,
+        "back": 5
+      },
+      "drill": "chin",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-16",
+      "session": "sim-aster-2026-06-16",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 6,
+        "back": 6
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-17",
+      "session": "sim-aster-2026-06-17",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 6,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-18",
+      "session": "sim-aster-2026-06-18",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 5,
+        "neck": 7,
+        "back": 5
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-19",
+      "session": "sim-aster-2026-06-19",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "chin",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-20",
+      "session": "sim-aster-2026-06-20",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": null,
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-21",
+      "session": "sim-aster-2026-06-21",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 5,
+        "neck": 4,
+        "back": 5
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-22",
+      "session": "sim-aster-2026-06-22",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-23",
+      "session": "sim-aster-2026-06-23",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-24",
+      "session": "sim-aster-2026-06-24",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-25",
+      "session": "sim-aster-2026-06-25",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-26",
+      "session": "sim-aster-2026-06-26",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "chin",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-27",
+      "session": "sim-aster-2026-06-27",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 5,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-28",
+      "session": "sim-aster-2026-06-28",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 5,
+        "back": 6
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-29",
+      "session": "sim-aster-2026-06-29",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": "Raised the monitor"
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-06-30",
+      "session": "sim-aster-2026-06-30",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 3,
+        "back": 5
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-01",
+      "session": "sim-aster-2026-07-01",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-02",
+      "session": "sim-aster-2026-07-02",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-03",
+      "session": "sim-aster-2026-07-03",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 4,
+        "back": 1
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-04",
+      "session": "sim-aster-2026-07-04",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 0,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-05",
+      "session": "sim-aster-2026-07-05",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 5,
+        "back": 2
+      },
+      "drill": "chin",
+      "response": "snoozed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-06",
+      "session": "sim-aster-2026-07-06",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": null,
+      "drill": "chin",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-07",
+      "session": "sim-aster-2026-07-07",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-08",
+      "session": "sim-aster-2026-07-08",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-09",
+      "session": "sim-aster-2026-07-09",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-10",
+      "session": "sim-aster-2026-07-10",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "chin",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-11",
+      "session": "sim-aster-2026-07-11",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-aster",
+      "day": "2026-07-12",
+      "session": "sim-aster-2026-07-12",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 2
+      },
+      "drill": "chin",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-15",
+      "session": "sim-birch-2026-06-15",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-16",
+      "session": "sim-birch-2026-06-16",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 6,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-17",
+      "session": "sim-birch-2026-06-17",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 6,
+        "back": 5
+      },
+      "drill": "back",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-18",
+      "session": "sim-birch-2026-06-18",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 4,
+        "back": 2
+      },
+      "drill": "back",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-19",
+      "session": "sim-birch-2026-06-19",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 7,
+        "back": 4
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-20",
+      "session": "sim-birch-2026-06-20",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-21",
+      "session": "sim-birch-2026-06-21",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": null,
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-22",
+      "session": "sim-birch-2026-06-22",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-23",
+      "session": "sim-birch-2026-06-23",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 3,
+        "back": 1
+      },
+      "drill": "back",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-24",
+      "session": "sim-birch-2026-06-24",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 2,
+        "back": 2
+      },
+      "drill": "back",
+      "response": "snoozed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-25",
+      "session": "sim-birch-2026-06-25",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 2
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-26",
+      "session": "sim-birch-2026-06-26",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-27",
+      "session": "sim-birch-2026-06-27",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 3,
+        "back": 5
+      },
+      "drill": "back",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-28",
+      "session": "sim-birch-2026-06-28",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 3,
+        "back": 5
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-29",
+      "session": "sim-birch-2026-06-29",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 5
+      },
+      "drill": "back",
+      "response": "snoozed",
+      "intervention": "Moved the keyboard closer"
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-06-30",
+      "session": "sim-birch-2026-06-30",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-01",
+      "session": "sim-birch-2026-07-01",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-02",
+      "session": "sim-birch-2026-07-02",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-03",
+      "session": "sim-birch-2026-07-03",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 6,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-04",
+      "session": "sim-birch-2026-07-04",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-05",
+      "session": "sim-birch-2026-07-05",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 0,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-06",
+      "session": "sim-birch-2026-07-06",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 1
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-07",
+      "session": "sim-birch-2026-07-07",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": null,
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-08",
+      "session": "sim-birch-2026-07-08",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-09",
+      "session": "sim-birch-2026-07-09",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-10",
+      "session": "sim-birch-2026-07-10",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 5,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-11",
+      "session": "sim-birch-2026-07-11",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "back",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-birch",
+      "day": "2026-07-12",
+      "session": "sim-birch-2026-07-12",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "back",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-15",
+      "session": "sim-cedar-2026-06-15",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-16",
+      "session": "sim-cedar-2026-06-16",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 2
+      },
+      "drill": "shoulders",
+      "response": "snoozed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-17",
+      "session": "sim-cedar-2026-06-17",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-18",
+      "session": "sim-cedar-2026-06-18",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 6,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-19",
+      "session": "sim-cedar-2026-06-19",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 6,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-20",
+      "session": "sim-cedar-2026-06-20",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 5,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-21",
+      "session": "sim-cedar-2026-06-21",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-22",
+      "session": "sim-cedar-2026-06-22",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": null,
+      "drill": "shoulders",
+      "response": "snoozed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-23",
+      "session": "sim-cedar-2026-06-23",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-24",
+      "session": "sim-cedar-2026-06-24",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 3,
+        "back": 1
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-25",
+      "session": "sim-cedar-2026-06-25",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-26",
+      "session": "sim-cedar-2026-06-26",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-27",
+      "session": "sim-cedar-2026-06-27",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-28",
+      "session": "sim-cedar-2026-06-28",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 4,
+        "back": 6
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-29",
+      "session": "sim-cedar-2026-06-29",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 5,
+        "neck": 4,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": "Added foot support"
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-06-30",
+      "session": "sim-cedar-2026-06-30",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 4,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-01",
+      "session": "sim-cedar-2026-07-01",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "snoozed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-02",
+      "session": "sim-cedar-2026-07-02",
+      "local_hour": 20,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-03",
+      "session": "sim-cedar-2026-07-03",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-04",
+      "session": "sim-cedar-2026-07-04",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 3,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-05",
+      "session": "sim-cedar-2026-07-05",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 2
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-06",
+      "session": "sim-cedar-2026-07-06",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 2,
+        "neck": 4,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-07",
+      "session": "sim-cedar-2026-07-07",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 1,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "snoozed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-08",
+      "session": "sim-cedar-2026-07-08",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": null,
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-09",
+      "session": "sim-cedar-2026-07-09",
+      "local_hour": 9,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "skipped",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-10",
+      "session": "sim-cedar-2026-07-10",
+      "local_hour": 12,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-11",
+      "session": "sim-cedar-2026-07-11",
+      "local_hour": 15,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 3
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    },
+    {
+      "provenance": "simulated_study",
+      "participant": "sim-cedar",
+      "day": "2026-07-12",
+      "session": "sim-cedar-2026-07-12",
+      "local_hour": 18,
+      "active_minutes": 45,
+      "symptoms": {
+        "jaw": 3,
+        "neck": 5,
+        "back": 4
+      },
+      "drill": "shoulders",
+      "response": "completed",
+      "intervention": null
+    }
+  ]
+}
