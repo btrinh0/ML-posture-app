@@ -95,11 +95,52 @@ def simulate(person, day):
     return state,segment,vector.astype(np.float32),baseline[0],valid
 
 
+def forecast_case(person, progressive):
+    minute = np.arange(SECONDS) / 60
+    up, forward, face = (.39,.44,.36)[person], (.13,.18,.16)[person], (.154,.178,.165)[person]
+    baseline = pose_channels(forward,up,0.,0.,face)[0]
+    loss = .12*np.sin(minute*1.3)
+    if progressive:
+        loss += (12+person)*np.clip((minute-10)/15,0,1)**2
+    reach = up / np.tan(np.deg2rad(baseline[0]-loss))
+    pose = pose_channels(reach,up,.003*loss,np.deg2rad(-.3*loss),face)
+    x = pose - baseline
+    x[:,0] *= -1
+    return (loss>=7).astype(int), x.astype(np.float32), baseline[0], np.ones(SECONDS,dtype=bool)
+
+
+def predicted_codes(session, kind, vectors, valid):
+    windows = np.lib.stride_tricks.sliding_window_view(vectors, WINDOW, axis=0).transpose(0,2,1)
+    okay = np.lib.stride_tricks.sliding_window_view(valid, WINDOW).all(axis=1)
+    windows = windows[okay]
+    features = rolling(windows) if kind == "tree" else windows
+    codes = np.full(len(valid), -1, dtype=np.int8)
+    for end, row in zip(np.flatnonzero(okay)+WINDOW-1, features):
+        scores, = session.run(None, {"input": np.ascontiguousarray(row[None])})
+        codes[end] = scores.argmax()
+    return codes
+
+
+def replay_row(key, state, x, baseline, valid, predictions):
+    return dict(session=key,baseline=round(float(baseline),4),
+                loss=np.rint(x[:,0]*10).astype(int).tolist(),forward=np.rint(x[:,1]*1000).astype(int).tolist(),
+                shoulder=np.rint(x[:,3]*1000).astype(int).tolist(),missing=np.flatnonzero(~valid).tolist(),
+                activity="".join(str(n) for n in state),
+                predictions="".join("n" if n<0 else str(n) for n in predictions))
 
 
 def generate(out, model=None):
     out.mkdir(parents=True,exist_ok=True)
     session = kind = None
+    if model:
+        import onnxruntime as ort
+        bundle = json.loads(model.read_text(encoding="utf-8"))
+        if bundle["provenance"] != "simulated_study":
+            raise ValueError("The example replay expects the selected simulation-trained model.")
+        options = ort.SessionOptions()
+        options.intra_op_num_threads = options.inter_op_num_threads = 1
+        session = ort.InferenceSession(base64.b64decode(bundle["model"]),options,providers=["CPUExecutionProvider"])
+        kind = bundle["kind"]
     diary, replay, cases, parity = [], [], [], []
     for person,name in enumerate(PEOPLE):
         exported=[]
@@ -124,14 +165,34 @@ def generate(out, model=None):
                 session=key,local_hour=hour,active_minutes=45,symptoms=symptoms,drill=["chin","back","shoulders"][person],
                 response=str(rng.choice(["completed","skipped","snoozed"],p=[.73,.18,.09])),
                 intervention=CHANGES[person][0] if day==14 else None))
+            if model:
+                predictions=predicted_codes(session,kind,x,valid)
+                replay.append(replay_row(key,state,x,baseline,valid,predictions))
+                if VISITS.get(day) == "follow_up":
+                    for activity in range(len(LABELS)):
+                        end = int(np.flatnonzero((state[:CAPTURE]==activity) & (predictions[:CAPTURE]>=0))[0])
+                        window = np.round(x[end-WINDOW+1:end+1].astype(float),5)
+                        expected = predicted_codes(session,kind,window.astype(np.float32),np.ones(WINDOW,dtype=bool))[-1]
+                        parity.append(dict(participant=name.lower(),activity=LABELS[activity],second=end,
+                                           x=window.tolist(),prediction=int(expected)))
         if not model:
             write_gzip(out/f"{name.lower()}-labels.jsonl.gz",exported)
-    if not model:
+        else:
+            for progressive in (False,True):
+                state,x,baseline,valid = forecast_case(person,progressive)
+                key = name.lower()+"-"+("progressive" if progressive else "stable")
+                cases.append(replay_row(key,state,x,baseline,valid,predicted_codes(session,kind,x,valid)))
+    if model:
+        write_gzip(out/"replay.jsonl.gz",replay)
+        write_gzip(out/"forecast-cases.jsonl.gz",cases)
+        write_json(out/"desktop-cases.json",dict(provenance="simulated_study",cases=parity))
+    else:
         write_json(out/"diary.json",dict(provenance="simulated_study",seed=SEED,people=list(PEOPLE),days=diary))
 
 
 if __name__ == "__main__":
     args=argparse.ArgumentParser(description=__doc__)
     args.add_argument("--out",type=Path,required=True)
+    args.add_argument("--replay-model",type=Path)
     options=args.parse_args()
-    generate(options.out)
+    generate(options.out,options.replay_model)
