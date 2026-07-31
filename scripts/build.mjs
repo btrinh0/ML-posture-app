@@ -18,6 +18,7 @@ await cp(join(root, 'shared'), join(out, 'shared'), { recursive: true });
 await cp(join(root, 'desktop', 'companion.mjs'), join(out, 'companion.mjs'));
 const assets = join(out, 'assets');
 await mkdir(assets, { recursive: true });
+await cp(join(root, 'research/generated/dashboard.json'), join(assets, 'dashboard.json'));
 await cp(join(root, 'assets/icon.png'), join(assets, 'icon.png'));
 const sensor = join(root, 'assets/pose_landmarker_lite.task');
 if (

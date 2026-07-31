@@ -36,14 +36,27 @@ let report,
   last = 0,
   state,
   stateKey;
+let examples;
+async function exampleReports() {
+  if (!examples) {
+    const response = await fetch('./assets/dashboard.json');
+    if (!response.ok) throw new Error('The bundled study could not be opened.');
+    examples = await response.json();
+  }
+  return examples;
+}
 async function refresh() {
   const id = ++version;
   try {
-    const source = 'personal';
+    const source = $('report-source').value;
     const days = Number($('range').value);
-    const next = await window.desk.report(days);
+    const next = source === 'personal' ? await window.desk.report(days) : (await exampleReports()).reports[source][days];
     if (id !== version) return;
     report = next;
+    $('change-form').hidden = source !== 'personal';
+    $('report-context').textContent = source === 'personal'
+      ? 'Gaps indicate missing measurements.'
+      : 'Simulated study · ' + $('report-source').selectedOptions[0].text.split(' · ')[0] + ' · ' + examples.start + ' to ' + examples.end + '. Check-ins and desk changes are fictional.';
     last = Date.now();
     render();
   } catch (err) {
@@ -206,6 +219,14 @@ function render() {
         r.history.sessions +
         ' qualifying sessions. Forecasts need 14 days, 3 sessions and a classifier.'
       : 'History ready. During a classified session, drift can trigger a break up to three minutes early.';
+  const source = $('report-source').value;
+  const check = examples?.controlled?.[source];
+  $('example-forecast').hidden = !check;
+  if (check) {
+    const lead = check.progressive.lead_seconds;
+    $('example-forecast').textContent = examples.forecast[source].issued + ' nudges in four weeks. The steady test had ' + check.stable.nudges.length +
+      '. ' + (lead === null ? 'The drift test had no warning within three minutes.' : 'The drift test gave ' + lead + ' seconds of warning.');
+  }
   const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const buckets = ['00–04', '04–08', '08–12', '12–16', '16–20', '20–24'];
   const forecasts = $('heat-type').value === 'forecast';
@@ -259,9 +280,11 @@ function render() {
   );
 }
 $('range').onchange = refresh;
+$('report-source').onchange = refresh;
 $('change-form').onsubmit = async (event) => {
   event.preventDefault();
-    if (await act('markChange', { day: $('change-date').value, title: $('change-title').value }, 'Change recorded.')) {
+  if ($('report-source').value !== 'personal') return;
+  if (await act('markChange', { day: $('change-date').value, title: $('change-title').value }, 'Change recorded.')) {
     $('change-title').value = '';
     await refresh();
   }
