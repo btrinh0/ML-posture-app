@@ -258,7 +258,8 @@ async function start() {
     if (!pick) {
       const saved = store.get("SELECT value FROM settings WHERE key='model'");
       if (saved) return JSON.parse(saved.value);
-      return null;
+      const builtIn = JSON.parse(await readFile(join(dist, 'assets/activity.deskmodel'), 'utf8'));
+      return { ...validateBundle(builtIn), bundled: true };
     }
     candidate = null;
     const file = await dialog.showOpenDialog(win, {
