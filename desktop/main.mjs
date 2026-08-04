@@ -164,6 +164,10 @@ const actions = {
     store.run("INSERT OR REPLACE INTO settings VALUES('model','null')");
     candidate = null;
   },
+  bundledModel: () => {
+    store.run("DELETE FROM settings WHERE key='model'");
+    candidate = null;
+  },
 };
 const mime = {
   '.html': 'text/html',

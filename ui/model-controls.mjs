@@ -26,10 +26,11 @@ function lazyClassifier(bundle) {
   };
 }
 async function select(mode) {
-  const controls = ['import-model', 'remove-model'].map($);
+  const controls = ['import-model', 'remove-model', 'bundled-model'].map($);
   controls.forEach((button) => { button.disabled = true; });
   try {
     if (mode === 'rules' && !(await act('removeModel'))) return;
+    if (mode === 'bundled' && !(await act('bundledModel'))) return;
     const pick = mode === 'import';
     const bundle = mode === 'rules' ? null : await window.desk.model(pick);
     if (pick && !bundle) return;
@@ -46,6 +47,7 @@ async function select(mode) {
     const variant = bundle?.variant === 'mean_and_latest' ? ' (mean and latest values)' : '';
     $('model-name').textContent = bundle ? names[bundle.kind] + variant + ' · ' + source + ' · 20-second windows' : 'Static posture rules';
     $('remove-model').hidden = !bundle;
+    $('bundled-model').hidden = mode === 'bundled' || bundle?.bundled === true;
   } catch (err) {
     feedback('Could not load the activity model. ' + err.message);
   } finally {
@@ -54,4 +56,5 @@ async function select(mode) {
 }
 $('import-model').onclick = () => select('import');
 $('remove-model').onclick = () => select('rules');
+$('bundled-model').onclick = () => select('bundled');
 void select('saved');

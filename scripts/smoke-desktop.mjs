@@ -55,6 +55,16 @@ try {
   await page.getByRole('button', { name: 'End session' }).waitFor();
   assert.ok(await page.locator('#profiles').isDisabled());
   await page.getByRole('button', { name: 'Pose sensor' }).click();
+  await page.getByText(/LightGBM .*trained on simulated sessions/).waitFor();
+  assert.equal(await page.evaluate(() => performance.getEntriesByType('resource').some((r) => r.name.includes('ort-wasm'))), false);
+  await page.locator('#remove-model').click();
+  await page.getByText('Static posture rules', { exact: true }).waitFor();
+  await page.reload();
+  await page.getByRole('button', { name: 'Pose sensor' }).click();
+  await page.locator('#bundled-model').waitFor();
+  assert.equal(await page.evaluate(() => window.desk.model(false)), null);
+  await page.locator('#bundled-model').click();
+  await page.getByText(/LightGBM .*trained on simulated sessions/).waitFor();
   if (reference) await page.locator('#view').selectOption(sideImage ? 'side' : 'front');
   const pixels = reference ? (await readFile(reference)).toString('base64') : null;
   await page.evaluate(async ({ pixels, side, mime }) => {
