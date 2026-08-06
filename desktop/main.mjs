@@ -47,6 +47,7 @@ let lastPerformance = 0,
 const isHome = (url) => url === home;
 const state = () => ({
   ...store.state(),
+  autoStart: app.getLoginItemSettings({ args: ['--tray'] }).openAtLogin,
   sensorFresh: telemetry.fresh(),
   collecting: telemetry.collecting,
   label: telemetry.label,
@@ -135,6 +136,7 @@ const actions = {
   },
   addProfile: (v) => store.addProfile(v),
   profile: (v) => store.chooseProfile(v),
+  autoStart: (v) => app.setLoginItemSettings({ openAtLogin: v === true, args: ['--tray'] }),
   capture: (v) => setCapture(v === true),
   label: (v) => telemetry.mark(v),
   exportLabels,
@@ -312,7 +314,7 @@ async function start() {
       tick();
     });
   await win.loadURL(home);
-  show();
+  if (!process.argv.includes('--tray')) show();
   timer = setInterval(tick, 1000);
 }
 if (!app.requestSingleInstanceLock()) app.quit();

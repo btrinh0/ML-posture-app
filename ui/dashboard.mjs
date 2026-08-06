@@ -86,6 +86,7 @@ function render(next) {
       $(k).value = state.symptoms?.[k] ?? '';
     });
     $('interval').value = profile.interval_min;
+    $('startup').checked = state.autoStart;
     $('adjustments').hidden = !state.setupResult;
     $('advice').replaceChildren(
       ...(state.setupResult?.advice.length
@@ -191,6 +192,7 @@ $('setup-form').onsubmit = (e) => {
     'Desk setup saved.',
   );
 };
+$('startup').onchange = (e) => act('autoStart', e.target.checked);
 document
   .querySelectorAll('[data-outcome]')
   .forEach(

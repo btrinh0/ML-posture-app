@@ -24,6 +24,7 @@ const client = await _electron.launch({
   args: [
     '.',
     '--user-data-dir=' + profile,
+    '--tray',
     '--use-fake-device-for-media-stream',
     '--use-fake-ui-for-media-stream',
     '--autoplay-policy=no-user-gesture-required',
