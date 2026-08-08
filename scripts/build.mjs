@@ -20,7 +20,15 @@ const assets = join(out, 'assets');
 await mkdir(assets, { recursive: true });
 for (const name of ['activity.deskmodel', 'dashboard.json'])
   await cp(join(root, 'research/generated', name), join(assets, name));
-await cp(join(root, 'assets/icon.png'), join(assets, 'icon.png'));
+for (const name of ['icon.png', 'inter.woff2', 'inter-license.txt']) {
+  const source =
+    name === 'icon.png'
+      ? 'assets/icon.png'
+      : name === 'inter.woff2'
+        ? 'node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2'
+        : 'node_modules/@fontsource-variable/inter/LICENSE';
+  await cp(join(root, source), join(assets, name));
+}
 const sensor = join(root, 'assets/pose_landmarker_lite.task');
 if (
   createHash('sha256')

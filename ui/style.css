@@ -1,3 +1,9 @@
+@font-face {
+  font-family: Inter;
+  src: url('./assets/inter.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
   color: #202923;
