@@ -1,0 +1,11 @@
+appId: org.deskframe.companion
+productName: Deskframe
+directories:
+  output: release
+files:
+  - desktop/**/*
+  - shared/**/*
+  - dist/**/*
+  - package.json
+asar: true
+npmRebuild: false
