@@ -1,6 +1,6 @@
 {
   "name": "deskframe",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "A private desk companion for study sessions, movement breaks and posture research.",
   "author": "Deskframe contributors",
   "main": "desktop/main.mjs",
@@ -12,8 +12,8 @@
     "start": "npm run desktop",
     "test": "node --test --test-isolation=none test/*.test.mjs",
     "desktop": "npm run build && electron .",
-    "test:desktop": "node scripts/smoke-desktop.mjs",
-    "pack:win": "npm run build && electron-builder --dir --win --x64 --publish never"
+    "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "test:desktop": "node scripts/smoke-desktop.mjs"
   },
   "engines": {
     "node": ">=24"
