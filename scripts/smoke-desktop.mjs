@@ -265,6 +265,6 @@ try {
   } finally { await restarted.close(); }
   console.log('Reopened the saved check-in and study block.');
 } finally {
-  await client.close();
+  await client.close().catch(() => {});
   await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });
 }
