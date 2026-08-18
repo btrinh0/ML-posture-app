@@ -8,7 +8,7 @@ import { _electron } from 'playwright-core';
 const qa = resolve('.qa');
 await mkdir(qa, { recursive: true });
 const profile = await mkdtemp(join(qa, 'desktop-'));
-const packaged = null;
+const packaged = process.argv.slice(2).find((v) => !v.startsWith('--'));
 const fixtures = process.argv
   .slice(2)
   .find((v) => v.startsWith('--fixtures='))
@@ -20,9 +20,9 @@ const reference = sideImage || process.argv
   .find((v) => v.startsWith('--pose-image='))
   ?.slice('--pose-image='.length);
 const client = await _electron.launch({
-  executablePath: (await import('electron')).default,
+  executablePath: packaged ? resolve(packaged) : (await import('electron')).default,
   args: [
-    '.',
+    ...(packaged ? [] : ['.']),
     '--user-data-dir=' + profile,
     '--tray',
     '--use-fake-device-for-media-stream',
