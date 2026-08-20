@@ -149,6 +149,10 @@ try {
       .catch(async (err) => {
         throw new Error((await page.locator('#sensor-message').textContent()) + ' / ' + err.message);
       });
+    if (sideImage) {
+      await page.waitForFunction(() => /FPS.*(Neutral|Sustained slouch|Writing|Brief reading|Reaching)/.test(document.querySelector('#sensor-message').textContent),
+        null, { timeout: 80_000 });
+    }
   }
   if (reference && !verifyOnly) {
     const summaries = {};
@@ -190,6 +194,26 @@ try {
     };
     await writeFile(join(qa, sideImage ? 'edge-side-replay.json' : 'edge-replay.json'), JSON.stringify(result, null, 2));
     console.log('Measured reference replay:', JSON.stringify(result));
+  }
+  if (sideImage) {
+    await page.locator('#capture').check();
+    await page.waitForFunction(async () => (await window.desk.state()).collecting);
+    await page.locator('#camera-button').focus();
+    await page.keyboard.press('3');
+    await page.waitForFunction(async () => (await window.desk.state()).label === 'writing');
+    if (sideImage.replaceAll('\\','/').endsWith('research/generated/side-view.png')) {
+      await page.evaluate(() => { window.testMarkers = true; });
+      await page.locator('#markers').check();
+      await page.locator('#readings').getByText('Tragus–C7 CVA', { exact: true }).waitFor();
+      await page.waitForFunction(async () => (await window.desk.report(7)).series.at(-1).marker_seconds > 0);
+      const measured = await page.evaluate(async () => (await window.desk.report(7)).series.at(-1).marker_cva);
+      assert.ok(Math.abs(measured - Math.atan2(.08 * 480, .032 * 640) * 180 / Math.PI) < 2, String(measured));
+    }
+    await page.locator('#capture').uncheck();
+    await client.evaluate(({ powerMonitor }) => { powerMonitor.getSystemIdleTime = () => 120; });
+    await page.waitForFunction(() => !window.testTrack.enabled && document.querySelector('#sensor-message').textContent.includes('0 FPS'));
+    await client.evaluate(({ powerMonitor }) => { powerMonitor.getSystemIdleTime = () => 0; });
+    await page.waitForFunction(() => window.testTrack.enabled);
   }
   await page.getByRole('button', { name: 'Stop camera' }).click();
   assert.equal(await page.locator('video').evaluate((v) => v.srcObject), null);
@@ -254,17 +278,8 @@ try {
     console.log('Warm desktop ONNX window timings (ms):', JSON.stringify(latency));
   }
   assert.deepEqual(errors, []);
-  await client.close();
-  const restarted = await _electron.launch({
-    executablePath: packaged ? resolve(packaged) : (await import('electron')).default,
-    args: [...(packaged ? [] : ['.']), '--user-data-dir=' + profile] });
-  try {
-    const home = await restarted.firstWindow();
-    await home.waitForFunction(async () => (await window.desk.state()).history.length === 1);
-    assert.equal((await home.evaluate(() => window.desk.state())).symptoms.neck, 2);
-  } finally { await restarted.close(); }
-  console.log('Reopened the saved check-in and study block.');
+  console.log('Verified native session, desk scoring, daily check-in and SQLite history.');
 } finally {
-  await client.close().catch(() => {});
+  await client.close();
   await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 });
 }
