@@ -239,8 +239,35 @@ try {
   assert.equal(state.history.length, 1);
   assert.equal(state.symptoms.neck, 2);
   assert.equal(state.setupResult.score, 1);
+  await page.getByRole('button', { name: 'Trends', exact: true }).click();
+  await page.locator('#heat table').waitFor();
+  await page.locator('#change-title').fill('Raised the test screen');
+  await page.getByRole('button', { name: 'Record change' }).click();
+  await page.locator('#change-results').getByRole('heading', { name: 'Raised the test screen' }).waitFor();
+  const personal = await page.evaluate(() => window.desk.report(28));
+  assert.equal(personal.changes[0].after.neck, 2);
+  assert.equal(personal.changes[0].before.neck, null);
+  for (const [key, change] of [['aster','Raised the monitor'], ['birch','Moved the keyboard closer'], ['cedar','Added foot support']]) {
+    await page.locator('#report-source').selectOption(key);
+    await page.locator('#change-results').getByRole('heading', { name: change }).waitFor();
+    assert.ok(await page.locator('#change-form').isHidden());
+    assert.equal(await page.locator('#weekly tbody tr').count(), 4);
+    assert.ok((await page.locator('#report-context').innerText()).includes('fictional'));
+  }
+  await page.locator('#report-source').selectOption('personal');
+  await page.locator('#change-results').getByRole('heading', { name: 'Raised the test screen' }).waitFor();
+  await page.locator('#range').selectOption('7');
+  await page.locator('#plot-group').selectOption('daily');
+  await page.locator('#weekly').evaluate((el) => (el.closest('details').open = true));
+  await page.waitForFunction(() => document.querySelectorAll('#weekly tbody tr').length === 1);
+  assert.equal(await page.locator('#weekly tbody tr').count(), 1);
+  await page.screenshot({ path: join(qa, 'trends.png') });
+  await page.getByRole('button', { name: 'Study desk', exact: true }).click();
+  await page.screenshot({ path: join(qa, 'study-desk.png') });
   {
-    const suites = [];
+    const shipped = await page.evaluate(() => window.desk.model(false));
+    const { cases } = JSON.parse(await readFile('research/generated/desktop-cases.json', 'utf8'));
+    const suites = [{ kind: 'bundled', bundle: shipped, x: cases.map((v) => v.x), y: cases.map((v) => v.prediction) }];
     if (fixtures) for (const kind of ['rules', 'tree', 'cnn']) {
       suites.push({ kind, bundle: JSON.parse(await readFile(join(fixtures, 'fixture-' + kind + '.deskmodel'), 'utf8')),
         ...JSON.parse(await readFile(join(fixtures, 'parity-' + kind + '.json'), 'utf8')) });
