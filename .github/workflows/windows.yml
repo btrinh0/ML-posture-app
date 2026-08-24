@@ -1,0 +1,41 @@
+name: Windows desktop
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+      - name: Install and verify the desktop app on a clean Windows runner
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -LiteralPath release -Filter 'Deskframe-Setup-*.exe' | Select-Object -First 1
+          $destination = Join-Path $env:RUNNER_TEMP 'Deskframe'
+          $process = Start-Process -FilePath $installer.FullName -ArgumentList "/S /D=$destination" -WindowStyle Hidden -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "Installer failed with exit code $($process.ExitCode)." }
+          $paths = @((Join-Path $destination 'Deskframe.exe'), (Join-Path $env:LOCALAPPDATA 'Programs/deskframe/Deskframe.exe'))
+          $installed = $paths | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+          if (!$installed) { throw 'The installer completed without an installed Deskframe executable.' }
+          npm run test:desktop -- "$installed" --side-image=research/generated/side-view.png --verify-only
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Deskframe-Windows-x64
+          path: release/Deskframe-Setup-*.exe
+          if-no-files-found: error
+          compression-level: 0
+
