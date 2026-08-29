@@ -3,6 +3,7 @@ name: Windows desktop
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -39,3 +40,26 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
+  release:
+    needs: installer
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Publish the verified Windows installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          name="Deskframe-Setup-${GITHUB_REF_NAME#v}.exe"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name Deskframe-Windows-x64 --dir verified
+          test -s "verified/$name"
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            if ! gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fxq "$name"; then
+              gh release upload "$GITHUB_REF_NAME" "verified/$name" --repo "$GITHUB_REPOSITORY"
+            fi
+          else
+            gh release create "$GITHUB_REF_NAME" "verified/$name" --repo "$GITHUB_REPOSITORY" --verify-tag --title "Deskframe $GITHUB_REF_NAME" --notes "Unsigned Windows x64 installer with the offline sensor and three simulated profiles."
+          fi
