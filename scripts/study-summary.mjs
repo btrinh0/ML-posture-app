@@ -6,6 +6,20 @@ import { Insights } from '../desktop/insights.mjs';
 import { Telemetry } from '../desktop/telemetry.mjs';
 import { DriftGate, drifting, labels } from '../shared/kinematics.mjs';
 
+if (process.argv.includes('--help')) {
+  console.log([
+    'npm run study:report -- [study-directory]',
+    '',
+    'Rebuild the example with Python 3.13 and Node.js 24',
+    'python -m pip install -r research/requirements.txt',
+    'python research/generate_study.py --out study-data/example',
+    'python research/benchmark.py study-data/example/aster-labels.jsonl.gz study-data/example/birch-labels.jsonl.gz study-data/example/cedar-labels.jsonl.gz --out study-data/example',
+    'python research/generate_study.py --out study-data/example --replay-model study-data/example/activity.deskmodel',
+    'node scripts/study-summary.mjs study-data/example',
+  ].join('\n'));
+  process.exit(0);
+}
+
 const dir = resolve(process.argv[2] ?? 'research/generated');
 const json = async (name) => JSON.parse(await readFile(join(dir, name), 'utf8'));
 const diary = await json('diary.json'), benchmark = await json('benchmark.json');

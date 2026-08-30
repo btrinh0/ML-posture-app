@@ -13,7 +13,8 @@
     "test": "node --test --test-isolation=none test/*.test.mjs",
     "desktop": "npm run build && electron .",
     "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never",
-    "test:desktop": "node scripts/smoke-desktop.mjs"
+    "test:desktop": "node scripts/smoke-desktop.mjs",
+    "study:report": "node scripts/study-summary.mjs"
   },
   "engines": {
     "node": ">=24"

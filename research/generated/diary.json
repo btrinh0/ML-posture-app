@@ -10,8 +10,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-15",
-      "session": "sim-aster-2026-06-15",
+      "day": "2026-10-26",
+      "session": "sim-aster-2026-10-26",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -26,8 +26,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-16",
-      "session": "sim-aster-2026-06-16",
+      "day": "2026-10-27",
+      "session": "sim-aster-2026-10-27",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -42,8 +42,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-17",
-      "session": "sim-aster-2026-06-17",
+      "day": "2026-10-28",
+      "session": "sim-aster-2026-10-28",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -58,8 +58,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-18",
-      "session": "sim-aster-2026-06-18",
+      "day": "2026-10-29",
+      "session": "sim-aster-2026-10-29",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -74,8 +74,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-19",
-      "session": "sim-aster-2026-06-19",
+      "day": "2026-10-30",
+      "session": "sim-aster-2026-10-30",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -90,8 +90,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-20",
-      "session": "sim-aster-2026-06-20",
+      "day": "2026-10-31",
+      "session": "sim-aster-2026-10-31",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": null,
@@ -102,8 +102,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-21",
-      "session": "sim-aster-2026-06-21",
+      "day": "2026-11-01",
+      "session": "sim-aster-2026-11-01",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -118,8 +118,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-22",
-      "session": "sim-aster-2026-06-22",
+      "day": "2026-11-02",
+      "session": "sim-aster-2026-11-02",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -134,8 +134,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-23",
-      "session": "sim-aster-2026-06-23",
+      "day": "2026-11-03",
+      "session": "sim-aster-2026-11-03",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -150,8 +150,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-24",
-      "session": "sim-aster-2026-06-24",
+      "day": "2026-11-04",
+      "session": "sim-aster-2026-11-04",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -166,8 +166,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-25",
-      "session": "sim-aster-2026-06-25",
+      "day": "2026-11-05",
+      "session": "sim-aster-2026-11-05",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -182,8 +182,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-26",
-      "session": "sim-aster-2026-06-26",
+      "day": "2026-11-06",
+      "session": "sim-aster-2026-11-06",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -198,8 +198,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-27",
-      "session": "sim-aster-2026-06-27",
+      "day": "2026-11-07",
+      "session": "sim-aster-2026-11-07",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -214,8 +214,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-28",
-      "session": "sim-aster-2026-06-28",
+      "day": "2026-11-08",
+      "session": "sim-aster-2026-11-08",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -230,8 +230,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-29",
-      "session": "sim-aster-2026-06-29",
+      "day": "2026-11-09",
+      "session": "sim-aster-2026-11-09",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -246,8 +246,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-06-30",
-      "session": "sim-aster-2026-06-30",
+      "day": "2026-11-10",
+      "session": "sim-aster-2026-11-10",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -262,8 +262,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-01",
-      "session": "sim-aster-2026-07-01",
+      "day": "2026-11-11",
+      "session": "sim-aster-2026-11-11",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -278,8 +278,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-02",
-      "session": "sim-aster-2026-07-02",
+      "day": "2026-11-12",
+      "session": "sim-aster-2026-11-12",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -294,8 +294,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-03",
-      "session": "sim-aster-2026-07-03",
+      "day": "2026-11-13",
+      "session": "sim-aster-2026-11-13",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -310,8 +310,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-04",
-      "session": "sim-aster-2026-07-04",
+      "day": "2026-11-14",
+      "session": "sim-aster-2026-11-14",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -326,8 +326,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-05",
-      "session": "sim-aster-2026-07-05",
+      "day": "2026-11-15",
+      "session": "sim-aster-2026-11-15",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -342,8 +342,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-06",
-      "session": "sim-aster-2026-07-06",
+      "day": "2026-11-16",
+      "session": "sim-aster-2026-11-16",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": null,
@@ -354,8 +354,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-07",
-      "session": "sim-aster-2026-07-07",
+      "day": "2026-11-17",
+      "session": "sim-aster-2026-11-17",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -370,8 +370,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-08",
-      "session": "sim-aster-2026-07-08",
+      "day": "2026-11-18",
+      "session": "sim-aster-2026-11-18",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -386,8 +386,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-09",
-      "session": "sim-aster-2026-07-09",
+      "day": "2026-11-19",
+      "session": "sim-aster-2026-11-19",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -402,8 +402,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-10",
-      "session": "sim-aster-2026-07-10",
+      "day": "2026-11-20",
+      "session": "sim-aster-2026-11-20",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -418,8 +418,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-11",
-      "session": "sim-aster-2026-07-11",
+      "day": "2026-11-21",
+      "session": "sim-aster-2026-11-21",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -434,8 +434,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-aster",
-      "day": "2026-07-12",
-      "session": "sim-aster-2026-07-12",
+      "day": "2026-11-22",
+      "session": "sim-aster-2026-11-22",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -450,8 +450,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-15",
-      "session": "sim-birch-2026-06-15",
+      "day": "2026-10-26",
+      "session": "sim-birch-2026-10-26",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -466,8 +466,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-16",
-      "session": "sim-birch-2026-06-16",
+      "day": "2026-10-27",
+      "session": "sim-birch-2026-10-27",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -482,8 +482,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-17",
-      "session": "sim-birch-2026-06-17",
+      "day": "2026-10-28",
+      "session": "sim-birch-2026-10-28",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -498,8 +498,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-18",
-      "session": "sim-birch-2026-06-18",
+      "day": "2026-10-29",
+      "session": "sim-birch-2026-10-29",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -514,8 +514,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-19",
-      "session": "sim-birch-2026-06-19",
+      "day": "2026-10-30",
+      "session": "sim-birch-2026-10-30",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -530,8 +530,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-20",
-      "session": "sim-birch-2026-06-20",
+      "day": "2026-10-31",
+      "session": "sim-birch-2026-10-31",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -546,8 +546,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-21",
-      "session": "sim-birch-2026-06-21",
+      "day": "2026-11-01",
+      "session": "sim-birch-2026-11-01",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": null,
@@ -558,8 +558,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-22",
-      "session": "sim-birch-2026-06-22",
+      "day": "2026-11-02",
+      "session": "sim-birch-2026-11-02",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -574,8 +574,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-23",
-      "session": "sim-birch-2026-06-23",
+      "day": "2026-11-03",
+      "session": "sim-birch-2026-11-03",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -590,8 +590,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-24",
-      "session": "sim-birch-2026-06-24",
+      "day": "2026-11-04",
+      "session": "sim-birch-2026-11-04",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -606,8 +606,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-25",
-      "session": "sim-birch-2026-06-25",
+      "day": "2026-11-05",
+      "session": "sim-birch-2026-11-05",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -622,8 +622,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-26",
-      "session": "sim-birch-2026-06-26",
+      "day": "2026-11-06",
+      "session": "sim-birch-2026-11-06",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -638,8 +638,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-27",
-      "session": "sim-birch-2026-06-27",
+      "day": "2026-11-07",
+      "session": "sim-birch-2026-11-07",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -654,8 +654,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-28",
-      "session": "sim-birch-2026-06-28",
+      "day": "2026-11-08",
+      "session": "sim-birch-2026-11-08",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -670,8 +670,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-29",
-      "session": "sim-birch-2026-06-29",
+      "day": "2026-11-09",
+      "session": "sim-birch-2026-11-09",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -686,8 +686,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-06-30",
-      "session": "sim-birch-2026-06-30",
+      "day": "2026-11-10",
+      "session": "sim-birch-2026-11-10",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -702,8 +702,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-01",
-      "session": "sim-birch-2026-07-01",
+      "day": "2026-11-11",
+      "session": "sim-birch-2026-11-11",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -718,8 +718,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-02",
-      "session": "sim-birch-2026-07-02",
+      "day": "2026-11-12",
+      "session": "sim-birch-2026-11-12",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -734,8 +734,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-03",
-      "session": "sim-birch-2026-07-03",
+      "day": "2026-11-13",
+      "session": "sim-birch-2026-11-13",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -750,8 +750,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-04",
-      "session": "sim-birch-2026-07-04",
+      "day": "2026-11-14",
+      "session": "sim-birch-2026-11-14",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -766,8 +766,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-05",
-      "session": "sim-birch-2026-07-05",
+      "day": "2026-11-15",
+      "session": "sim-birch-2026-11-15",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -782,8 +782,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-06",
-      "session": "sim-birch-2026-07-06",
+      "day": "2026-11-16",
+      "session": "sim-birch-2026-11-16",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -798,8 +798,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-07",
-      "session": "sim-birch-2026-07-07",
+      "day": "2026-11-17",
+      "session": "sim-birch-2026-11-17",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": null,
@@ -810,8 +810,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-08",
-      "session": "sim-birch-2026-07-08",
+      "day": "2026-11-18",
+      "session": "sim-birch-2026-11-18",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -826,8 +826,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-09",
-      "session": "sim-birch-2026-07-09",
+      "day": "2026-11-19",
+      "session": "sim-birch-2026-11-19",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -842,8 +842,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-10",
-      "session": "sim-birch-2026-07-10",
+      "day": "2026-11-20",
+      "session": "sim-birch-2026-11-20",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -858,8 +858,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-11",
-      "session": "sim-birch-2026-07-11",
+      "day": "2026-11-21",
+      "session": "sim-birch-2026-11-21",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -874,8 +874,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-birch",
-      "day": "2026-07-12",
-      "session": "sim-birch-2026-07-12",
+      "day": "2026-11-22",
+      "session": "sim-birch-2026-11-22",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -890,8 +890,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-15",
-      "session": "sim-cedar-2026-06-15",
+      "day": "2026-10-26",
+      "session": "sim-cedar-2026-10-26",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -906,8 +906,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-16",
-      "session": "sim-cedar-2026-06-16",
+      "day": "2026-10-27",
+      "session": "sim-cedar-2026-10-27",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -922,8 +922,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-17",
-      "session": "sim-cedar-2026-06-17",
+      "day": "2026-10-28",
+      "session": "sim-cedar-2026-10-28",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -938,8 +938,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-18",
-      "session": "sim-cedar-2026-06-18",
+      "day": "2026-10-29",
+      "session": "sim-cedar-2026-10-29",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -954,8 +954,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-19",
-      "session": "sim-cedar-2026-06-19",
+      "day": "2026-10-30",
+      "session": "sim-cedar-2026-10-30",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -970,8 +970,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-20",
-      "session": "sim-cedar-2026-06-20",
+      "day": "2026-10-31",
+      "session": "sim-cedar-2026-10-31",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -986,8 +986,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-21",
-      "session": "sim-cedar-2026-06-21",
+      "day": "2026-11-01",
+      "session": "sim-cedar-2026-11-01",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -1002,8 +1002,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-22",
-      "session": "sim-cedar-2026-06-22",
+      "day": "2026-11-02",
+      "session": "sim-cedar-2026-11-02",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": null,
@@ -1014,8 +1014,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-23",
-      "session": "sim-cedar-2026-06-23",
+      "day": "2026-11-03",
+      "session": "sim-cedar-2026-11-03",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -1030,8 +1030,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-24",
-      "session": "sim-cedar-2026-06-24",
+      "day": "2026-11-04",
+      "session": "sim-cedar-2026-11-04",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -1046,8 +1046,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-25",
-      "session": "sim-cedar-2026-06-25",
+      "day": "2026-11-05",
+      "session": "sim-cedar-2026-11-05",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -1062,8 +1062,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-26",
-      "session": "sim-cedar-2026-06-26",
+      "day": "2026-11-06",
+      "session": "sim-cedar-2026-11-06",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -1078,8 +1078,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-27",
-      "session": "sim-cedar-2026-06-27",
+      "day": "2026-11-07",
+      "session": "sim-cedar-2026-11-07",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -1094,8 +1094,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-28",
-      "session": "sim-cedar-2026-06-28",
+      "day": "2026-11-08",
+      "session": "sim-cedar-2026-11-08",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -1110,8 +1110,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-29",
-      "session": "sim-cedar-2026-06-29",
+      "day": "2026-11-09",
+      "session": "sim-cedar-2026-11-09",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -1126,8 +1126,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-06-30",
-      "session": "sim-cedar-2026-06-30",
+      "day": "2026-11-10",
+      "session": "sim-cedar-2026-11-10",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -1142,8 +1142,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-01",
-      "session": "sim-cedar-2026-07-01",
+      "day": "2026-11-11",
+      "session": "sim-cedar-2026-11-11",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -1158,8 +1158,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-02",
-      "session": "sim-cedar-2026-07-02",
+      "day": "2026-11-12",
+      "session": "sim-cedar-2026-11-12",
       "local_hour": 20,
       "active_minutes": 45,
       "symptoms": {
@@ -1174,8 +1174,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-03",
-      "session": "sim-cedar-2026-07-03",
+      "day": "2026-11-13",
+      "session": "sim-cedar-2026-11-13",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -1190,8 +1190,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-04",
-      "session": "sim-cedar-2026-07-04",
+      "day": "2026-11-14",
+      "session": "sim-cedar-2026-11-14",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -1206,8 +1206,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-05",
-      "session": "sim-cedar-2026-07-05",
+      "day": "2026-11-15",
+      "session": "sim-cedar-2026-11-15",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -1222,8 +1222,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-06",
-      "session": "sim-cedar-2026-07-06",
+      "day": "2026-11-16",
+      "session": "sim-cedar-2026-11-16",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {
@@ -1238,8 +1238,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-07",
-      "session": "sim-cedar-2026-07-07",
+      "day": "2026-11-17",
+      "session": "sim-cedar-2026-11-17",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -1254,8 +1254,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-08",
-      "session": "sim-cedar-2026-07-08",
+      "day": "2026-11-18",
+      "session": "sim-cedar-2026-11-18",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": null,
@@ -1266,8 +1266,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-09",
-      "session": "sim-cedar-2026-07-09",
+      "day": "2026-11-19",
+      "session": "sim-cedar-2026-11-19",
       "local_hour": 9,
       "active_minutes": 45,
       "symptoms": {
@@ -1282,8 +1282,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-10",
-      "session": "sim-cedar-2026-07-10",
+      "day": "2026-11-20",
+      "session": "sim-cedar-2026-11-20",
       "local_hour": 12,
       "active_minutes": 45,
       "symptoms": {
@@ -1298,8 +1298,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-11",
-      "session": "sim-cedar-2026-07-11",
+      "day": "2026-11-21",
+      "session": "sim-cedar-2026-11-21",
       "local_hour": 15,
       "active_minutes": 45,
       "symptoms": {
@@ -1314,8 +1314,8 @@
     {
       "provenance": "simulated_study",
       "participant": "sim-cedar",
-      "day": "2026-07-12",
-      "session": "sim-cedar-2026-07-12",
+      "day": "2026-11-22",
+      "session": "sim-cedar-2026-11-22",
       "local_hour": 18,
       "active_minutes": 45,
       "symptoms": {

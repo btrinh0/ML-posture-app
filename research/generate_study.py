@@ -11,7 +11,7 @@ import numpy as np
 from dataset import LABELS, WINDOW, rolling
 
 SEED = 41723
-START = date(2026, 6, 15)
+START = date(2026, 10, 26)
 PEOPLE = ("Aster", "Birch", "Cedar")
 VISITS = {2: "development", 8: "development", 15: "development", 24: "follow_up"}
 SECONDS = 45 * 60

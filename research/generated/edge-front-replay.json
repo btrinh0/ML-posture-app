@@ -1,0 +1,21 @@
+{
+  "measured_on": "2026-11-23",
+  "cpu": "12th Gen Intel(R) Core(TM) i9-12900KF",
+  "logical_processors": 24,
+  "os": "10.0.26100",
+  "seconds_per_mode": 24,
+  "source": "Public MediaPipe pose.jpg replayed at 640×480 in an isolated profile. Stable front view.",
+  "summaries": {
+    "adaptive": {
+      "samples": 8,
+      "mean_cpu": 0.46782653900249627,
+      "mean_working_set_mb": 596.4228515625
+    },
+    "fixed": {
+      "samples": 8,
+      "mean_cpu": 2.4172353312277157,
+      "mean_working_set_mb": 587.73388671875
+    }
+  },
+  "reference_url": "https://storage.googleapis.com/mediapipe-assets/pose.jpg"
+}
