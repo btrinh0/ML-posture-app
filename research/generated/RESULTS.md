@@ -104,4 +104,15 @@ Two additional 45-minute scenarios start from the same four-week history for eac
 | Birch | 0 | 0 | 20.9 | — |
 | Cedar | 0 | 1 | 20.5 | 61 |
 
+## Measured Windows desktop performance
+
+The installed-format Deskframe 1.1.0 executable ran its actual pose sensor and bundled classifier on an in-memory replay of a generated side-view image. The test host used a 12th Gen Intel(R) Core(TM) i9-12900KF with 24 logical processors and Windows 10.0.26100. Each policy had eight process samples over 24 seconds after warm-up.
+
+| Sampling | Mean CPU (%) | Mean working set (MiB) | Sampled ONNX windows | Mean sampled window (ms) |
+| --- | --- | --- | --- | --- |
+| adaptive | 0.27 | 664.6 | 3 | 0.167 |
+| fixed | 2.41 | 664.4 | 3 | 0.200 |
+
+Across 100 additional warm windows the bundled classifier had a desktop p95 of approximately 0.10 ms, including feature preparation. The renderer clock resolves about 0.1 ms. Its labels matched the Python CPU graph on all 15 cross-runtime cases. The CPU and memory figures sum the Electron processes. A single stable reference on this desktop does not establish laptop battery life or clinical performance. [Sampling results](edge-side-replay.json), [ONNX timings](onnx-replay.json)
+
 Reproduce the study or collect new data using the [research instructions](../README.md). Explore the records under **Trends → Data source** in the desktop app.

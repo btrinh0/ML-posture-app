@@ -13,7 +13,9 @@ const fixtures = process.argv
   .slice(2)
   .find((v) => v.startsWith('--fixtures='))
   ?.slice('--fixtures='.length);
-const reference = process.argv
+const sideImage = process.argv.slice(2).find((v) => v.startsWith('--side-image='))?.slice('--side-image='.length);
+const verifyOnly = process.argv.includes('--verify-only');
+const reference = sideImage || process.argv
   .slice(2)
   .find((v) => v.startsWith('--pose-image='))
   ?.slice('--pose-image='.length);
@@ -54,22 +56,48 @@ try {
   await page.getByRole('button', { name: 'End session' }).waitFor();
   assert.ok(await page.locator('#profiles').isDisabled());
   await page.getByRole('button', { name: 'Pose sensor' }).click();
+  await page.getByText(/LightGBM .*trained on simulated sessions/).waitFor();
+  assert.equal(await page.evaluate(() => performance.getEntriesByType('resource').some((r) => r.name.includes('ort-wasm'))), false);
+  await page.locator('#remove-model').click();
+  await page.getByText('Static posture rules', { exact: true }).waitFor();
+  await page.reload();
+  await page.getByRole('button', { name: 'Pose sensor' }).click();
+  await page.locator('#bundled-model').waitFor();
+  assert.equal(await page.evaluate(() => window.desk.model(false)), null);
+  await page.locator('#bundled-model').click();
+  await page.getByText(/LightGBM .*trained on simulated sessions/).waitFor();
   // Feed deterministic, memory-only frames through the real video element and MediaPipe runtime.
-  if (reference) await page.locator('#view').selectOption('front');
+  if (reference) await page.locator('#view').selectOption(sideImage ? 'side' : 'front');
   const pixels = reference ? (await readFile(reference)).toString('base64') : null;
-  await page.evaluate(async (pixels) => {
+  await page.evaluate(async ({ pixels, side, mime }) => {
     const canvas = document.createElement('canvas');
     canvas.width = 640;
     canvas.height = 480;
     const ctx = canvas.getContext('2d');
     const source = new Image();
     if (pixels) {
-      source.src = 'data:image/jpeg;base64,' + pixels;
+      source.src = 'data:' + mime + ';base64,' + pixels;
       await source.decode();
     }
     let frame = 0;
     const paint = () => {
-      if (pixels)
+      if (pixels && side) {
+        const scale = Math.min(640 / source.width, 480 / source.height);
+        ctx.fillStyle = '#eee';
+        ctx.fillRect(0, 0, 640, 480);
+        ctx.drawImage(source, (640 - source.width*scale)/2, (480 - source.height*scale)/2, source.width*scale, source.height*scale);
+        if (window.testMarkers) {
+          // Known pixel targets on the generated reference check the optical
+          // angle path independently from the unmarked ear–shoulder angle.
+          for (const [x, y, color] of [[.449, .109, '#00ebef'], [.417, .189, '#f208ec']]) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc((640-source.width*scale)/2 + x*source.width*scale,
+              (480-source.height*scale)/2 + y*source.height*scale, 3.5, 0, 2*Math.PI);
+            ctx.fill();
+          }
+        }
+      } else if (pixels)
         ctx.drawImage(
           source,
           source.width * 0.15,
@@ -97,7 +125,7 @@ try {
         return stream;
       },
     });
-  }, pixels);
+  }, { pixels, side: Boolean(sideImage), mime: reference?.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg' });
   await page.getByRole('button', { name: 'Start camera' }).click();
   await page
     .waitForFunction(
@@ -124,6 +152,12 @@ try {
       .catch(async (err) => {
         throw new Error((await page.locator('#sensor-message').textContent()) + ' / ' + err.message);
       });
+    if (sideImage) {
+      await page.waitForFunction(() => /FPS.*(Neutral|Sustained slouch|Writing|Brief reading|Reaching)/.test(document.querySelector('#sensor-message').textContent),
+        null, { timeout: 80_000 });
+    }
+  }
+  if (reference && !verifyOnly) {
     const summaries = {};
     for (const policy of ['adaptive', 'fixed']) {
       await page.locator('#policy').selectOption(policy);
@@ -147,6 +181,9 @@ try {
         mean_cpu: readings.reduce((n, r) => n + r.cpu, 0) / readings.length,
         mean_working_set_mb: readings.reduce((n, r) => n + r.mb, 0) / readings.length,
       };
+      const perf = (await page.evaluate(() => window.desk.report(7))).performance.find((p) => p.policy === policy);
+      summaries[policy].sampled_onnx_windows = perf?.timed_windows ?? 0;
+      summaries[policy].mean_sampled_onnx_ms = perf?.latency ?? null;
     }
     const result = {
       cpu: cpus()[0].model,
@@ -154,11 +191,32 @@ try {
       os: release(),
       seconds_per_mode: 24,
       source:
-        'Public MediaPipe pose.jpg, replayed at 640×480 in an active isolated profile; stable front-view reference.',
+        sideImage ? 'Generated seated side view at 640×480. Real pose sensor and bundled activity classifier in an isolated profile.' :
+          'Public MediaPipe pose.jpg, replayed at 640×480 in an active isolated profile. Stable front-view reference.',
       summaries,
     };
-    await writeFile(join(qa, 'edge-replay.json'), JSON.stringify(result, null, 2));
+    await writeFile(join(qa, sideImage ? 'edge-side-replay.json' : 'edge-replay.json'), JSON.stringify(result, null, 2));
     console.log('Measured reference replay:', JSON.stringify(result));
+  }
+  if (sideImage) {
+    await page.locator('#capture').check();
+    await page.waitForFunction(async () => (await window.desk.state()).collecting);
+    await page.locator('#camera-button').focus();
+    await page.keyboard.press('3');
+    await page.waitForFunction(async () => (await window.desk.state()).label === 'writing');
+    if (sideImage.replaceAll('\\','/').endsWith('research/generated/side-view.png')) {
+      await page.evaluate(() => { window.testMarkers = true; });
+      await page.locator('#markers').check();
+      await page.locator('#readings').getByText('Tragus–C7 CVA', { exact: true }).waitFor();
+      await page.waitForFunction(async () => (await window.desk.report(7)).series.at(-1).marker_seconds > 0);
+      const measured = await page.evaluate(async () => (await window.desk.report(7)).series.at(-1).marker_cva);
+      assert.ok(Math.abs(measured - Math.atan2(.08 * 480, .032 * 640) * 180 / Math.PI) < 2, String(measured));
+    }
+    await page.locator('#capture').uncheck();
+    await client.evaluate(({ powerMonitor }) => { powerMonitor.getSystemIdleTime = () => 120; });
+    await page.waitForFunction(() => !window.testTrack.enabled && document.querySelector('#sensor-message').textContent.includes('0 FPS'));
+    await client.evaluate(({ powerMonitor }) => { powerMonitor.getSystemIdleTime = () => 0; });
+    await page.waitForFunction(() => window.testTrack.enabled);
   }
   await page.getByRole('button', { name: 'Stop camera' }).click();
   assert.equal(await page.locator('video').evaluate((v) => v.srcObject), null);
@@ -186,6 +244,21 @@ try {
   assert.equal(state.setupResult.score, 1);
   await page.getByRole('button', { name: 'Trends', exact: true }).click();
   await page.locator('#heat table').waitFor();
+  await page.locator('#change-title').fill('Raised the test screen');
+  await page.getByRole('button', { name: 'Record change' }).click();
+  await page.locator('#change-results').getByRole('heading', { name: 'Raised the test screen' }).waitFor();
+  const personal = await page.evaluate(() => window.desk.report(28));
+  assert.equal(personal.changes[0].after.neck, 2);
+  assert.equal(personal.changes[0].before.neck, null);
+  for (const [key, change] of [['aster','Raised the monitor'], ['birch','Moved the keyboard closer'], ['cedar','Added foot support']]) {
+    await page.locator('#report-source').selectOption(key);
+    await page.locator('#change-results').getByRole('heading', { name: change }).waitFor();
+    assert.ok(await page.locator('#change-form').isHidden());
+    assert.equal(await page.locator('#weekly tbody tr').count(), 4);
+    assert.ok((await page.locator('#report-context').innerText()).includes('fictional'));
+  }
+  await page.locator('#report-source').selectOption('personal');
+  await page.locator('#change-results').getByRole('heading', { name: 'Raised the test screen' }).waitFor();
   await page.locator('#range').selectOption('7');
   await page.locator('#plot-group').selectOption('daily');
   await page.locator('#weekly').evaluate((el) => (el.closest('details').open = true));
@@ -194,11 +267,16 @@ try {
   await page.screenshot({ path: join(qa, 'trends.png') });
   await page.getByRole('button', { name: 'Study desk', exact: true }).click();
   await page.screenshot({ path: join(qa, 'study-desk.png') });
-  if (fixtures) {
+  {
+    const shipped = await page.evaluate(() => window.desk.model(false));
+    const { cases } = JSON.parse(await readFile('research/generated/desktop-cases.json', 'utf8'));
+    const suites = [{ kind: 'bundled', bundle: shipped, x: cases.map((v) => v.x), y: cases.map((v) => v.prediction) }];
+    if (fixtures) for (const kind of ['rules', 'tree', 'cnn']) {
+      suites.push({ kind, bundle: JSON.parse(await readFile(join(fixtures, 'fixture-' + kind + '.deskmodel'), 'utf8')),
+        ...JSON.parse(await readFile(join(fixtures, 'parity-' + kind + '.json'), 'utf8')) });
+    }
     const latency = {};
-    for (const kind of ['rules', 'tree', 'cnn']) {
-      const bundle = JSON.parse(await readFile(join(fixtures, 'fixture-' + kind + '.deskmodel'), 'utf8'));
-      const checks = JSON.parse(await readFile(join(fixtures, 'parity-' + kind + '.json'), 'utf8'));
+    for (const { kind, bundle, x, y } of suites) {
       const actual = await page.evaluate(
         async ({ bundle, x }) => {
           const { openClassifier } = await import('./classifier.mjs');
@@ -219,13 +297,13 @@ try {
             await model.close();
           }
         },
-        { bundle, x: checks.x },
+        { bundle, x },
       );
-      assert.deepEqual(actual.results, checks.y, kind + ' browser/Python predictions differ');
+      assert.deepEqual(actual.results, y, kind + ' browser/Python predictions differ');
       const { results, ...timing } = actual;
       latency[kind] = timing;
     }
-    console.log('All three ONNX graphs matched Python CPU predictions inside the desktop WASM runtime.');
+    console.log('Python and desktop CPU predictions matched for ' + suites.map((suite) => suite.kind).join(', ') + '.');
     await writeFile(join(qa, 'onnx-replay.json'), JSON.stringify(latency, null, 2));
     console.log('Warm desktop ONNX window timings (ms):', JSON.stringify(latency));
   }

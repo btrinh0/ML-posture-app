@@ -192,6 +192,19 @@ table(['Profile', 'Steady-session forecast nudges', 'Progressive-session forecas
     const { stable, progressive } = dashboard.controlled[name.toLowerCase()];
     return [name, stable.nudges.length, progressive.nudges.length, fmt(progressive.onset/60, 1), fmt(progressive.lead_seconds, 0)];
   }));
+const edge = await json('edge-side-replay.json').catch((err) => {
+  if (err.code !== 'ENOENT') throw err;
+});
+if (edge) {
+  para('## Measured Windows desktop performance');
+  para('The installed-format Deskframe 1.1.0 executable ran its actual pose sensor and bundled classifier on an in-memory replay of a generated side-view image. The test host used a ' + edge.cpu + ' with ' + edge.logical_processors + ' logical processors and Windows ' + edge.os + '. Each policy had eight process samples over ' + edge.seconds_per_mode + ' seconds after warm-up.');
+  table(['Sampling', 'Mean CPU (%)', 'Mean working set (MiB)', 'Sampled ONNX windows', 'Mean sampled window (ms)'],
+    Object.entries(edge.summaries).map(([k,r]) => [k,fmt(r.mean_cpu),fmt(r.mean_working_set_mb,1),
+      r.sampled_onnx_windows,fmt(r.mean_sampled_onnx_ms,3)]));
+  const latency = await json('onnx-replay.json');
+  para('Across 100 additional warm windows the bundled classifier had a desktop p95 of approximately ' +
+    fmt(latency.bundled.p95_ms,2) + ' ms, including feature preparation. The renderer clock resolves about 0.1 ms. Its labels matched the Python CPU graph on all 15 cross-runtime cases. The CPU and memory figures sum the Electron processes. A single stable reference on this desktop does not establish laptop battery life or clinical performance. [Sampling results](edge-side-replay.json), [ONNX timings](onnx-replay.json)');
+}
 para('Reproduce the study or collect new data using the [research instructions](../README.md). Explore the records under **Trends → Data source** in the desktop app.');
 await writeFile(join(dir, 'RESULTS.md'), lines.join('\n'));
 console.log('Created the three local example dashboards and study results.');

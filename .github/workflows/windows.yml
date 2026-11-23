@@ -3,6 +3,7 @@ name: Windows desktop
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -21,11 +22,44 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run dist:win
-      - name: Verify the packaged desktop app
-        run: npm run test:desktop -- release/win-unpacked/Deskframe.exe
+      - name: Install and verify the desktop app on a clean Windows runner
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -LiteralPath release -Filter 'Deskframe-Setup-*.exe' | Select-Object -First 1
+          $destination = Join-Path $env:RUNNER_TEMP 'Deskframe'
+          $process = Start-Process -FilePath $installer.FullName -ArgumentList "/S /D=$destination" -WindowStyle Hidden -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "Installer failed with exit code $($process.ExitCode)." }
+          $paths = @((Join-Path $destination 'Deskframe.exe'), (Join-Path $env:LOCALAPPDATA 'Programs/deskframe/Deskframe.exe'))
+          $installed = $paths | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+          if (!$installed) { throw 'The installer completed without an installed Deskframe executable.' }
+          npm run test:desktop -- "$installed" --side-image=research/generated/side-view.png --verify-only
       - uses: actions/upload-artifact@v7
         with:
           name: Deskframe-Windows-x64
           path: release/Deskframe-Setup-*.exe
           if-no-files-found: error
           compression-level: 0
+
+  release:
+    needs: installer
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Publish the verified Windows installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          name="Deskframe-Setup-${GITHUB_REF_NAME#v}.exe"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name Deskframe-Windows-x64 --dir verified
+          test -s "verified/$name"
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            if ! gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fxq "$name"; then
+              gh release upload "$GITHUB_REF_NAME" "verified/$name" --repo "$GITHUB_REPOSITORY"
+            fi
+          else
+            gh release create "$GITHUB_REF_NAME" "verified/$name" --repo "$GITHUB_REPOSITORY" --verify-tag --title "Deskframe $GITHUB_REF_NAME" --notes "Windows x64 installer with the offline posture sensor, activity classifier, and three fictional four-week example profiles. The installer is unsigned."
+          fi

@@ -4,7 +4,9 @@ Deskframe is a local-first Windows desktop companion for study sessions. Start w
 
 ## Install
 
-Run the Windows x64 installer `Deskframe-Setup-1.0.0.exe`. It installs for the current user and includes the offline sensor, SQLite and the ONNX CPU runtime. The current installer is unsigned. Completed **Windows desktop** workflow runs offer the installer in the **Deskframe-Windows-x64** artifact. **Desk setup → Desktop preferences** controls launch at sign-in. Use **Quit Deskframe** in the tray menu to exit. [Windows builds](https://github.com/btrinh0/test/actions/workflows/windows.yml)
+Download the Windows x64 installer `Deskframe-Setup-1.1.0.exe` from the release. It installs for the current user and includes the offline sensor, SQLite, a trained activity model and the ONNX CPU runtime. The installer is unsigned. **Desk setup → Desktop preferences** controls launch at sign-in. Use **Quit Deskframe** in the tray menu to exit. [Windows installer](https://github.com/btrinh0/test/releases/download/v1.1.0/Deskframe-Setup-1.1.0.exe), [Windows build checks](https://github.com/btrinh0/test/actions/workflows/windows.yml)
+
+To explore immediately, open **Trends → Data source** and choose **Aster**, **Birch** or **Cedar**. Each fictional participant has four weeks of simulated sessions, symptom scores, completed drills and a dated desk change. The examples open offline. Your personal profile has its own database records. [Measured study results](research/generated/RESULTS.md)
 
 ## Run from source
 
@@ -23,7 +25,7 @@ Run `npm.cmd test` for the domain tests, then `npm.cmd run build` and `npm.cmd r
 2. Start a session in **Study desk**. After 60 seconds of system inactivity the clock pauses. A break can be completed, snoozed for five active minutes, or skipped. Short movement breaks and changes of position are discussed in the [OSHA work process guide](https://www.osha.gov/etools/computer-workstations/work-process).
 3. Log jaw, neck and upper-back discomfort once per day. Saving again edits that day’s entry. Use a separate local profile for each person.
 
-The movement library offers optional gentle movements for desk breaks. Its references include [University Hospitals Sussex](https://www.uhsussex.nhs.uk/resources/self-treatment-of-acute-neck-pain-2/) and [Leeds Teaching Hospitals](https://www.leedsth.nhs.uk/patients/resources/shoulder-exercises/).
+**Desk setup → Movement break instructions** includes chin tucks, upper-back extension, shoulder-blade squeezes and a jaw tension check. These general instructions draw on published movement guidance and advice about daytime clenching. [University Hospitals Sussex](https://www.uhsussex.nhs.uk/resources/self-treatment-of-acute-neck-pain-2/), [Leeds Teaching Hospitals](https://www.leedsth.nhs.uk/patients/resources/shoulder-exercises/), [NIDCR guidance on temporomandibular disorders](https://www.nidcr.nih.gov/health-info/tmd)
 
 ## Optional camera sensing
 
@@ -32,17 +34,20 @@ Start a study session, open **Pose sensor**, choose a view, and start the camera
 | View | Measurements |
 | --- | --- |
 | Side profile | The ear–shoulder inclination in a torso-relative coordinate system estimates a CVA-like angle. Forward head offset and shoulder displacement relative to the hip use torso-length units. Shoulder displacement includes torso lean. |
+| Side profile with two markers | With a level camera and correctly located cyan tragus and magenta C7 markers, Deskframe measures the angle from the image horizontal at C7 to the tragus, plus forward shoulder offset from C7. Missing or ambiguous dots produce a gap in the marker series. |
 | Front facing | Signed shoulder elevation relative to the baseline uses the height difference divided by shoulder width. Positive values indicate a higher anatomical left shoulder. |
 
 The side-view moment illustration uses a 10 lbf head weight, a nominal 0.50 m torso, and the normalized forward offset. Dividing the moment by a reference arm of 0.10 m yields an equivalent lever force in lbf. Individual head mass, muscle forces and joint loads are unmeasured. The camera proxies and alert thresholds are engineering measures for within-setup tracking. Clinical CVA measurement uses the tragus, the C7 landmark and a horizontal reference. [CVA validation study](https://pmc.ncbi.nlm.nih.gov/articles/PMC7559098/)
 
-The local MediaPipe sensor polls at 1 FPS during stable monitoring, targets 12 FPS during calibration or verification, and pauses inference when the OS is idle. **Fixed 30 FPS experiment** enables a comparison run. With valid tracking, a sustained drift cue replaces the scheduled timer cue. Tracking loss brings back timer reminders. [MediaPipe Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js)
+The local MediaPipe sensor targets 1 FPS during stable monitoring and 12 FPS during calibration or verification. It requests the corresponding camera capture rate where the device supports it. The app disables the video track and pauses inference during system idle time. **Fixed 30 FPS experiment** enables a comparison run. The sensor shows its inference target and the camera-reported capture rate. With valid tracking, a sustained drift cue replaces the scheduled timer cue. Tracking loss brings back timer reminders. [MediaPipe Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js)
 
 ## Training and trends
 
-The initial install uses static posture rules. The study tools compare those rules, LightGBM and a PyTorch 1D CNN using 20-second windows and held-out sessions and participants. Import the selected local model to enable ONNX classification. The repository includes reproducible fixture checks. Real-user F1, alert rates and symptom outcomes require participant recordings. [Study and benchmark instructions](research/README.md)
+The installed side-view classifier is a quantized LightGBM model trained on the generated study. It uses mean and latest values in 20-second windows. This variant ranked first on the development session folds. The benchmark includes static rules, full-feature LightGBM, the LightGBM feature ablation, and a compact PyTorch 1D CNN. The app initializes inference on demand. Under **Pose sensor → Activity classifier**, you can switch to static rules, restore the bundled model, or import a model trained on your own exports. [Study and benchmark instructions](research/README.md)
 
 **Trends** shows weekly and daily CVA proxies, neutral tracked time, discomfort, completed drills, week-over-week changes, and a time-of-day heatmap. Percentages use observed seconds. Weekly correlations describe associations between symptoms and measurements from the same day. The most frequently observed weekly drift pattern influences the next movement suggestion. The fatigue forecaster needs 14 observed days, three qualifying historical sessions, and a live side-view classifier. It blends recent and personal historical drift slopes and looks for an accelerating loss approaching the cue threshold within three minutes.
+
+Record a desk or routine adjustment under **Trends → Desk and routine changes**. Deskframe compares the seven calendar days before it with the seven starting on its date. Results include the ear–shoulder angle, marked CVA where available, neutral time, individual discomfort scores, completed drills and data coverage. Observational changes and correlations cannot establish a treatment effect.
 
 ## Local data
 

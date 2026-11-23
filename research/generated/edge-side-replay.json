@@ -1,0 +1,23 @@
+{
+  "cpu": "12th Gen Intel(R) Core(TM) i9-12900KF",
+  "logical_processors": 24,
+  "os": "10.0.26100",
+  "seconds_per_mode": 24,
+  "source": "Generated seated side view at 640×480. Real pose sensor and bundled activity classifier in an isolated profile.",
+  "summaries": {
+    "adaptive": {
+      "samples": 8,
+      "mean_cpu": 0.26770159766727675,
+      "mean_working_set_mb": 664.6376953125,
+      "sampled_onnx_windows": 3,
+      "mean_sampled_onnx_ms": 0.16666666604578495
+    },
+    "fixed": {
+      "samples": 8,
+      "mean_cpu": 2.4074975793949074,
+      "mean_working_set_mb": 664.44970703125,
+      "sampled_onnx_windows": 3,
+      "mean_sampled_onnx_ms": 0.19999999987582365
+    }
+  }
+}
