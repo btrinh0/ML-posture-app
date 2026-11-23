@@ -8,3 +8,4 @@ __pycache__/
 *.sqlite*
 *.deskmodel
 study-data/
+*.jsonl
