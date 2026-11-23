@@ -1,0 +1,18 @@
+appId: org.deskframe.companion
+productName: Deskframe
+directories:
+  output: release
+files:
+  - desktop/**/*
+  - dist/**/*
+  - package.json
+asar: true
+npmRebuild: false
+win:
+  icon: assets/icon.ico
+  target: nsis
+nsis:
+  oneClick: true
+  perMachine: false
+  deleteAppDataOnUninstall: false
+artifactName: Deskframe-Setup-${version}.${ext}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Deskframe</title><link rel="stylesheet" href="./style.css"><script type="module" src="./dashboard.mjs"></script>
+</head>
+<body>
+<aside class="rail">
+  <div class="brand"><img src="./assets/icon.png" alt="">Deskframe</div>
+  <nav aria-label="Workspace">
+    <button data-page="today" aria-current="page">Study desk</button>
+    <button data-page="setup">Desk setup</button>
+    <button data-page="sensor">Pose sensor</button>
+    <button data-page="trends">Trends</button>
+  </nav>
+  <div class="account"><label for="profiles">Local profile</label><select id="profiles"></select><button class="link" id="add-profile">Add profile</button></div>
+</aside>
+<main>
+  <header><p id="date"></p><span class="local"><span class="dot"></span> On this device</span></header>
+  <div id="feedback" role="status" hidden></div>
+  <section id="today" class="page">
+    <h1>Study desk</h1>
+    <article class="focus">
+      <div class="focus-header"><h2>Study session</h2><span id="session-status">Ready</span></div>
+      <p id="clock" aria-label="Active study time">00:00</p>
+      <progress id="progress" max="1" value="0" aria-label="Progress to movement break"></progress>
+      <div class="focus-foot"><span id="next-break">Movement break after 30 active minutes</span><button id="session-button" class="accent">Start session</button></div>
+    </article>
+    <article id="prompt" class="notice" hidden><div><p class="eyebrow" id="prompt-kind"></p><h2 id="prompt-title"></h2><p id="prompt-body"></p><p class="hint">Move within a comfortable range. Stop if symptoms increase.</p></div>
+      <div class="controls"><button data-outcome="completed" class="primary">Completed</button><button data-outcome="snoozed">In 5 min</button><button data-outcome="skipped">Skip</button><button data-outcome="false_positive" id="override">False alarm</button></div>
+    </article>
+    <div class="columns">
+      <article class="card"><h2>Daily check-in</h2><p class="muted">Rate each area from 0 (none) to 10 (highest).</p>
+        <form id="symptoms" class="stack"><div id="scores"></div><button class="primary" type="submit">Save check-in</button></form>
+      </article>
+      <article class="card"><h2>Movement breaks</h2><p class="big-number" id="completed">0</p><p class="muted">Completed today</p><hr><p id="desk-status"></p><button class="link" data-open="setup">Review desk setup ↗</button></article>
+    </div>
+    <article class="card"><h2>Recent sessions</h2><div id="history" class="rows"></div></article>
+  </section>
+  <section id="setup" class="page" hidden>
+    <h1>Desk setup</h1>
+    <article class="card"><h2>Workstation check</h2><p class="muted">Choose the closest description for your usual study position.</p>
+      <form id="setup-form" class="stack"><div id="questions"></div>
+        <label>Movement break interval<select id="interval"><option value="25">25 active minutes</option><option value="30" selected>30 active minutes</option><option value="35">35 active minutes</option><option value="40">40 active minutes</option></select></label>
+        <button class="primary" type="submit">Save desk setup</button>
+      </form>
+    </article>
+    <article class="card" id="adjustments" hidden><h2>Desk adjustments</h2><div id="advice"></div></article>
+    <article class="card"><h2>Desktop preferences</h2><label class="inline"><input id="startup" type="checkbox">Open in the tray when I sign in to Windows</label><p class="muted">Closing the window keeps an active session in the tray. Use Quit Deskframe in the tray menu to exit.</p></article>
+  </section>
+  <section id="sensor" class="page" hidden><h1>Pose sensor</h1><div id="sensor-panel"></div></section>
+  <section id="trends" class="page" hidden><h1>Trends</h1><div id="trends-panel"></div></section>
+</main>
+<dialog id="profile-dialog"><form id="profile-form" class="stack"><h2>Add a local profile</h2><label>Nickname<input id="alias" maxlength="32" required autocomplete="off"></label><div class="controls"><button class="primary">Create profile</button><button id="cancel-profile" type="button">Cancel</button></div></form></dialog>
+</body></html>
