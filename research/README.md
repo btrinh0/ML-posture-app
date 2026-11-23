@@ -50,3 +50,5 @@ On November 23, 2026, the Windows build completed ten-second front-view calibrat
 | Fixed sampling, 30 FPS target | 2.42% | 588 MiB |
 
 This short replay measures one desktop and one stable pose. Laptop battery use, a physical webcam, mixed desk behaviors and clinical outcomes require separate observations. To repeat it, download the reference JPEG to `.qa/reference-pose.jpg` and add `--pose-image=.qa/reference-pose.jpg` to the desktop smoke command above. The test writes its measurements under `.qa/`.
+
+On the same machine, the packaged desktop app ran 100 warm ONNX windows per fixture model. The p95 was approximately 0.20 ms for rules, LightGBM and the CNN at the renderer timer’s resolution. Each timing starts with an available 20-second window of pose features and includes input preparation and scoring. All three models matched their Python CPU predictions on ten parity windows each.

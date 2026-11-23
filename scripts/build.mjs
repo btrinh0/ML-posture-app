@@ -5,9 +5,12 @@ import { fileURLToPath } from 'node:url';
 
 const root = await realpath(fileURLToPath(new URL('..', import.meta.url)));
 const out = join(root, 'dist');
-const previous = await lstat(out).catch(e => { if (e.code !== 'ENOENT') throw e; });
+const previous = await lstat(out).catch((e) => {
+  if (e.code !== 'ENOENT') throw e;
+});
 if (previous) {
-  if (previous.isSymbolicLink() || relative(root, await realpath(out)) !== 'dist') throw new Error('Unexpected build directory.');
+  if (previous.isSymbolicLink() || relative(root, await realpath(out)) !== 'dist')
+    throw new Error('Unexpected build directory.');
   await rm(out, { recursive: true });
 }
 await cp(join(root, 'ui'), out, { recursive: true });
@@ -16,12 +19,20 @@ await cp(join(root, 'desktop', 'companion.mjs'), join(out, 'companion.mjs'));
 const assets = join(out, 'assets');
 await mkdir(assets, { recursive: true });
 for (const name of ['icon.png', 'inter.woff2', 'inter-license.txt']) {
-  const source = name === 'icon.png' ? 'assets/icon.png' : name === 'inter.woff2'
-    ? 'node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2' : 'node_modules/@fontsource-variable/inter/LICENSE';
+  const source =
+    name === 'icon.png'
+      ? 'assets/icon.png'
+      : name === 'inter.woff2'
+        ? 'node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2'
+        : 'node_modules/@fontsource-variable/inter/LICENSE';
   await cp(join(root, source), join(assets, name));
 }
 const sensor = join(root, 'assets/pose_landmarker_lite.task');
-if (createHash('sha256').update(await readFile(sensor)).digest('hex') !== '59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a') {
+if (
+  createHash('sha256')
+    .update(await readFile(sensor))
+    .digest('hex') !== '59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a'
+) {
   throw new Error('The pose sensor failed its integrity check.');
 }
 await cp(sensor, join(assets, 'pose.task'));

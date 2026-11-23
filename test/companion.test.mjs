@@ -26,28 +26,44 @@ test('idle and suspension do not advance reminders; retries resolve one prompt o
   const s = new DeskStore(':memory:', () => now);
   s.start();
   assert.throws(() => s.addProfile('Second'));
-  for (let i = 0; i < 1800; i++) { now += 1000; s.tick(true); }
-  now += 3_600_000; s.tick(false);
+  for (let i = 0; i < 1800; i++) {
+    now += 1000;
+    s.tick(true);
+  }
+  now += 3_600_000;
+  s.tick(false);
   assert.equal(s.session.active_ms, 0);
-  for (let i = 0; i < 1800; i++) { now += 1000; s.tick(false); }
+  for (let i = 0; i < 1800; i++) {
+    now += 1000;
+    s.tick(false);
+  }
   const p = s.pending();
   assert.equal(p.kind, 'timer');
   s.tick(false);
-  s.resolve(p.id, 'completed'); s.resolve(p.id, 'completed');
+  s.resolve(p.id, 'completed');
+  s.resolve(p.id, 'completed');
   assert.equal(s.state().completed, 1);
   s.close();
 });
 test('a restarted process closes interrupted sessions at the last checkpoint', () => {
   const dir = mkdtempSync(join(tmpdir(), 'deskframe-store-'));
   try {
-    let now = Date.now(); const path = join(dir, 'desk.sqlite');
+    let now = Date.now();
+    const path = join(dir, 'desk.sqlite');
     const first = new DeskStore(path, () => now);
-    first.start(); now += 5000; first.tick(false); first.prompt('timer','walk');
-    first.db.close(); now += 60_000;
+    first.start();
+    now += 5000;
+    first.tick(false);
+    first.prompt('timer', 'walk');
+    first.db.close();
+    now += 60_000;
     const second = new DeskStore(path, () => now);
     const [entry] = second.state().history;
-    assert.equal(entry.active_ms, 5000); assert.equal(entry.ended, now - 60_000);
+    assert.equal(entry.active_ms, 5000);
+    assert.equal(entry.ended, now - 60_000);
     assert.equal(second.get('SELECT outcome FROM prompts').outcome, 'ended');
     second.close();
-  } finally { rmSync(dir, { recursive: true }); }
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
 });
