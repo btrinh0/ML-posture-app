@@ -2,15 +2,41 @@ import { $, act, feedback } from './dashboard.mjs';
 import { setClassifier } from './sensor.mjs';
 import { openClassifier } from './classifier.mjs';
 
-let current = null;
 const names = { rules: 'Benchmarked static rules', tree: 'LightGBM', cnn: 'Temporal 1D CNN' };
-async function load(pick) {
-  $('import-model').disabled = true;
-  let replacement;
+let current;
+
+// A camera-free session never initializes the ONNX runtime. An explicit import is
+// verified before it replaces a working model.
+function lazyClassifier(bundle) {
+  let loading;
+  let revision = 0;
+  return {
+    reset() {
+      revision++;
+      loading?.then((model) => model.reset(), () => {});
+    },
+    async push(second, vector) {
+      const at = revision;
+      loading ??= openClassifier(bundle);
+      const model = await loading;
+      return revision === at ? model.push(second, vector) : null;
+    },
+    async close() {
+      revision++;
+      if (loading) await loading.then((model) => model.close(), () => {});
+    },
+  };
+}
+async function select(mode) {
+  const controls = ['import-model', 'remove-model', 'bundled-model'].map($);
+  controls.forEach((button) => { button.disabled = true; });
   try {
-    const bundle = await window.desk.model(pick);
-    if (!bundle) return;
-    replacement = await openClassifier(bundle);
+    if (mode === 'rules' && !(await act('removeModel'))) return;
+    if (mode === 'bundled' && !(await act('bundledModel'))) return;
+    const pick = mode === 'import';
+    const bundle = mode === 'rules' ? null : await window.desk.model(pick);
+    if (pick && !bundle) return;
+    const replacement = bundle ? (pick ? await openClassifier(bundle) : lazyClassifier(bundle)) : null;
     if (pick && !(await act('installModel'))) {
       await replacement.close();
       return;
@@ -19,22 +45,18 @@ async function load(pick) {
     current = replacement;
     setClassifier(current);
     await previous?.close();
-    $('model-name').textContent = names[bundle.kind] + ' · local ONNX CPU inference · 20-second windows';
-    $('remove-model').hidden = false;
+    const source = bundle?.provenance === 'simulated_study' ? 'trained on simulated sessions' : 'trained on study exports';
+    const variant = bundle?.variant === 'mean_and_latest' ? ' (mean and latest values)' : '';
+    $('model-name').textContent = bundle ? names[bundle.kind] + variant + ' · ' + source + ' · 20-second windows' : 'Static posture rules';
+    $('remove-model').hidden = !bundle;
+    $('bundled-model').hidden = mode === 'bundled' || bundle?.bundled === true;
   } catch (err) {
     feedback('Could not load the activity model. ' + err.message);
   } finally {
-    $('import-model').disabled = false;
+    controls.forEach((button) => { button.disabled = false; });
   }
 }
-$('import-model').onclick = () => load(true);
-$('remove-model').onclick = async () => {
-  if (!(await act('removeModel'))) return;
-  setClassifier(null);
-  const previous = current;
-  current = null;
-  await previous?.close();
-  $('model-name').textContent = 'Static posture rules';
-  $('remove-model').hidden = true;
-};
-void load(false);
+$('import-model').onclick = () => select('import');
+$('remove-model').onclick = () => select('rules');
+$('bundled-model').onclick = () => select('bundled');
+void select('saved');

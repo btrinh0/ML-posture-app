@@ -7,6 +7,9 @@ export function node(tag, text, cls) {
   if (cls) element.className = cls;
   return element;
 }
+for (const drill of Object.values(drills)) {
+  $('drill-library').append(node('h3', drill.title), node('p', drill.text, 'muted'));
+}
 let state, formKey, feedbackTimer;
 const renderers = new Set();
 export function observe(fn) {

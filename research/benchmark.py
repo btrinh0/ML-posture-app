@@ -92,7 +92,7 @@ def transfer(data, epochs):
             results[user] = {"eligible": False, "reason": "Missing training activities"}
             continue
         results[user] = {}
-        for kind in ("rules","tree","cnn"):
+        for kind in KINDS:
             graph = fit(kind,data.x[train],data.y[train],epochs)
             for other in sorted(set(data.user)-{user}):
                 test = data.user == other
@@ -118,8 +118,12 @@ def partition(rows):
 
 
 def bundle(kind, graph, source):
-    return dict(format="deskframe.model.v1", kind=kind, labels=LABELS, channels=CHANNELS, seconds=WINDOW,
-                provenance=source, model=base64.b64encode(graph).decode("ascii"))
+    result = dict(format="deskframe.model.v1", kind="tree" if kind.startswith("tree") else kind,
+                  labels=LABELS, channels=CHANNELS, seconds=WINDOW, provenance=source,
+                  model=base64.b64encode(graph).decode("ascii"))
+    if kind == "tree_levels_only":
+        result["variant"] = "mean_and_latest"
+    return result
 
 
 def main():
@@ -137,11 +141,11 @@ def main():
         source,data,followup = partition(load(args.exports))
     results = splits(data,args.epochs)
     scores = results["leave_one_session_out"]
-    candidates = [k for k in ("rules","tree","cnn") if scores[k]["p95_ms"] < 15]
+    candidates = [k for k in KINDS if scores[k]["p95_ms"] < 15]
     if candidates:
         chosen = max(candidates,key=lambda k:(scores[k]["macro_f1"],-scores[k]["false_alerts_per_hour"],-scores[k]["p95_ms"]))
     else:
-        chosen = min(("rules","tree","cnn"),key=lambda k:scores[k]["p95_ms"])
+        chosen = min(KINDS,key=lambda k:scores[k]["p95_ms"])
     report = dict(provenance=source, participants=len(set(data.user)), sessions=len(set(data.session)),
                   window_seconds=WINDOW, labels=LABELS, selected=chosen, met_latency_target=bool(candidates),
                   environment={"os":platform.platform(),"onnxruntime":ort.__version__}, results=results)
@@ -149,7 +153,7 @@ def main():
     report["single_participant_transfer"]=transfer(data,args.epochs)
     if followup is not None:
         report["follow_up"]={"sessions":len(set(followup.session)),"participants":len(set(followup.user)),"models":{}}
-    for kind in (("rules","tree","cnn") if args.smoke or followup is not None else (chosen,)):
+    for kind in (KINDS if followup is not None else ("rules","tree","cnn") if args.smoke else (chosen,)):
         graph = fit(kind,data.x[data.trainable],data.y[data.trainable],args.epochs)
         if followup is not None:
             pred,timing=inference(graph,kind,followup.x)

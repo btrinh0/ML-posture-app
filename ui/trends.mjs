@@ -1,4 +1,4 @@
-import { $, feedback, node, observe } from './dashboard.mjs';
+import { $, act, feedback, node, observe } from './dashboard.mjs';
 import { drills } from './companion.mjs';
 
 const display = (v, unit = '', digits = 1) => (Number.isFinite(v) ? v.toFixed(digits) + unit : '—');
@@ -36,12 +36,27 @@ let report,
   last = 0,
   state,
   stateKey;
+let examples;
+async function exampleReports() {
+  if (!examples) {
+    const response = await fetch('./assets/dashboard.json');
+    if (!response.ok) throw new Error('The bundled study could not be opened.');
+    examples = await response.json();
+  }
+  return examples;
+}
 async function refresh() {
   const id = ++version;
   try {
-    const next = await window.desk.report(Number($('range').value));
+    const source = $('report-source').value;
+    const days = Number($('range').value);
+    const next = source === 'personal' ? await window.desk.report(days) : (await exampleReports()).reports[source][days];
     if (id !== version) return;
     report = next;
+    $('change-form').hidden = source !== 'personal';
+    $('report-context').textContent = source === 'personal'
+      ? 'Observations for this profile. Gaps show periods without measurements.'
+      : 'Simulated study · ' + $('report-source').selectedOptions[0].text.split(' · ')[0] + ' · ' + examples.start + ' to ' + examples.end + '. Check-ins and desk changes are fictional.';
     last = Date.now();
     render();
   } catch (err) {
@@ -115,10 +130,10 @@ function plot() {
   const high = values.length ? Math.ceil((Math.max(...values) + 2) / 5) * 5 : 90;
   line(
     metric,
-    metric === 'cva' ? 'CVA proxy (°)' : 'Neutral tracked time (%)',
+    $('plot-metric').selectedOptions[0].text,
     25,
     89,
-    metric === 'cva' ? [low, high] : [0, 100],
+    metric === 'neutral_pct' ? [0, 100] : [low, high],
     '#245b40',
   );
   line(pain, $('plot-pain').selectedOptions[0].text + ' (0–10)', 138, 202, [0, 10], '#935d39');
@@ -136,8 +151,9 @@ function render() {
       [
         'Week ending',
         'Tracked',
-        'CVA',
-        'Δ CVA',
+        'CVA proxy',
+        'Tragus–C7 CVA',
+        'Δ proxy',
         'Neutral',
         'Discomfort',
         'Δ discomfort',
@@ -145,11 +161,15 @@ function render() {
         'Pairs',
         'r · CVA',
         'r · neutral',
+        'Marker pairs',
+        'r · marker CVA',
+        'Δ marker CVA',
       ],
       r.weeks.map((w) => [
         w.end,
         display(w.seconds / 60, ' min'),
         display(w.cva, '°'),
+        display(w.marker_cva, '°'),
         display(w.cva_change, '°'),
         display(w.neutral_pct, '%'),
         display(w.pain),
@@ -158,9 +178,28 @@ function render() {
         String(w.paired),
         display(w.r_cva, '', 2),
         display(w.r_neutral, '', 2),
+        String(w.marker_paired),
+        display(w.r_marker, '', 2),
+        display(w.marker_change, '°'),
       ]),
     ),
   );
+  const details = r.changes.map(({ title, day, before, after, inProgress }) => {
+    const section = node('section');
+    section.append(node('h3', title), node('p', day + (inProgress ? ' · Follow-up in progress' : ''), 'hint'));
+    section.append(table(['Measure', before.first + ' – ' + before.last, after.first + ' – ' + after.last, 'Change'],
+      [['CVA proxy', 'cva', '°'], ['Tragus–C7 CVA', 'marker_cva', '°'], ['Neutral tracked time', 'neutral_pct', '%'], ['Mean discomfort', 'pain', ''],
+       ['Jaw tension', 'jaw', ''], ['Neck stiffness', 'neck', ''], ['Upper-back soreness', 'back', ''],
+       ['Completed drills', 'completed', ''], ['Days with tracking', 'tracked_days', ''], ['Days with check-ins', 'logged_days', '']]
+        .map(([label, key, unit], index) => {
+          const a = before[key], b = after[key];
+          const delta = Number.isFinite(a) && Number.isFinite(b) ? b - a : null;
+          return [label, display(a, unit, index >= 7 ? 0 : 1), display(b, unit, index >= 7 ? 0 : 1),
+            display(delta, key === 'neutral_pct' ? ' pp' : unit, index >= 7 ? 0 : 1)];
+        })));
+    return section;
+  });
+  $('change-results').replaceChildren(...(details.length ? details : [node('p', 'No desk or routine changes recorded in this period.', 'hint')]));
   $('pattern').replaceChildren(
     ...(r.pattern
       ? [
@@ -180,6 +219,15 @@ function render() {
         r.history.sessions +
         ' qualifying past sessions. A forecast needs at least three qualifying sessions and a loaded classifier.'
       : 'Personal history ready. During a classified session, accelerating drift can trigger a break up to three minutes ahead.';
+  const source = $('report-source').value;
+  const check = examples?.controlled?.[source];
+  $('example-forecast').hidden = !check;
+  if (check) {
+    const lead = check.progressive.lead_seconds;
+    $('example-forecast').textContent = 'The four-week replay produced ' + examples.forecast[source].issued +
+      ' forecast nudges. In a separate steady-session check there were ' + check.stable.nudges.length +
+      '. In the gradual-drift check, ' + (lead === null ? 'no nudge preceded the threshold within three minutes.' : 'a nudge preceded the threshold by ' + lead + ' seconds.');
+  }
   const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const buckets = ['00–04', '04–08', '08–12', '12–16', '16–20', '20–24'];
   const forecasts = $('heat-type').value === 'forecast';
@@ -212,19 +260,20 @@ function render() {
     r.prompts.length
       ? table(
           ['Reminder', 'Response', 'Count'],
-          r.prompts.map((p) => [p.kind, p.outcome.replace('_', ' '), String(p.n)]),
+          r.prompts.map((p) => [p.kind.replace('_', ' '), p.outcome.replace('_', ' '), String(p.n)]),
         )
       : node('p', 'Break responses will appear after your first reminder.', 'muted'),
   );
   $('performance').replaceChildren(
     r.performance.length
       ? table(
-          ['Sampling', 'Observations', 'Mean CPU', 'Working set', 'Mean ONNX window'],
+          ['Sampling', 'Observations', 'Mean CPU', 'Working set', 'Timed windows', 'Mean ONNX window'],
           r.performance.map((p) => [
             p.policy,
             String(p.n),
             display(p.cpu, '%'),
             display(p.ram, ' MiB', 0),
+            String(p.timed_windows),
             display(p.latency, ' ms', 2),
           ]),
         )
@@ -232,6 +281,15 @@ function render() {
   );
 }
 $('range').onchange = refresh;
+$('report-source').onchange = refresh;
+$('change-form').onsubmit = async (event) => {
+  event.preventDefault();
+  if ($('report-source').value !== 'personal') return;
+  if (await act('markChange', { day: $('change-date').value, title: $('change-title').value }, 'Change recorded.')) {
+    $('change-title').value = '';
+    await refresh();
+  }
+};
 $('heat-type').onchange = () => {
   if (report) render();
 };
@@ -244,6 +302,8 @@ observe((next) => {
   const key = JSON.stringify([next.day, next.symptoms, next.session?.id, next.completed, next.prompt?.id]);
   const changed = profile !== next.profile.id || key !== stateKey;
   state = next;
+  $('change-date').max = next.day;
+  if (!$('change-date').value) $('change-date').value = next.day;
   profile = state.profile.id;
   stateKey = key;
   if (!$('trends').hidden && (changed || Date.now() - last > 60_000)) {

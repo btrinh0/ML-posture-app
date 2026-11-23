@@ -41,6 +41,15 @@ def activity_plan(rng):
     return np.array(labels[:SECONDS]), np.array(blocks[:SECONDS])
 
 
+def pose_channels(forward, up, torso, pitch, face):
+    vx, vy = np.sin(torso), np.cos(torso)
+    ex = vx + forward*vy + up*vx
+    ey = vy - forward*vx + up*vy
+    nx, ny = ex+face*np.cos(pitch), ey+face*np.sin(pitch)
+    return np.column_stack(np.broadcast_arrays(np.degrees(np.arctan2(up,forward)),forward,
+        np.degrees(pitch),vx,nx,ny,ex,ey,vx,vy))
+
+
 def simulate(person, day):
     rng = np.random.default_rng([SEED, person, day])
     state, segment = activity_plan(rng)
@@ -79,15 +88,8 @@ def simulate(person, day):
     up = baseline_up + smooth(u,.005)
     torso = roll + smooth(s*(1 if person != 1 else 1.15),.006)
     pitch = np.deg2rad(smooth(p+np.sin(t/43)*1.1,.8))
-    def geometry(forward, up, torso, pitch):
-        vx, vy = np.sin(torso), np.cos(torso)
-        ex = vx + forward*vy + up*vx
-        ey = vy - forward*vx + up*vy
-        nx, ny = ex+face*np.cos(pitch), ey+face*np.sin(pitch)
-        return np.column_stack(np.broadcast_arrays(np.degrees(np.arctan2(up,forward)),forward,
-            np.degrees(pitch),vx,nx,ny,ex,ey,vx,vy))
-    baseline = geometry(baseline_forward,baseline_up,roll,0)[0]
-    raw = geometry(forward,up,torso,pitch)
+    baseline = pose_channels(baseline_forward,baseline_up,roll,0,face)[0]
+    raw = pose_channels(forward,up,torso,pitch,face)
     vector = raw-baseline
     vector[:,0] *= -1
     # Occasional tracking outages remove observations and break windows.
@@ -95,6 +97,21 @@ def simulate(person, day):
     for start in rng.integers(35,SECONDS-12,size=2):
         valid[start:start+int(rng.integers(2,7))] = False
     return state,segment,vector.astype(np.float32),baseline[0],valid
+
+
+def forecast_case(person, progressive):
+    """A controlled uninterrupted desk block, separate from the observational simulation."""
+    minute = np.arange(SECONDS) / 60
+    up, forward, face = (.39,.44,.36)[person], (.13,.18,.16)[person], (.154,.178,.165)[person]
+    baseline = pose_channels(forward,up,0.,0.,face)[0]
+    loss = .12*np.sin(minute*1.3)
+    if progressive:
+        loss += (12+person)*np.clip((minute-10)/15,0,1)**2
+    reach = up / np.tan(np.deg2rad(baseline[0]-loss))
+    pose = pose_channels(reach,up,.003*loss,np.deg2rad(-.3*loss),face)
+    x = pose - baseline
+    x[:,0] *= -1
+    return (loss>=7).astype(int), x.astype(np.float32), baseline[0], np.ones(SECONDS,dtype=bool)
 
 
 def predicted_codes(session, kind, vectors, valid):
@@ -109,6 +126,14 @@ def predicted_codes(session, kind, vectors, valid):
     return codes
 
 
+def replay_row(key, state, x, baseline, valid, predictions):
+    return dict(session=key,baseline=round(float(baseline),4),
+                loss=np.rint(x[:,0]*10).astype(int).tolist(),forward=np.rint(x[:,1]*1000).astype(int).tolist(),
+                shoulder=np.rint(x[:,3]*1000).astype(int).tolist(),missing=np.flatnonzero(~valid).tolist(),
+                activity="".join(str(n) for n in state),
+                predictions="".join("n" if n<0 else str(n) for n in predictions))
+
+
 def generate(out, model=None):
     out.mkdir(parents=True,exist_ok=True)
     session = kind = None
@@ -121,7 +146,7 @@ def generate(out, model=None):
         options.intra_op_num_threads = options.inter_op_num_threads = 1
         session = ort.InferenceSession(base64.b64decode(bundle["model"]),options,providers=["CPUExecutionProvider"])
         kind = bundle["kind"]
-    diary, replay = [], []
+    diary, replay, cases, parity = [], [], [], []
     for person,name in enumerate(PEOPLE):
         exported=[]
         for day in range(28):
@@ -149,14 +174,25 @@ def generate(out, model=None):
             if model:
                 predictions=predicted_codes(session,kind,x,valid)
                 # Each entry represents one second. Fixed-point columns keep the offline example small.
-                replay.append(dict(session=key,baseline=round(float(baseline),4),
-                    loss=np.rint(x[:,0]*10).astype(int).tolist(),forward=np.rint(x[:,1]*1000).astype(int).tolist(),
-                    shoulder=np.rint(x[:,3]*1000).astype(int).tolist(),missing=np.flatnonzero(~valid).tolist(),
-                    predictions="".join("n" if n<0 else str(n) for n in predictions)))
+                replay.append(replay_row(key,state,x,baseline,valid,predictions))
+                if VISITS.get(day) == "follow_up":
+                    for activity in range(len(LABELS)):
+                        end = int(np.flatnonzero((state[:CAPTURE]==activity) & (predictions[:CAPTURE]>=0))[0])
+                        window = np.round(x[end-WINDOW+1:end+1].astype(float),5)
+                        expected = predicted_codes(session,kind,window.astype(np.float32),np.ones(WINDOW,dtype=bool))[-1]
+                        parity.append(dict(participant=name.lower(),activity=LABELS[activity],second=end,
+                                           x=window.tolist(),prediction=int(expected)))
         if not model:
             write_gzip(out/f"{name.lower()}-labels.jsonl.gz",exported)
+        else:
+            for progressive in (False,True):
+                state,x,baseline,valid = forecast_case(person,progressive)
+                key = name.lower()+"-"+("progressive" if progressive else "stable")
+                cases.append(replay_row(key,state,x,baseline,valid,predicted_codes(session,kind,x,valid)))
     if model:
         write_gzip(out/"replay.jsonl.gz",replay)
+        write_gzip(out/"forecast-cases.jsonl.gz",cases)
+        write_json(out/"desktop-cases.json",dict(provenance="simulated_study",cases=parity))
     else:
         write_json(out/"diary.json",dict(provenance="simulated_study",seed=SEED,people=list(PEOPLE),days=diary))
 

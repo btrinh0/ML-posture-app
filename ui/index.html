@@ -113,6 +113,12 @@
           <div id="advice"></div>
         </article>
         <article class="card">
+          <details><summary>Movement break instructions</summary>
+            <div id="drill-library"></div>
+            <p class="hint">Choose a comfortable movement and stop if symptoms increase. Follow any individual instructions from your clinician.</p>
+          </details>
+        </article>
+        <article class="card">
           <h2>Desktop preferences</h2>
           <label class="inline"
             ><input id="startup" type="checkbox" />Open in the tray when I sign in to Windows</label
@@ -128,6 +134,8 @@
         <article class="card">
           <h2>Camera calibration</h2>
           <p class="muted" id="framing"></p>
+          <label class="inline" id="marker-option"><input id="markers" type="checkbox" />Measure CVA with two markers</label>
+          <p class="hint" id="marker-help" hidden>With the side camera level, use a small cyan marker on the near tragus and a magenta marker over C7 at the base of the neck. Have someone familiar with the landmarks help place them. Keep both dots visible. The angle appears when both are detected.</p>
           <div class="controls sensor-controls">
             <label
               >Camera view<select id="view">
@@ -153,7 +161,7 @@
           </div>
           <div id="readings" class="readings"></div>
           <p class="hint">
-            CVA uses an ear–shoulder proxy. The load illustration assumes a 10 lb head, a 0.50 m torso and a
+            The unmarked angle uses the ear and shoulder. The load illustration assumes a 10 lb head, a 0.50 m torso and a
             0.10 m reference lever. These estimates support comparison within a setup.
           </p>
         </article>
@@ -174,12 +182,20 @@
           <div class="controls sensor-controls">
             <button id="import-model">Import trained model</button
             ><button id="remove-model" hidden>Use built-in rules</button>
+            <button id="bundled-model" hidden>Use bundled model</button>
           </div>
         </article>
       </section>
       <section id="trends" class="page" hidden>
         <div class="trend-title">
           <h1>Trends</h1>
+          <label>Data source<select id="report-source">
+            <option value="personal">My profile</option>
+            <optgroup label="Four-week simulated study">
+              <option value="aster">Aster · simulated</option><option value="birch">Birch · simulated</option>
+              <option value="cedar">Cedar · simulated</option>
+            </optgroup>
+          </select></label>
           <label
             >Period<select id="range">
               <option value="7">Last 7 days</option>
@@ -190,7 +206,7 @@
         </div>
         <article class="card">
           <h2>Posture and discomfort</h2>
-          <p class="muted">Observations for this profile. Gaps show periods without measurements.</p>
+          <p id="report-context" class="muted">Observations for this profile. Gaps show periods without measurements.</p>
           <div class="plot-head">
             <label
               >Group by<select id="plot-group">
@@ -201,6 +217,7 @@
             <label
               >Posture<select id="plot-metric">
                 <option value="cva">CVA proxy (degrees)</option>
+                <option value="marker_cva">Tragus–C7 CVA (degrees)</option>
                 <option value="neutral_pct">Neutral tracked time (%)</option>
               </select></label
             >
@@ -221,10 +238,20 @@
             <summary>Weekly measurements and correlations</summary>
             <div id="weekly" class="table-wrap"></div>
             <p class="hint">
-              Pearson r pairs each day’s mean discomfort with its mean CVA proxy or neutral tracked time. A
+              Pearson r pairs each day’s mean discomfort with its angle or neutral tracked time. Marker CVA uses days with visible markers. A
               value needs at least three paired days with variation in both measures.
             </p>
           </details>
+        </article>
+        <article class="card">
+          <h2>Desk and routine changes</h2>
+          <p class="muted">Compare the seven days before a change with the seven days starting on its date.</p>
+          <form id="change-form" class="plot-head">
+            <label>Change date<input type="date" required id="change-date" /></label>
+            <label>What changed?<input type="text" required maxlength="80" id="change-title" placeholder="Moved keyboard closer" /></label>
+            <button type="submit">Record change</button>
+          </form>
+          <div id="change-results" class="table-wrap"></div>
         </article>
         <div class="columns">
           <article class="card">
@@ -234,6 +261,7 @@
           <article class="card">
             <h2>Fatigue forecast</h2>
             <p id="forecast-state" class="text-block"></p>
+            <p id="example-forecast" class="hint" hidden></p>
           </article>
         </div>
         <article class="card">

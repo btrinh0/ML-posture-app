@@ -1,6 +1,6 @@
 {
   "name": "deskframe",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A private desk companion for study sessions, movement breaks and posture research.",
   "author": "Deskframe contributors",
   "main": "desktop/main.mjs",

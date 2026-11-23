@@ -43,7 +43,6 @@ let win,
   locked = false,
   shortcutsReady = false;
 let lastPerformance = 0,
-  lastForecast = 0,
   candidate = null;
 const isHome = (url) => url === home;
 const state = () => ({
@@ -128,6 +127,7 @@ const actions = {
   },
   setup: (v) => store.saveSetup(v),
   checkIn: (v) => store.checkIn(v),
+  markChange: (v) => store.markChange(v),
   resolve: (v) => {
     store.resolve(v.id, v.outcome, () => {
       if (v.correction && v.outcome === 'false_positive') telemetry.correct(v.id, v.correction);
@@ -163,6 +163,10 @@ const actions = {
     candidate = null;
   },
   removeModel: () => {
+    store.run("INSERT OR REPLACE INTO settings VALUES('model','null')");
+    candidate = null;
+  },
+  bundledModel: () => {
     store.run("DELETE FROM settings WHERE key='model'");
     candidate = null;
   },
@@ -176,6 +180,7 @@ const mime = {
   '.png': 'image/png',
   '.woff2': 'font/woff2',
   '.txt': 'text/plain',
+  '.json': 'application/json',
 };
 const csp =
   "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'";
@@ -256,7 +261,12 @@ async function start() {
   });
   ipcMain.handle('desk:model', async (e, pick) => {
     if (!isHome(e.senderFrame.url)) return null;
-    if (!pick) return JSON.parse(store.get("SELECT value FROM settings WHERE key='model'")?.value || 'null');
+    if (!pick) {
+      const saved = store.get("SELECT value FROM settings WHERE key='model'");
+      if (saved) return JSON.parse(saved.value);
+      const builtIn = JSON.parse(await readFile(join(dist, 'assets/activity.deskmodel'), 'utf8'));
+      return { ...validateBundle(builtIn), bundled: true };
+    }
     candidate = null;
     const file = await dialog.showOpenDialog(win, {
       title: 'Choose the benchmarked model',
@@ -271,23 +281,9 @@ async function start() {
   });
   ipcMain.handle('desk:sample', (e, value) => {
     if (!isHome(e.senderFrame.url) || !telemetry.sample(value)) return;
-    const drill = insights.weeklyPattern()?.drill ?? (value.metrics.view === 'front' ? 'shoulders' : 'chin');
-    if (value.cue === true) {
-      const p = store.prompt('drift', drill);
-      telemetry.freezeCorrection(p);
-      notify(p);
-    } else if (
-      value.prediction === 'neutral' &&
-      value.metrics.view === 'side' &&
-      Date.now() - lastForecast >= 30_000
-    ) {
-      lastForecast = Date.now();
-      if (insights.forecast()) {
-        const p = store.prompt('forecast', drill);
-        telemetry.freezeCorrection(p);
-        notify(p);
-      }
-    }
+    const p = insights.sensorReminder(value.cue === true, value.metrics, value.prediction);
+    telemetry.freezeCorrection(p);
+    notify(p);
   });
   ipcMain.handle('desk:action', async (e, name, value) => {
     if (!isHome(e.senderFrame.url) || !Object.hasOwn(actions, name)) throw new Error('Unknown action.');

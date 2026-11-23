@@ -507,6 +507,11 @@ button[aria-pressed='true'] {
 .trend-title select {
   font-size: 0.82rem;
 }
+.trend-title h1 { flex: 1 1 180px; }
+#drill-library h3, #change-results h3 { margin-top: 16px; }
+#drill-library p { margin-top: 4px; }
+#change-form { align-items: flex-end; }
+#change-form label { align-items: flex-start; flex-direction: column; }
 #trend-plot {
   width: 100%;
   height: 238px;

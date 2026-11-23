@@ -1,4 +1,6 @@
 import { $, node, observe, act, feedback } from './dashboard.mjs';
+import { markerMeasurement } from './shared/markers.mjs';
+import { CameraRate } from './shared/camera-rate.mjs';
 import {
   Calibration,
   DriftGate,
@@ -15,6 +17,23 @@ let state,
   generation = 0,
   running = false,
   timeout;
+let cameraRate, lastMarkerVisible = false;
+const markerCanvas = document.createElement('canvas');
+const markerPixels = markerCanvas.getContext('2d', { willReadFrequently: true });
+function readMarkers(pose) {
+  const width = Math.min(480, video.videoWidth);
+  const height = Math.round(width * video.videoHeight / video.videoWidth);
+  if (markerCanvas.width !== width || markerCanvas.height !== height) {
+    markerCanvas.width = width;
+    markerCanvas.height = height;
+  }
+  markerPixels.drawImage(video, 0, 0, width, height);
+  try {
+    return markerMeasurement(markerPixels.getImageData(0, 0, width, height), pose);
+  } finally {
+    markerPixels.clearRect(0, 0, width, height);
+  }
+}
 let calibration,
   gate,
   lastSecond,
@@ -38,6 +57,8 @@ const message = (text) => {
   if ($('sensor-message').textContent !== text) $('sensor-message').textContent = text;
 };
 function framing() {
+  $('marker-option').hidden = $('view').value !== 'side';
+  $('marker-help').hidden = $('view').value !== 'side' || !$('markers').checked;
   $('framing').textContent =
     $('view').value === 'side'
       ? 'Place a level camera beside you. Keep the near ear, shoulder and hip in view. Sit comfortably and hold still for 10 seconds.'
@@ -54,6 +75,7 @@ function reset() {
   lastVideoTime = -1;
   lastFrameAt = -Infinity;
   lastValid = false;
+  lastMarkerVisible = false;
   $('readings').replaceChildren();
 }
 function buttons() {
@@ -87,6 +109,7 @@ function stop(status, inform = true) {
   video.pause();
   video.srcObject = null;
   device = null;
+  cameraRate = null;
   model?.close();
   model = null;
   $('preview').hidden = true;
@@ -101,6 +124,7 @@ function readings(m) {
       ? [['Shoulder elevation', m.asym, '°']]
       : [
           ['CVA proxy', m.cva, '°'],
+          ...(m.marker ? [['Tragus–C7 CVA', m.marker.cva, '°'], ['Shoulder ahead of C7', m.marker.shoulder, ' torso']] : []),
           ['CVA drop', m.drop, '°'],
           ['Protraction proxy', m.shoulder, ' torso'],
           ['Moment proxy', m.moment, ' N·m'],
@@ -137,7 +161,7 @@ async function loop(token) {
   });
   try {
     const track = device.getVideoTracks()[0];
-    track.enabled = rate > 0;
+    void cameraRate.set(rate);
     if (!rate || !video.videoWidth || video.readyState < 2 || video.currentTime === lastVideoTime) {
       if (!rate || started - lastFrameAt > 1800) {
         if (!calibration.reference) calibration.samples = [];
@@ -177,6 +201,8 @@ async function loop(token) {
           }
           const second = Math.floor(Date.now() / 1000);
           if (second !== lastSecond) {
+            if (m.view === 'side' && $('markers').checked) m.marker = readMarkers(g);
+            lastMarkerVisible = Boolean(m.marker);
             const activeClassifier = classifier;
             const scored =
               m.vector && activeClassifier ? await activeClassifier.push(second, m.vector) : null;
@@ -206,6 +232,8 @@ async function loop(token) {
               ' · ' +
               rate +
               ' FPS' +
+              (track.getSettings?.().frameRate ? ' · camera ' + Math.round(track.getSettings().frameRate) + ' FPS' : '') +
+              (m.view === 'side' && $('markers').checked && !lastMarkerVisible ? ' · markers not located' : '') +
               (prediction ? ' · ' + titles[labels.indexOf(prediction)] : ''),
           );
         }
@@ -230,13 +258,14 @@ async function start() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30, max: 30 } },
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: $('policy').value === 'fixed' ? 30 : 12, max: 30 } },
     });
     if (token !== generation) {
       stream.getTracks().forEach((t) => t.stop());
       return;
     }
     device = stream;
+    cameraRate = new CameraRate(device.getVideoTracks()[0]);
     device.getVideoTracks()[0].onended = () =>
       stop('Camera disconnected. You can continue the study session.');
     video.srcObject = stream;
@@ -278,6 +307,7 @@ $('recalibrate').onclick = () => {
   message('Hold your comfortable position for 10 seconds.');
 };
 $('view').onchange = framing;
+$('markers').onchange = framing;
 $('policy').onchange = () => {
   if (running) void act('sensorPolicy', $('policy').value);
 };

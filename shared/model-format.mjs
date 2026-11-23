@@ -13,7 +13,7 @@ export function validateBundle(b, allowFixture = false) {
   ) {
     throw new Error('Choose a compatible Deskframe model from the benchmark exporter.');
   }
-  if (b.provenance !== 'user_sessions' && !(allowFixture && b.provenance === 'synthetic_smoke')) {
+  if (!['user_sessions', 'simulated_study'].includes(b.provenance) && !(allowFixture && b.provenance === 'synthetic_smoke')) {
     throw new Error(
       'This model is marked as a synthetic test fixture. Import a model trained on study exports.',
     );

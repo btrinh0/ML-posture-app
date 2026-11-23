@@ -18,6 +18,8 @@ await cp(join(root, 'shared'), join(out, 'shared'), { recursive: true });
 await cp(join(root, 'desktop', 'companion.mjs'), join(out, 'companion.mjs'));
 const assets = join(out, 'assets');
 await mkdir(assets, { recursive: true });
+for (const name of ['activity.deskmodel', 'dashboard.json'])
+  await cp(join(root, 'research/generated', name), join(assets, name));
 for (const name of ['icon.png', 'inter.woff2', 'inter-license.txt']) {
   const source =
     name === 'icon.png'
