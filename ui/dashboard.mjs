@@ -100,4 +100,5 @@ $('startup').onchange = e => act('autoStart', e.target.checked);
 document.querySelectorAll('[data-outcome]').forEach(b => b.onclick = () => act('resolve', { id:state.prompt?.id, outcome:b.dataset.outcome,
   correction:b.dataset.outcome === 'false_positive' && !$('correction-field').hidden ? $('correction').value:null }));
 window.desk.onChange(render);
+window.desk.onPromptClick(() => { openPage('today'); if (!$('prompt').hidden) $('prompt').scrollIntoView({ block:'center' }); });
 render(await window.desk.state());

@@ -23,7 +23,8 @@ export function geometry(data, w, h, view, reference = null) {
     if (!left || !right || !lh || !rh) return null;
     const width = Math.abs(left.x-right.x), torso = (distance(left,lh)+distance(right,rh))/2;
     if (torso < .16*h || width < .48*torso || width > 1.8*torso || nose.y >= (left.y+right.y)/2 ||
-        Math.abs(nose.x-(left.x+right.x)/2) > .30*width || (left.y+right.y) >= (lh.y+rh.y)) return null;
+        Math.abs(nose.x-(left.x+right.x)/2) > .60*width || Math.abs(lh.x-rh.x) < .22*torso ||
+        (left.y+right.y) >= (lh.y+rh.y)) return null;
     return { view, key:'front', scale:torso/h, raw:[angle(right.y-left.y, width)] };
   }
   if (view !== 'side') return null;

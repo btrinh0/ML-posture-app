@@ -41,7 +41,7 @@ export class Insights {
     const key=s.profile+'-'+session;
     if (this.past?.key === key && now-this.past.at < 300_000) return this.past.result;
     const rows = s.all(`SELECT t.session, date(sec,'unixepoch','localtime') AS day,
-      CAST(t.active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS drop FROM samples t
+      CAST(t.active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS "drop" FROM samples t
       JOIN sessions s ON s.id=t.session WHERE s.profile=? AND s.ended IS NOT NULL AND t.view='side'
       AND (prediction IS NULL OR prediction IN ('neutral','slouch')) AND t.sec>=?
       GROUP BY t.session,day,minute HAVING count(*)>=10 ORDER BY t.session,minute`,
@@ -57,7 +57,7 @@ export class Insights {
     if (!session || session.active_ms<10*60_000) return null;
     const personal = this.historicalSlope();
     if (personal.slope === null) return null;
-    const points = s.all(`SELECT CAST(active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS drop
+    const points = s.all(`SELECT CAST(active_ms/60000 AS INTEGER) AS minute,avg(drop_deg) AS "drop"
       FROM samples WHERE session=? AND view='side' AND prediction IN ('neutral','slouch') AND active_ms>=?
       GROUP BY minute HAVING count(*)>=10 ORDER BY minute`,session.id,session.active_ms-8*60_000);
     if (points.length < 6 || points.at(-1).minute < Math.floor(session.active_ms/60000)-1 ||
@@ -78,19 +78,25 @@ export class Insights {
       WHERE s.profile=? AND t.sec>=? AND view='side' GROUP BY day ORDER BY day`,profile,from);
     const symptoms=new Map(s.symptomsSince(days).map(r=>[r.day,r]));
     const observed=new Map(daily.map(d=>[d.day,d]));
+    const completed=new Map(s.all(`SELECT date(p.resolved/1000,'unixepoch','localtime') AS day,count(*) AS n FROM prompts p
+      JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.outcome='completed' AND p.resolved>=? GROUP BY day`,profile,from*1000)
+      .map(r=>[r.day,r.n]));
     const series=Array.from({ length:days },(_,i)=>{
       const day=dayBefore(today,days-i-1), r=observed.get(day), p=symptoms.get(day);
       return { day,seconds:r?.seconds ?? 0,cva_sum:r?.cva_sum ?? 0,neutral:r?.neutral ?? 0,
         cva:r ? r.cva_sum/r.seconds:null,neutral_pct:r ? 100*r.neutral/r.seconds:null,pain:p ? (p.jaw+p.neck+p.back)/3:null,
-        jaw:p?.jaw ?? null,neck:p?.neck ?? null,back:p?.back ?? null };
+        jaw:p?.jaw ?? null,neck:p?.neck ?? null,back:p?.back ?? null,completed:completed.get(day) ?? 0 };
     });
     const weeks=[];
     for (let i=0;i<days;i+=7) {
       const week=series.slice(i,i+7), seconds=sum(week,'seconds');
       const pairs=week.filter(d=>d.cva!==null && d.pain!==null);
-      weeks.push({ start:week[0].day,end:week.at(-1).day,seconds,
-        cva:seconds ? sum(week,'cva_sum')/seconds:null,neutral_pct:seconds ? 100*sum(week,'neutral')/seconds:null,
-        pain:average(week.map(d=>d.pain).filter(Number.isFinite)),paired:pairs.length,
+      const cva=seconds ? sum(week,'cva_sum')/seconds:null;
+      const pain=average(week.map(d=>d.pain).filter(Number.isFinite)), prev=weeks.at(-1);
+      weeks.push({ start:week[0].day,end:week.at(-1).day,seconds,cva,pain,completed:sum(week,'completed'),
+        ...Object.fromEntries(['jaw','neck','back'].map(k=>[k,average(week.map(d=>d[k]).filter(Number.isFinite))])),
+        cva_change:cva!==null && prev?.cva!=null ? cva-prev.cva:null,pain_change:pain!==null && prev?.pain!=null ? pain-prev.pain:null,
+        neutral_pct:seconds ? 100*sum(week,'neutral')/seconds:null,paired:pairs.length,
         r_cva:correlation(pairs.map(d=>[d.cva,d.pain])),r_neutral:correlation(pairs.map(d=>[d.neutral_pct,d.pain])) });
     }
     const heat=s.all(`SELECT CAST(strftime('%w',sec,'unixepoch','localtime') AS INTEGER) AS weekday,
@@ -102,6 +108,10 @@ export class Insights {
       FROM performance p JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY policy`,profile,from*1000);
     const prompts=s.all(`SELECT kind,coalesce(outcome,'pending') AS outcome,count(*) AS n FROM prompts p
       JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY kind,outcome`,profile,from*1000);
-    return { weeks,series,heat,performance,prompts,pattern:this.weeklyPattern(),history:this.historicalSlope() };
+    const forecastHeat=s.all(`SELECT CAST(strftime('%w',p.at/1000,'unixepoch','localtime') AS INTEGER) AS weekday,
+      CAST(strftime('%H',p.at/1000,'unixepoch','localtime') AS INTEGER)/4 AS block,count(*) AS n
+      FROM prompts p JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.kind='forecast' AND p.at>=?
+      GROUP BY weekday,block`,profile,from*1000);
+    return { weeks,series,heat,forecastHeat,performance,prompts,pattern:this.weeklyPattern(),history:this.historicalSlope() };
   }
 }

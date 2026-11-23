@@ -26,7 +26,7 @@ const send = () => { if (win && !win.isDestroyed()) win.webContents.send('desk:c
 function notify(prompt) {
   if (!prompt || !Notification.isSupported()) return;
   const note = new Notification({ title: 'Time for a movement break', body: drills[prompt.drill].title, silent: true, icon: join(dist, 'assets/icon.png') });
-  note.on('click', show);
+  note.on('click', () => { show(); win?.webContents.send('desk:showPrompt'); });
   note.show();
 }
 function tick() {
@@ -65,6 +65,7 @@ const actions = {
   autoStart: v => app.setLoginItemSettings({ openAtLogin: v === true, args: ['--tray'] }),
   capture: v => setCapture(v === true), label: v => telemetry.mark(v), exportLabels,
   sensorOff: () => { setCapture(false); telemetry.reset(); },
+  recalibrate: v => { setCapture(false); telemetry.reset(); telemetry.policy = v === 'fixed' ? 'fixed':'adaptive'; },
   lost: () => { telemetry.freshAt = null; telemetry.segment++; telemetry.recent=[]; },
   sensorPolicy: v => { if (store.session) telemetry.policy = v === 'fixed' ? 'fixed':'adaptive'; },
   installModel: () => {
@@ -93,7 +94,7 @@ async function start() {
       && details.mediaTypes?.length === 1 && details.mediaTypes[0] === 'video');
   });
   session.defaultSession.setPermissionCheckHandler((wc, permission, origin, details) =>
-    wc === win?.webContents && origin.startsWith('desk://app') && permission === 'media' && details.mediaType !== 'audio');
+    wc === win?.webContents && ['desk://app','desk://app/',home].includes(origin) && permission === 'media' && details.mediaType !== 'audio');
   store = new DeskStore(join(app.getPath('userData'), 'deskframe.sqlite'));
   telemetry = new Telemetry(store);
   insights = new Insights(store);

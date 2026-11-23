@@ -39,3 +39,14 @@ npm.cmd run test:desktop -- --fixtures=.qa/benchmark
 ```
 
 The smoke run generates six artificial sessions and exercises both split strategies. It emits three fixture-only models and parity cases. The desktop test checks their labels against Python ONNX Runtime. The app’s model import accepts study-trained artifacts. Fixture metrics describe simulated data only.
+
+## Measured desktop replay
+
+On November 23, 2026, the Windows build completed ten-second front-view calibration on a 640 × 480 in-memory replay of Google’s pose reference image. The test kept the OS activity signal active, selected each sampling policy in the desktop UI, warmed up for four seconds and measured eight three-second intervals per policy on an Intel Core i9-12900KF with 24 logical processors, Windows build 26100. Mean CPU sums Electron process percentages. Working set sums the per-process readings and can include shared pages. [Public reference image](https://storage.googleapis.com/mediapipe-assets/pose.jpg)
+
+| Stable front-view replay | Mean CPU | Mean working set |
+| --- | ---: | ---: |
+| Adaptive monitoring, 1 FPS target | 0.47% | 596 MiB |
+| Fixed sampling, 30 FPS target | 2.42% | 588 MiB |
+
+This short replay measures one desktop and one stable pose. Laptop battery use, a physical webcam, mixed desk behaviors and clinical outcomes require separate observations. To repeat it, download the reference JPEG to `.qa/reference-pose.jpg` and add `--pose-image=.qa/reference-pose.jpg` to the desktop smoke command above. The test writes its measurements under `.qa/`.

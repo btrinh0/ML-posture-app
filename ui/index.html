@@ -5,6 +5,7 @@
   <title>Deskframe</title><link rel="stylesheet" href="./style.css"><script type="module" src="./dashboard.mjs"></script>
   <script type="module" src="./sensor.mjs"></script>
   <script type="module" src="./model-controls.mjs"></script>
+  <script type="module" src="./trends.mjs"></script>
 </head>
 <body>
 <aside class="rail">
@@ -30,7 +31,7 @@
     </article>
     <article id="prompt" class="notice" hidden><div><p class="eyebrow" id="prompt-kind"></p><h2 id="prompt-title"></h2><p id="prompt-body"></p><p class="hint">Move within a comfortable range. Stop if symptoms increase.</p></div>
       <div class="controls"><button data-outcome="completed" class="primary">Completed</button><button data-outcome="snoozed">In 5 min</button><button data-outcome="skipped">Skip</button><button data-outcome="false_positive" id="override">False alarm</button></div>
-      <label id="correction-field" class="field" hidden>Activity during this cue<select id="correction"><option value="">Dismiss only</option><option value="neutral">Neutral</option><option value="writing">Writing</option><option value="reading">Brief reading</option><option value="reaching">Reaching / shifting</option></select></label>
+      <label id="correction-field" class="field" hidden>Activity to save with “False alarm”<select id="correction"><option value="">Dismiss only</option><option value="neutral">Neutral</option><option value="writing">Writing</option><option value="reading">Brief reading</option><option value="reaching">Reaching / shifting</option></select></label>
     </article>
     <div class="columns">
       <article class="card"><h2>Daily check-in</h2><p class="muted">Rate each area from 0 (none) to 10 (highest).</p>
@@ -66,7 +67,23 @@
     <article class="card" id="model-panel"><h2>Activity classifier</h2><p id="model-name" class="muted">Static posture rules</p>
       <div class="controls sensor-controls"><button id="import-model">Import trained model</button><button id="remove-model" hidden>Use built-in rules</button></div></article>
   </section>
-  <section id="trends" class="page" hidden><h1>Trends</h1><div id="trends-panel"></div></section>
+  <section id="trends" class="page" hidden>
+    <div class="trend-title"><h1>Trends</h1><label>Period<select id="range"><option value="7">Last 7 days</option><option value="28" selected>Last 28 days</option><option value="84">Last 84 days</option></select></label></div>
+    <article class="card"><h2>Posture and discomfort</h2><p class="muted">Observations for this profile. Gaps show periods without measurements.</p>
+      <div class="plot-head"><label>Group by<select id="plot-group"><option value="weekly">Week</option><option value="daily">Day</option></select></label>
+        <label>Posture<select id="plot-metric"><option value="cva">CVA proxy (degrees)</option><option value="neutral_pct">Neutral tracked time (%)</option></select></label>
+        <label>Discomfort<select id="plot-pain"><option value="pain">Mean of three areas</option><option value="jaw">Jaw tension</option><option value="neck">Neck stiffness</option><option value="back">Upper-back soreness</option></select></label></div>
+      <div id="plot-empty" class="empty" hidden>Start a calibrated session or save a daily check-in to see your first observation.</div>
+      <canvas id="trend-plot" role="img" aria-label="Daily posture and discomfort trajectories"></canvas>
+      <details><summary>Weekly measurements and correlations</summary><div id="weekly" class="table-wrap"></div>
+        <p class="hint">Pearson r pairs each day’s mean discomfort with its mean CVA proxy or neutral tracked time. A value needs at least three paired days with variation in both measures.</p></details>
+    </article>
+    <div class="columns"><article class="card"><h2>Weekly movement focus</h2><div id="pattern" class="text-block"></div></article>
+      <article class="card"><h2>Fatigue forecast</h2><p id="forecast-state" class="text-block"></p></article></div>
+    <article class="card"><h2>Time of day</h2><div class="plot-head"><label>Show<select id="heat-type"><option value="drift">Head drift</option><option value="forecast">Fatigue forecast nudges</option></select></label></div><p class="muted" id="heat-caption"></p><div class="table-wrap" id="heat"></div></article>
+    <article class="card"><h2>Break responses</h2><div id="responses"></div></article>
+    <article class="card"><h2>Desktop performance</h2><p class="muted">Measurements every 10 seconds during study sessions. Fixed and adaptive camera runs are reported separately.</p><div class="table-wrap" id="performance"></div></article>
+  </section>
 </main>
 <dialog id="profile-dialog"><form id="profile-form" class="stack"><h2>Add a local profile</h2><label>Nickname<input id="alias" maxlength="32" required autocomplete="off"></label><div class="controls"><button class="primary">Create profile</button><button id="cancel-profile" type="button">Cancel</button></div></form></dialog>
 </body></html>
