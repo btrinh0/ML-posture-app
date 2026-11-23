@@ -126,3 +126,34 @@ test('a window resets across missing seconds and rolling slopes use elapsed seco
   assert.equal(f.at(-1), 20);
   assert.equal(b.push(39, vector(39)), null);
 });
+test('change comparisons use adjacent calendar weeks, distinguish zero from missing and stay profile-local', () => {
+  const { store: s, insights, advance, sample } = rig();
+  for (const day of [0, 1, 7, 8, 14, 15]) {
+    advance(day);
+    s.start();
+    const score = day < 8 ? 0 : 4;
+    s.checkIn({ jaw: score, neck: score, back: score });
+    sample(score, 0, 0);
+    s.end();
+  }
+  const input = { day: '2026-10-09', title: 'Raised screen' };
+  s.markChange(input);
+  s.markChange(input);
+  const [change] = insights.report(7).changes;
+  assert.equal(insights.report(28).changes.length, 1);
+  assert.equal(change.before.logged_days, 2);
+  assert.equal(change.before.pain, 0);
+  assert.equal(change.before.cva, 70);
+  assert.equal(change.after.logged_days, 2);
+  assert.equal(change.after.pain, 4);
+  assert.equal(change.after.cva, 66);
+  assert.equal(change.after.last, '2026-10-15');
+  assert.equal(change.inProgress, false);
+  assert.throws(() => s.markChange({ ...input, day: '2026-02-30' }));
+  assert.throws(() => s.markChange({ ...input, day: '2026-11-15' }));
+  s.addProfile('Second');
+  assert.deepEqual(insights.report(28).changes, []);
+  s.markChange(input);
+  assert.equal(insights.report(28).changes[0].before.pain, null);
+  s.close();
+});

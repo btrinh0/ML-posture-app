@@ -10,6 +10,9 @@ export class Telemetry {
         view TEXT NOT NULL, cva REAL, drop_deg REAL, forward REAL, shoulder REAL, asym REAL, moment REAL, load_lb REAL,
         neutral INTEGER NOT NULL, prediction TEXT, label TEXT, segment INTEGER NOT NULL, vector TEXT,
         PRIMARY KEY(session,sec));
+      CREATE TABLE IF NOT EXISTS marker_samples (
+        session INTEGER NOT NULL, sec INTEGER NOT NULL, cva REAL NOT NULL, shoulder REAL NOT NULL,
+        PRIMARY KEY(session,sec), FOREIGN KEY(session,sec) REFERENCES samples(session,sec));
       CREATE TABLE IF NOT EXISTS performance (
         session INTEGER NOT NULL REFERENCES sessions, at INTEGER NOT NULL, policy TEXT NOT NULL,
         cpu REAL NOT NULL, ram_mb REAL NOT NULL, inference_ms REAL, rate INTEGER NOT NULL);
@@ -107,6 +110,9 @@ export class Telemetry {
       this.segment,
       vector,
     );
+    const marker = m.marker;
+    if (side && finite(marker?.cva, 90) && marker.cva >= 0 && finite(marker.shoulder, 2))
+      this.store.run('INSERT OR IGNORE INTO marker_samples VALUES(?,?,?,?)', s.id, sec, marker.cva, marker.shoulder);
     return true;
   }
   freezeCorrection(prompt) {

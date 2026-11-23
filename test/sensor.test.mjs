@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import { calibrated, Calibration, DriftGate, geometry, samplingRate } from '../shared/kinematics.mjs';
 import { DeskStore } from '../desktop/store.mjs';
 import { Telemetry } from '../desktop/telemetry.mjs';
+import { markerMeasurement } from '../shared/markers.mjs';
+import { CameraRate } from '../shared/camera-rate.mjs';
+import { Insights } from '../desktop/insights.mjs';
 
 function side(shift = 0, mirror = false) {
   const points = [];
@@ -88,4 +91,64 @@ test('one numeric record per second, with research vectors only during labeled c
   s.addProfile('other');
   assert.deepEqual(t.exportRows(), []);
   s.close();
+});
+test('two colored landmarks measure the horizontal tragus–C7 angle in either side view', () => {
+  for (const w of [320, 640]) for (const facing of [1, -1]) {
+    const h = w * .75, x = (p) => Math.round((facing === 1 ? p : 1 - p) * w);
+    const frame = { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+    const pose = { view: 'side', scale: .5, anchors: { ear: { x: x(.5) / w, y: .25 },
+      shoulder: { x: x(.45) / w, y: .45 }, facing } };
+    const paint = (cx, cy, color) => {
+      for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++)
+        frame.data.set(color, 4 * ((cy+j)*w + cx+i));
+    };
+    paint(x(.5), h*.25, [10, 215, 230, 255]);
+    assert.equal(markerMeasurement(frame, pose), null);
+    paint(x(.3875), h*.4, [224, 12, 239, 255]);
+    const m = markerMeasurement(frame, pose);
+    assert.ok(Math.abs(m.cva - 45) < 1e-7);
+    assert.ok(Math.abs(m.shoulder - 1/6) < 1e-7);
+    paint(x(.48), h*.25, [10, 215, 230, 255]);
+    assert.equal(markerMeasurement(frame, pose), null);
+  }
+});
+test('marker telemetry preserves separate denominators for measured and estimated angles', () => {
+  let now = Date.now();
+  const s = new DeskStore(':memory:', () => now);
+  s.start();
+  const t = new Telemetry(s), m = calibrated(side(), side());
+  t.sample({ session: s.session.id, metrics: { ...m, marker: { cva: 45, shoulder: .11 } } });
+  now += 1000;
+  t.sample({ session: s.session.id, metrics: m });
+  const d = new Insights(s).report(7).series.at(-1);
+  assert.equal(d.seconds, 2);
+  assert.equal(d.marker_seconds, 1);
+  assert.equal(d.marker_cva, 45);
+  assert.equal(d.cva, m.cva);
+  s.close();
+});
+test('adaptive camera requests serialize changes, respect hardware limits and pause the track at idle', async () => {
+  const applied = [];
+  let release;
+  const track = { enabled: true, getCapabilities: () => ({ frameRate: { min: 5, max: 24 } }),
+    async applyConstraints(options) {
+      applied.push(options.frameRate);
+      if (applied.length === 1) await new Promise((r) => { release = r; });
+    } };
+  const control = new CameraRate(track);
+  const pending = control.set(12);
+  await Promise.resolve();
+  control.set(1);
+  control.set(0);
+  assert.equal(track.enabled, false);
+  release();
+  await pending;
+  await control.set(1);
+  await control.set(1);
+  await control.set(30);
+  assert.equal(track.enabled, true);
+  assert.deepEqual(applied.map((o) => o.max), [12, 5, 24]);
+  const unsupported = new CameraRate({ enabled: false, async applyConstraints(){ throw Error('unsupported'); } });
+  await unsupported.set(1);
+  assert.equal(unsupported.track.enabled, true);
 });

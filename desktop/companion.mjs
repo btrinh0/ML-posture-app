@@ -48,6 +48,10 @@ export const drills = {
     title: 'Shoulder-blade squeeze',
     text: 'Relax your shoulders. Gently bring your shoulder blades toward each other, then release.',
   },
+  jaw: {
+    title: 'Jaw tension check',
+    text: 'Notice whether you are clenching while you work. If so, ease the pressure and allow your jaw muscles to relax.',
+  },
 };
 
 export function deskResult(answers) {

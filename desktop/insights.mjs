@@ -89,19 +89,64 @@ export class Insights {
       session.id,
       session.active_ms - 8 * 60_000,
     );
-    if (
-      points.length < 6 ||
-      points.at(-1).minute < Math.floor(session.active_ms / 60000) - 1 ||
-      points.at(-1).minute - points.at(-6).minute !== 5
-    )
+    const tail = points.slice(-6);
+    if (tail.length < 6 || tail.at(-1).minute < Math.floor(session.active_ms / 60000) - 1 ||
+        tail.at(-1).minute - tail[0].minute > 7 || tail.some((p,i) => i && p.minute - tail[i-1].minute > 2))
       return null;
-    const recent = slope(points.slice(-3)),
-      prior = slope(points.slice(-6, -3)),
-      current = points.at(-1).drop;
+    const recent = slope(tail.slice(-3)),
+      prior = slope(tail.slice(0,3)),
+      current = tail.at(-1).drop;
     const estimate = 0.75 * recent + 0.25 * personal.slope;
     if (recent <= 0 || recent <= prior || estimate <= 0 || current < 1 || current >= 7) return null;
     const minutes = (7 - current) / estimate;
     return minutes <= 3 ? { minutes, slope: estimate } : null;
+  }
+  sensorReminder(cue, metrics, prediction) {
+    const s = this.s;
+    if (!s.session || s.idle) return;
+    let kind;
+    if (cue) kind = 'drift';
+    else if (metrics.view === 'side' && (prediction === 'neutral' || prediction === 'slouch') &&
+        metrics.drop > 0 && metrics.drop < 7 &&
+        (this.lastForecastSession !== s.session.id || s.now() - this.lastForecastAt >= 30_000)) {
+      this.lastForecastSession = s.session.id;
+      this.lastForecastAt = s.now();
+      if (this.forecast()) kind = 'forecast';
+    }
+    if (kind) return s.prompt(kind, this.weeklyPattern()?.drill ?? (metrics.view === 'front' ? 'shoulders' : 'chin'));
+  }
+  changePeriod(first, last) {
+    const s = this.s;
+    const start = new Date(first + 'T00:00:00').getTime();
+    const end = Math.min(s.now() + 1, new Date(dayBefore(last, -1) + 'T00:00:00').getTime());
+    const tracking = s.get(
+      `SELECT count(*) AS seconds, count(DISTINCT date(sec,'unixepoch','localtime')) AS tracked_days,
+       avg(cva) AS cva, 100.0*avg(neutral) AS neutral_pct FROM samples t
+       JOIN sessions s ON t.session=s.id WHERE s.profile=? AND t.view='side' AND sec>=? AND sec<?`,
+      s.profile, start / 1000, end / 1000);
+    const checkIns = s.get(
+      `SELECT count(*) AS logged_days, avg(jaw) AS jaw, avg(neck) AS neck, avg(back) AS back,
+       avg((jaw+neck+back)/3.0) AS pain FROM symptoms WHERE profile=? AND day BETWEEN ? AND ?`,
+      s.profile, first, last < localDay(s.now()) ? last : localDay(s.now()));
+    const { completed } = s.get(
+      `SELECT count(*) AS completed FROM prompts p JOIN sessions s ON s.id=p.session
+       WHERE s.profile=? AND p.outcome='completed' AND p.resolved>=? AND p.resolved<?`,
+      s.profile, start, end);
+    const marker = s.get(
+      `SELECT avg(m.cva) AS marker_cva,count(*) AS marker_seconds FROM marker_samples m
+       JOIN sessions s ON s.id=m.session WHERE s.profile=? AND m.sec>=? AND m.sec<?`,
+      s.profile, start / 1000, end / 1000);
+    return { first, last, ...tracking, ...marker, ...checkIns, completed };
+  }
+  changes(first, today) {
+    return this.s.all(
+      'SELECT day,title FROM interventions WHERE profile=? AND day BETWEEN ? AND ? ORDER BY day DESC,title',
+      this.s.profile, dayBefore(first, 6), today,
+    ).map((change) => {
+      const before = this.changePeriod(dayBefore(change.day, 7), dayBefore(change.day, 1));
+      const after = this.changePeriod(change.day, dayBefore(change.day, -6));
+      return { ...change, before, after, inProgress: today <= after.last };
+    });
   }
   report(days = 28) {
     const s = this.s,
@@ -119,6 +164,10 @@ export class Insights {
       from,
     );
     const symptoms = new Map(s.symptomsSince(days).map((r) => [r.day, r]));
+    const markers = new Map(s.all(
+      `SELECT date(m.sec,'unixepoch','localtime') AS day,count(*) AS n,sum(m.cva) AS total
+       FROM marker_samples m JOIN sessions s ON s.id=m.session WHERE s.profile=? AND m.sec>=? GROUP BY day`,
+      profile, from).map((row) => [row.day, row]));
     const observed = new Map(daily.map((d) => [d.day, d]));
     const completed = new Map(
       s
@@ -140,6 +189,9 @@ export class Insights {
         cva_sum: r?.cva_sum ?? 0,
         neutral: r?.neutral ?? 0,
         cva: r ? r.cva_sum / r.seconds : null,
+        marker_seconds: markers.get(day)?.n ?? 0,
+        marker_sum: markers.get(day)?.total ?? 0,
+        marker_cva: markers.has(day) ? markers.get(day).total / markers.get(day).n : null,
         neutral_pct: r ? (100 * r.neutral) / r.seconds : null,
         pain: p ? (p.jaw + p.neck + p.back) / 3 : null,
         jaw: p?.jaw ?? null,
@@ -153,7 +205,10 @@ export class Insights {
       const week = series.slice(i, i + 7),
         seconds = sum(week, 'seconds');
       const pairs = week.filter((d) => d.cva !== null && d.pain !== null);
+      const markerPairs = week.filter((d) => d.marker_cva !== null && d.pain !== null);
       const cva = seconds ? sum(week, 'cva_sum') / seconds : null;
+      const markerSeconds = sum(week, 'marker_seconds');
+      const markerCva = markerSeconds ? sum(week, 'marker_sum') / markerSeconds : null;
       const pain = average(week.map((d) => d.pain).filter(Number.isFinite)),
         prev = weeks.at(-1);
       weeks.push({
@@ -161,6 +216,11 @@ export class Insights {
         end: week.at(-1).day,
         seconds,
         cva,
+        marker_cva: markerCva,
+        marker_change: markerCva !== null && prev?.marker_cva != null ? markerCva - prev.marker_cva : null,
+        marker_seconds: markerSeconds,
+        marker_paired: markerPairs.length,
+        r_marker: correlation(markerPairs.map((d) => [d.marker_cva, d.pain])),
         pain,
         completed: sum(week, 'completed'),
         ...Object.fromEntries(
@@ -184,7 +244,7 @@ export class Insights {
       from,
     );
     const performance = s.all(
-      `SELECT policy,count(*) AS n,avg(cpu) AS cpu,avg(ram_mb) AS ram,avg(inference_ms) AS latency
+      `SELECT policy,count(*) AS n,avg(cpu) AS cpu,avg(ram_mb) AS ram,avg(inference_ms) AS latency,count(inference_ms) AS timed_windows
       FROM performance p JOIN sessions s ON s.id=p.session WHERE s.profile=? AND p.at>=? GROUP BY policy`,
       profile,
       from * 1000,
@@ -206,6 +266,7 @@ export class Insights {
     return {
       weeks,
       series,
+      changes: this.changes(first, today),
       heat,
       forecastHeat,
       performance,
