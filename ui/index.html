@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Deskframe</title><link rel="stylesheet" href="./style.css"><script type="module" src="./dashboard.mjs"></script>
+  <script type="module" src="./sensor.mjs"></script>
+  <script type="module" src="./model-controls.mjs"></script>
 </head>
 <body>
 <aside class="rail">
@@ -28,6 +30,7 @@
     </article>
     <article id="prompt" class="notice" hidden><div><p class="eyebrow" id="prompt-kind"></p><h2 id="prompt-title"></h2><p id="prompt-body"></p><p class="hint">Move within a comfortable range. Stop if symptoms increase.</p></div>
       <div class="controls"><button data-outcome="completed" class="primary">Completed</button><button data-outcome="snoozed">In 5 min</button><button data-outcome="skipped">Skip</button><button data-outcome="false_positive" id="override">False alarm</button></div>
+      <label id="correction-field" class="field" hidden>Activity during this cue<select id="correction"><option value="">Dismiss only</option><option value="neutral">Neutral</option><option value="writing">Writing</option><option value="reading">Brief reading</option><option value="reaching">Reaching / shifting</option></select></label>
     </article>
     <div class="columns">
       <article class="card"><h2>Daily check-in</h2><p class="muted">Rate each area from 0 (none) to 10 (highest).</p>
@@ -48,7 +51,21 @@
     <article class="card" id="adjustments" hidden><h2>Desk adjustments</h2><div id="advice"></div></article>
     <article class="card"><h2>Desktop preferences</h2><label class="inline"><input id="startup" type="checkbox">Open in the tray when I sign in to Windows</label><p class="muted">Closing the window keeps an active session in the tray. Use Quit Deskframe in the tray menu to exit.</p></article>
   </section>
-  <section id="sensor" class="page" hidden><h1>Pose sensor</h1><div id="sensor-panel"></div></section>
+  <section id="sensor" class="page" hidden><h1>Pose sensor</h1>
+    <article class="card"><h2>Camera calibration</h2><p class="muted" id="framing"></p>
+      <div class="controls sensor-controls"><label>Camera view<select id="view"><option value="side">Side profile</option><option value="front">Front facing</option></select></label>
+        <label>Sampling<select id="policy"><option value="adaptive">Adaptive</option><option value="fixed">Fixed 30 FPS experiment</option></select></label>
+        <button class="primary" id="camera-button">Start camera</button><button id="recalibrate" disabled>Recalibrate</button></div>
+      <p id="sensor-message" role="status" class="sensor-message">Start a study session to enable the camera.</p>
+      <div class="preview" hidden id="preview"><video id="video" autoplay muted playsinline></video><p>Local camera preview</p></div>
+      <div id="readings" class="readings"></div><p class="hint">CVA uses an ear–shoulder proxy. The load illustration assumes a 10 lb head, a 0.50 m torso and a 0.10 m reference lever. These estimates support comparison within a setup.</p>
+    </article>
+    <article class="card"><h2>Label a study block</h2><p class="muted">During side-view tracking, choose the activity as it changes. Labeled capture saves a short numeric pose vector each second under this profile.</p>
+      <label class="inline"><input type="checkbox" id="capture">Enable labeled capture</label><div id="labels" class="controls"></div>
+      <p id="shortcut-info" class="hint"></p><button class="link" id="export-labels">Export this profile’s labeled data ↗</button></article>
+    <article class="card" id="model-panel"><h2>Activity classifier</h2><p id="model-name" class="muted">Static posture rules</p>
+      <div class="controls sensor-controls"><button id="import-model">Import trained model</button><button id="remove-model" hidden>Use built-in rules</button></div></article>
+  </section>
   <section id="trends" class="page" hidden><h1>Trends</h1><div id="trends-panel"></div></section>
 </main>
 <dialog id="profile-dialog"><form id="profile-form" class="stack"><h2>Add a local profile</h2><label>Nickname<input id="alias" maxlength="32" required autocomplete="off"></label><div class="controls"><button class="primary">Create profile</button><button id="cancel-profile" type="button">Cancel</button></div></form></dialog>

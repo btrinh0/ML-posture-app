@@ -4,6 +4,7 @@ directories:
   output: release
 files:
   - desktop/**/*
+  - shared/**/*
   - dist/**/*
   - package.json
 asar: true

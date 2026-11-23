@@ -1,9 +1,13 @@
-import { app, BrowserWindow, ipcMain, Menu, Notification, powerMonitor, protocol, session, Tray, nativeImage } from 'electron';
-import { readFile } from 'node:fs/promises';
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, Menu, Notification, powerMonitor, protocol, session, Tray, nativeImage } from 'electron';
+import { readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DeskStore } from './store.mjs';
 import { drills } from './companion.mjs';
+import { Telemetry } from './telemetry.mjs';
+import { labels } from '../shared/kinematics.mjs';
+import { validateBundle } from '../shared/model-format.mjs';
+import { Insights } from './insights.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = resolve(here, '../dist');
@@ -11,9 +15,12 @@ const home = 'desk://app/index.html';
 protocol.registerSchemesAsPrivileged([{ scheme: 'desk', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true } }]);
 app.setName('Deskframe');
 app.setAppUserModelId('org.deskframe.companion');
-let win, tray, store, timer, quitting = false, locked = false;
+let win, tray, store, telemetry, insights, timer, quitting = false, locked = false, shortcutsReady = false;
+let lastPerformance = 0, lastForecast = 0, candidate = null;
 const isHome = url => url === home;
-const state = () => ({ ...store.state(), autoStart: app.getLoginItemSettings().openAtLogin });
+const state = () => ({ ...store.state(), autoStart: app.getLoginItemSettings({ args:['--tray'] }).openAtLogin,
+  sensorFresh: telemetry.fresh(), collecting:telemetry.collecting, label:telemetry.label,
+  correctionId:telemetry.review?.id, shortcutsReady });
 const show = () => { win?.show(); win?.focus(); };
 const send = () => { if (win && !win.isDestroyed()) win.webContents.send('desk:change', state()); };
 function notify(prompt) {
@@ -25,14 +32,46 @@ function notify(prompt) {
 function tick() {
   if (!store.session) return;
   const idle = locked || powerMonitor.getSystemIdleTime() >= 60;
-  notify(store.tick(idle));
+  notify(store.tick(idle, telemetry.fresh(), insights.weeklyPattern()?.drill));
+  if (Date.now()-lastPerformance >= 10_000) {
+    lastPerformance = Date.now();
+    const processes = app.getAppMetrics();
+    telemetry.recordPerformance(processes.reduce((n,p) => n+p.cpu.percentCPUUsage,0),
+      processes.reduce((n,p) => n+p.memory.workingSetSize/1024,0));
+  }
   send();
 }
+function setCapture(enabled) {
+  telemetry.collect(enabled);
+  globalShortcut.unregisterAll();
+  shortcutsReady = false;
+  if (!enabled) return;
+  shortcutsReady = labels.map((label,i) => globalShortcut.register('CommandOrControl+Alt+'+(i+1), () => { telemetry.mark(label); send(); })).every(Boolean);
+}
+async function exportLabels() {
+  const rows = telemetry.exportRows();
+  if (!rows.length) throw new Error('This profile has no labeled side-view samples to export.');
+  const file = await dialog.showSaveDialog(win, { title:'Export this profile’s labeled measurements', defaultPath:'desk-study.jsonl', filters:[{ name:'Study data',extensions:['jsonl'] }] });
+  if (!file.canceled) await writeFile(file.filePath, rows.map(r => JSON.stringify(r)).join('\n')+'\n');
+}
 const actions = {
-  start: () => store.start(), end: () => store.end(), setup: v => store.saveSetup(v),
-  checkIn: v => store.checkIn(v), resolve: v => store.resolve(v.id, v.outcome),
+  start: () => { if (!store.session) { store.start(); telemetry.reset(); } },
+  end: () => { setCapture(false); store.end(); telemetry.reset(); }, setup: v => store.saveSetup(v),
+  checkIn: v => store.checkIn(v), resolve: v => {
+    store.resolve(v.id,v.outcome,() => { if (v.correction && v.outcome === 'false_positive') telemetry.correct(v.id,v.correction); });
+    if (telemetry.review?.id === v.id) telemetry.review=null;
+  },
   addProfile: v => store.addProfile(v), profile: v => store.chooseProfile(v),
   autoStart: v => app.setLoginItemSettings({ openAtLogin: v === true, args: ['--tray'] }),
+  capture: v => setCapture(v === true), label: v => telemetry.mark(v), exportLabels,
+  sensorOff: () => { setCapture(false); telemetry.reset(); },
+  lost: () => { telemetry.freshAt = null; telemetry.segment++; telemetry.recent=[]; },
+  sensorPolicy: v => { if (store.session) telemetry.policy = v === 'fixed' ? 'fixed':'adaptive'; },
+  installModel: () => {
+    if (!candidate) throw new Error('Select and verify a model first.');
+    store.run("INSERT OR REPLACE INTO settings VALUES('model',?)", JSON.stringify(candidate)); candidate = null;
+  },
+  removeModel: () => { store.run("DELETE FROM settings WHERE key='model'"); candidate = null; },
 };
 const mime = { '.html': 'text/html', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm',
   '.png': 'image/png', '.woff2': 'font/woff2', '.txt': 'text/plain' };
@@ -56,6 +95,8 @@ async function start() {
   session.defaultSession.setPermissionCheckHandler((wc, permission, origin, details) =>
     wc === win?.webContents && origin.startsWith('desk://app') && permission === 'media' && details.mediaType !== 'audio');
   store = new DeskStore(join(app.getPath('userData'), 'deskframe.sqlite'));
+  telemetry = new Telemetry(store);
+  insights = new Insights(store);
   win = new BrowserWindow({ width: 1120, height: 840, minWidth: 750, minHeight: 580, show: false,
     title: 'Deskframe', backgroundColor: '#faf9f6', icon: join(dist, 'assets/icon.png'),
     webPreferences: { preload: join(here, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false, backgroundThrottling: false } });
@@ -64,6 +105,26 @@ async function start() {
   win.webContents.on('will-navigate', (e, url) => { if (!isHome(url)) e.preventDefault(); });
   win.on('close', e => { if (!quitting) { e.preventDefault(); win.hide(); } });
   ipcMain.handle('desk:state', e => { if (isHome(e.senderFrame.url)) return state(); });
+  ipcMain.handle('desk:report', (e,days) => { if (isHome(e.senderFrame.url)) return insights.report(days); });
+  ipcMain.handle('desk:model', async (e, pick) => {
+    if (!isHome(e.senderFrame.url)) return null;
+    if (!pick) return JSON.parse(store.get("SELECT value FROM settings WHERE key='model'")?.value || 'null');
+    candidate = null;
+    const file = await dialog.showOpenDialog(win,{ title:'Choose the benchmarked model',properties:['openFile'],filters:[{ name:'Deskframe activity model',extensions:['deskmodel'] }] });
+    if (file.canceled) return null;
+    if ((await stat(file.filePaths[0])).size > 9*1024*1024) throw new Error('The model file exceeds 9 MB.');
+    candidate = validateBundle(JSON.parse(await readFile(file.filePaths[0],'utf8')));
+    return candidate;
+  });
+  ipcMain.handle('desk:sample', (e, value) => {
+    if (!isHome(e.senderFrame.url) || !telemetry.sample(value)) return;
+    const drill=insights.weeklyPattern()?.drill ?? (value.metrics.view === 'front' ? 'shoulders':'chin');
+    if (value.cue === true) { const p=store.prompt('drift',drill); telemetry.freezeCorrection(p); notify(p); }
+    else if (value.prediction === 'neutral' && value.metrics.view === 'side' && Date.now()-lastForecast >= 30_000) {
+      lastForecast=Date.now();
+      if (insights.forecast()) { const p=store.prompt('forecast',drill); telemetry.freezeCorrection(p); notify(p); }
+    }
+  });
   ipcMain.handle('desk:action', async (e, name, value) => {
     if (!isHome(e.senderFrame.url) || !Object.hasOwn(actions, name)) throw new Error('Unknown action.');
     await actions[name](value);

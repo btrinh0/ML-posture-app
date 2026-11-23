@@ -11,6 +11,7 @@ if (previous) {
   await rm(out, { recursive: true });
 }
 await cp(join(root, 'ui'), out, { recursive: true });
+await cp(join(root, 'shared'), join(out, 'shared'), { recursive: true });
 await cp(join(root, 'desktop', 'companion.mjs'), join(out, 'companion.mjs'));
 const assets = join(out, 'assets');
 await mkdir(assets, { recursive: true });

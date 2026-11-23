@@ -94,7 +94,10 @@ export class DeskStore {
     s.last_tick = now;
     this.idle = idle;
     if (now - this.lastSaved >= 5000) this.persist();
-    if (!idle && !sensorActive && s.active_ms >= s.next_break && !this.pending()) {
+    if (!idle && s.active_ms >= s.next_break && !this.pending()) {
+      const last = this.get('SELECT kind,drill,outcome FROM prompts WHERE session=? ORDER BY id DESC LIMIT 1',s.id);
+      if (last?.outcome === 'snoozed') return this.prompt(last.kind,last.drill);
+      if (sensorActive) return;
       const count = this.get('SELECT count(*) AS n FROM prompts p JOIN sessions s ON p.session=s.id WHERE s.profile=?', this.profile).n;
       return this.prompt('timer', drill ?? Object.keys(drills)[count % Object.keys(drills).length]);
     }
@@ -104,6 +107,7 @@ export class DeskStore {
     if (!s || this.idle || !Object.hasOwn(drills, drill) || this.pending()) return;
     const now = this.now();
     const recent = this.get('SELECT resolved,outcome FROM prompts WHERE session=? ORDER BY id DESC LIMIT 1', s.id);
+    if (recent?.outcome === 'snoozed' && s.active_ms < s.next_break) return;
     if (recent?.resolved && now - recent.resolved < (recent.outcome === 'snoozed' ? 300_000 : 120_000)) return;
     this.run('INSERT INTO prompts(session,at,kind,drill) VALUES(?,?,?,?)', s.id, now, kind, drill);
     return this.pending();
@@ -111,11 +115,12 @@ export class DeskStore {
   pending() {
     return this.session && this.get('SELECT id,kind,drill FROM prompts WHERE session=? AND outcome IS NULL', this.session.id);
   }
-  resolve(id, outcome) {
+  resolve(id, outcome, onResolve) {
     if (!['completed', 'snoozed', 'false_positive', 'skipped'].includes(outcome)) throw new Error('Unknown break response.');
     const pending = this.pending();
     if (!pending || pending.id !== id) return;
     this.transaction(() => {
+      onResolve?.();
       this.run('UPDATE prompts SET outcome=?,resolved=? WHERE id=?', outcome, this.now(), id);
       const interval = this.get('SELECT interval_min FROM profiles WHERE id=?', this.profile).interval_min;
       this.session.next_break = this.session.active_ms + (outcome === 'snoozed' ? 5 : interval) * 60_000;

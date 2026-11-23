@@ -75,6 +75,8 @@ function render(next) {
     $('prompt-title').textContent = drills[prompt.drill].title;
     $('prompt-body').textContent = drills[prompt.drill].text;
     $('override').hidden = prompt.kind === 'timer';
+    $('correction-field').hidden = state.correctionId !== prompt.id;
+    if ($('correction').dataset.prompt !== String(prompt.id)) { $('correction').value=''; $('correction').dataset.prompt=prompt.id; }
   }
   const historyKey = JSON.stringify(state.history);
   if ($('history').dataset.key !== historyKey) {
@@ -95,6 +97,7 @@ $('profile-form').onsubmit = async e => { e.preventDefault(); if (await act('add
 $('symptoms').onsubmit = e => { e.preventDefault(); act('checkIn', Object.fromEntries(['jaw','neck','back'].map(k => [k, Number($(k).value)])), 'Today’s check-in is saved.'); };
 $('setup-form').onsubmit = e => { e.preventDefault(); act('setup', { answers:Object.fromEntries(deskQuestions.map(({ key }) => [key, Number($(key).value)])), interval:Number($('interval').value) }, 'Desk setup saved.'); };
 $('startup').onchange = e => act('autoStart', e.target.checked);
-document.querySelectorAll('[data-outcome]').forEach(b => b.onclick = () => act('resolve', { id:state.prompt?.id, outcome:b.dataset.outcome }));
+document.querySelectorAll('[data-outcome]').forEach(b => b.onclick = () => act('resolve', { id:state.prompt?.id, outcome:b.dataset.outcome,
+  correction:b.dataset.outcome === 'false_positive' && !$('correction-field').hidden ? $('correction').value:null }));
 window.desk.onChange(render);
 render(await window.desk.state());
