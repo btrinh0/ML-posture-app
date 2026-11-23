@@ -83,6 +83,40 @@ def splits(data, epochs):
     return report
 
 
+def transfer(data, epochs):
+    """Train on one calibration population and evaluate each other participant individually."""
+    results = {}
+    for user in sorted(set(data.user)):
+        train = data.trainable & (data.user == user)
+        if len(set(data.y[train])) != len(LABELS):
+            results[user] = {"eligible": False, "reason": "Missing training activities"}
+            continue
+        results[user] = {}
+        for kind in ("rules","tree","cnn"):
+            graph = fit(kind,data.x[train],data.y[train],epochs)
+            for other in sorted(set(data.user)-{user}):
+                test = data.user == other
+                pred,_ = inference(graph,kind,data.x[test])
+                results[user].setdefault(other,{})[kind] = metrics(list(zip(
+                    data.session[test],data.second[test],data.y[test],pred)))
+    return results
+
+
+def partition(rows):
+    sources = {r.get("provenance","user_sessions") for r in rows}
+    if len(sources) != 1 or not sources <= {"user_sessions","simulated_study"}:
+        raise ValueError("Use a single known provenance per benchmark. Keep generated and personal exports separate.")
+    development, followup = [], []
+    for row in rows:
+        part=row.get("partition","development")
+        if part not in ("development","follow_up"):
+            raise ValueError("Unknown study partition.")
+        (development if part=="development" else followup).append(row)
+    if {r["session"] for r in development} & {r["session"] for r in followup}:
+        raise ValueError("A session crosses the development and follow-up boundary.")
+    return sources.pop(), windows(development), windows(followup) if followup else None
+
+
 def bundle(kind, graph, source):
     return dict(format="deskframe.model.v1", kind=kind, labels=LABELS, channels=CHANNELS, seconds=WINDOW,
                 provenance=source, model=base64.b64encode(graph).decode("ascii"))
@@ -97,8 +131,10 @@ def main():
     args = parser.parse_args()
     if args.smoke == bool(args.exports) or args.epochs < 1:
         parser.error("Supply either real profile exports or --smoke, and a positive epoch count.")
-    source = "synthetic_smoke" if args.smoke else "user_sessions"
-    data = windows(fixture() if args.smoke else load(args.exports))
+    if args.smoke:
+        source,data,followup = "synthetic_smoke",windows(fixture()),None
+    else:
+        source,data,followup = partition(load(args.exports))
     results = splits(data,args.epochs)
     scores = results["leave_one_session_out"]
     candidates = [k for k in ("rules","tree","cnn") if scores[k]["p95_ms"] < 15]
@@ -110,9 +146,17 @@ def main():
                   window_seconds=WINDOW, labels=LABELS, selected=chosen, met_latency_target=bool(candidates),
                   environment={"os":platform.platform(),"onnxruntime":ort.__version__}, results=results)
     args.out.mkdir(parents=True,exist_ok=True)
-    (args.out/"benchmark.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
-    for kind in (("rules","tree","cnn") if args.smoke else (chosen,)):
+    report["single_participant_transfer"]=transfer(data,args.epochs)
+    if followup is not None:
+        report["follow_up"]={"sessions":len(set(followup.session)),"participants":len(set(followup.user)),"models":{}}
+    for kind in (("rules","tree","cnn") if args.smoke or followup is not None else (chosen,)):
         graph = fit(kind,data.x[data.trainable],data.y[data.trainable],args.epochs)
+        if followup is not None:
+            pred,timing=inference(graph,kind,followup.x)
+            report["follow_up"]["models"][kind]={**metrics(list(zip(followup.session,followup.second,followup.y,pred))),
+                                                 "p95_ms":float(np.percentile(timing,95))}
+        if not args.smoke and kind != chosen:
+            continue
         name = f"fixture-{kind}.deskmodel" if args.smoke else "activity.deskmodel"
         (args.out/name).write_text(json.dumps(bundle(kind,graph,source)),encoding="utf-8")
         if args.smoke:
@@ -120,6 +164,7 @@ def main():
             tests = data.x[indices]
             pred,_ = inference(graph,kind,tests)
             (args.out/f"parity-{kind}.json").write_text(json.dumps(dict(x=tests.tolist(),y=pred.tolist())),encoding="utf-8")
+    (args.out/"benchmark.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
     print(f"{source}: {report['sessions']} sessions, {report['participants']} participants; selected {chosen}.")
     print(f"Report and model saved to {args.out}.")
 

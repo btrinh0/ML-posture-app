@@ -7,5 +7,6 @@ release/
 __pycache__/
 *.sqlite*
 *.deskmodel
+!research/generated/activity.deskmodel
 study-data/
 *.jsonl

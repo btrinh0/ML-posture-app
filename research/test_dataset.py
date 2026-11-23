@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from dataset import windows
-from benchmark import metrics
+from benchmark import metrics, partition
 
 
 def record(sec, label="neutral", segment=1):
@@ -29,6 +29,17 @@ class StudyWindowsTest(unittest.TestCase):
         self.assertEqual(result["alerts"],2)
         self.assertEqual(result["false_alerts"],1)
         self.assertEqual(result["false_alerts_per_hour"],30)
+
+    def test_short_activities_have_eligible_endpoint_windows(self):
+        data=windows([record(i) if i<21 else record(i,"reading",2) for i in range(28)])
+        self.assertIn(25,data.second[data.trainable])
+
+    def test_partitions_and_provenance_cannot_mix(self):
+        rows=[record(i) for i in range(30)]
+        with self.assertRaisesRegex(ValueError,"provenance"):
+            partition(rows+[dict(rows[0],provenance="simulated_study")])
+        with self.assertRaisesRegex(ValueError,"boundary"):
+            partition(rows+[dict(rows[0],partition="follow_up")])
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 """Read numeric desktop exports and construct session-bounded evaluation windows."""
 import json
+import gzip
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,7 +26,9 @@ class Windows:
 def load(paths):
     rows = []
     for path in paths:
-        with Path(path).open(encoding="utf-8-sig") as stream:
+        path = Path(path)
+        opener = gzip.open if path.suffix == ".gz" else open
+        with opener(path, mode="rt", encoding="utf-8-sig") as stream:
             for line in stream:
                 if line.strip():
                     rows.append(json.loads(line))
@@ -66,8 +69,10 @@ def windows(rows):
             users.append(owners[session])
             sessions.append(session)
             secs.append(sec)
-            # Training uses an uninterrupted single annotation at a five-second stride.
-            training.append(sec % 5 == 0 and all(v[:2] == sample[:2] for v in block))
+            # Brief actions can be shorter than the observation window. Their label is the
+            # activity at the endpoint, following two consecutive seconds of that annotation.
+            required = block[-2:] if sample[0] in ("reading", "reaching") else block
+            training.append(sec % 5 == 0 and all(v[:2] == sample[:2] for v in required))
     if not x:
         raise ValueError("No complete 20-second labeled windows. Record longer continuous blocks.")
     return Windows(np.asarray(x, np.float32), np.asarray(y), np.asarray(users), np.asarray(sessions),
